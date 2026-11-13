@@ -14,19 +14,21 @@ export default function AuthPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [submitted, setSubmitted] = useState(false);
   const { signIn, signUp, loginWithGoogle, loginWithDemo, currentUser } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && !submitted) {
       navigate('/dashboard');
     }
-  }, [currentUser, navigate]);
+  }, [currentUser, submitted, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    setSubmitted(true);
 
     try {
       if (isSignUp) {
@@ -39,6 +41,7 @@ export default function AuthPage() {
     } catch (err) {
       console.error(err);
       setError(err.message || 'Authentication failed. Please verify credentials.');
+      setSubmitted(false);
     } finally {
       setLoading(false);
     }
@@ -47,12 +50,14 @@ export default function AuthPage() {
   const handleGoogleAuth = async () => {
     setError('');
     setLoading(true);
+    setSubmitted(true);
     try {
       await loginWithGoogle();
       navigate('/dashboard');
     } catch (err) {
       console.error(err);
       setError('Google Sign-In failed: ' + err.message);
+      setSubmitted(false);
     } finally {
       setLoading(false);
     }

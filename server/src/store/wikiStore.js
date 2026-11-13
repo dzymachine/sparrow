@@ -551,6 +551,20 @@ async function compileWikiContextAsync(userId) {
 
 function buildProfileSyncFacts(profileData) {
   const profileFacts = [];
+  if (profileData.goal) {
+    profileFacts.push({
+      text: `Primary Goal: ${String(profileData.goal).replace(/_/g, ' ')}`,
+      category: 'Goal',
+      source: 'Onboarding Profile'
+    });
+  }
+  if (profileData.maritalStatus) {
+    profileFacts.push({
+      text: `Marital Status: ${String(profileData.maritalStatus).replace(/_/g, ' ')}`,
+      category: 'Marital Status',
+      source: 'Onboarding Profile'
+    });
+  }
   if (profileData.stateJurisdiction) {
     profileFacts.push({
       text: `Jurisdiction: ${profileData.stateJurisdiction}`,
@@ -559,22 +573,45 @@ function buildProfileSyncFacts(profileData) {
     });
   }
   if (profileData.marriageLengthYears) {
+    const isLongDuration = Number(profileData.marriageLengthYears) >= 10;
+    const longDurationNote = isLongDuration ? ' (crosses CA 10-year long-duration threshold under Fam. Code § 4336)' : '';
     profileFacts.push({
-      text: `Length of marriage: ${profileData.marriageLengthYears} years`,
+      text: `Length of marriage: ${profileData.marriageLengthYears} years${longDurationNote}`,
       category: 'Marriage',
       source: 'Onboarding Profile'
     });
   }
   if (profileData.childrenCount !== undefined && profileData.childrenCount !== null) {
+    const count = Number(profileData.childrenCount);
+    const hasChildren = profileData.hasChildren !== false && count > 0;
+    if (hasChildren) {
+      const agesArr = Array.isArray(profileData.childrenAges) ? profileData.childrenAges.filter(a => String(a).trim()) : [];
+      const agesStr = agesArr.length > 0 ? ` (Ages: ${agesArr.join(', ')})` : '';
+      profileFacts.push({
+        text: `Dependents: ${count} child${count === 1 ? '' : 'ren'}${agesStr}`,
+        category: 'Family',
+        source: 'Onboarding Profile'
+      });
+    } else {
+      profileFacts.push({
+        text: 'Dependents: No children',
+        category: 'Family',
+        source: 'Onboarding Profile'
+      });
+    }
+  }
+  if (profileData.taxFilingStatus) {
+    const isJoint = String(profileData.taxFilingStatus).toLowerCase().includes('joint');
+    const taxNote = isJoint ? ' (Form 1040 Schedule B tracing recommended for hidden asset discovery)' : '';
     profileFacts.push({
-      text: `Dependents: ${profileData.childrenCount} children`,
-      category: 'Family',
+      text: `Tax Filing Status: ${String(profileData.taxFilingStatus).replace(/_/g, ' ')}${taxNote}`,
+      category: 'Tax Status',
       source: 'Onboarding Profile'
     });
   }
   if (profileData.employmentStatus || profileData.financialRole) {
     profileFacts.push({
-      text: `Employment & role: ${profileData.employmentStatus || 'unspecified'}, financial role: ${profileData.financialRole || 'unspecified'}`,
+      text: `Employment & role: ${profileData.employmentStatus || 'unspecified'}, financial role: ${String(profileData.financialRole || 'unspecified').replace(/_/g, ' ')}`,
       category: 'Employment & Role',
       source: 'Onboarding Profile'
     });

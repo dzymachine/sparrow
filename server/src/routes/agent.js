@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const memoryStore = require('../store/memoryStore');
+const knowledgeStore = require('../store/knowledgeStore');
 const wikiStore = require('../store/wikiStore');
 const ruthEngine = require('../services/ruthEngine');
 const firebaseAdmin = require('../config/firebaseAdmin');
@@ -127,8 +128,16 @@ router.post('/chat', async (req, res) => {
     }
   }
 
-  // Retrieve user profile & generate wiki-context-injected response
+  // Retrieve user profile & agent memory context
   const profile = memoryStore.getUserProfile(userId) || {};
+
+  // Evaluate matching deterministic rules cards for the profile
+  const matchedCards = knowledgeStore.evaluateRules(profile);
+
+  // Search knowledge base articles matching user query
+  const searchResults = knowledgeStore.searchKnowledge(message);
+
+  // Generate grounded Ruth AI response via ruthEngine
   const generated = await ruthEngine.generateRuthResponse({
     userId,
     message,
@@ -136,9 +145,18 @@ router.post('/chat', async (req, res) => {
     newlyAddedFacts
   });
 
+  let agentReply = generated.reply;
+
+  // Append knowledge base citation if applicable and not already cited
+  if (searchResults.length > 0 && !agentReply.includes('[S') && !agentReply.includes('[src-')) {
+    const topArt = searchResults[0];
+    agentReply += `\n\n*Related Knowledge Base Topic:* ${topArt.title} — ${topArt.summary}`;
+  }
+
   const agentMessageRecord = {
     sender: 'agent',
-    text: generated.reply,
+    text: agentReply,
+    matchedCards,
     suggestedActions: generated.suggestedActions,
     extractedFacts: newlyAddedFacts.filter((f) => f.section !== 'interaction_log')
   };
@@ -148,8 +166,9 @@ router.post('/chat', async (req, res) => {
 
   return res.json({
     success: true,
-    reply: generated.reply,
+    reply: agentReply,
     messageRecord: agentMessageRecord,
+    matchedCards,
     extractedFacts: agentMessageRecord.extractedFacts,
     wiki: latestWiki,
     wikiStats: latestWiki.stats

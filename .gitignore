@@ -28,3 +28,7 @@ server/serviceAccountKey.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Scratchpad
+scratchpad/
+
