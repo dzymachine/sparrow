@@ -171,7 +171,7 @@ export default function RuthBuddyWidget() {
     if (isBuddyOpen || isDiscreetHidden || isBubbleDismissed) return;
     const interval = setInterval(() => {
       setThoughtIndex((prev) => (prev + 1) % FINCH_AMBIENT_THOUGHTS.length);
-    }, 14000);
+    }, 30000);
     return () => clearInterval(interval);
   }, [isBuddyOpen, isDiscreetHidden, isBubbleDismissed]);
 

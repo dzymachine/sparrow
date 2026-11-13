@@ -72,13 +72,13 @@ export default function Navbar() {
               to="/dashboard" 
               className={`hover:text-[#261E19] transition ${location.pathname === '/dashboard' ? 'text-[#261E19] font-semibold' : ''}`}
             >
-              Dashboard & Discovery
+              Dashboard
             </Link>
             <Link 
-              to="/onboarding" 
-              className={`hover:text-[#261E19] transition ${location.pathname === '/onboarding' ? 'text-[#261E19] font-semibold' : ''}`}
+              to="/discovery" 
+              className={`hover:text-[#261E19] transition ${location.pathname === '/discovery' ? 'text-[#261E19] font-semibold' : ''}`}
             >
-              Intake Profile
+              Financial Discovery
             </Link>
             <Link 
               to="/consult" 
@@ -86,20 +86,6 @@ export default function Navbar() {
             >
               Consult a Pro
             </Link>
-            <Link 
-              to="/" 
-              className={`hover:text-[#261E19] transition ${location.pathname === '/' ? 'text-[#261E19] font-semibold' : ''}`}
-            >
-              Overview
-            </Link>
-            {currentUser && (
-              <Link
-                to="/settings"
-                className={`hover:text-[#261E19] transition ${location.pathname === '/settings' ? 'text-[#261E19] font-semibold' : ''}`}
-              >
-                Settings
-              </Link>
-            )}
           </nav>
 
           {/* User actions & Reset Workspace */}
