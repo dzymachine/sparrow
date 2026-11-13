@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { db, bucket, isConfigured: isFirebaseConfigured } = require('../config/firebaseAdmin');
+const firebaseAdmin = require('../config/firebaseAdmin');
 
 const DATA_ROOT = process.env.WIKI_DATA_DIR || path.join(__dirname, '../../data/wikis');
 
@@ -120,7 +120,7 @@ function createDemoSeedWiki(userId) {
   return wiki;
 }
 
-function persistWikiToDisk(wiki) {
+function writeWikiToLocalDisk(wiki) {
   try {
     const safeId = sanitizeUserId(wiki.userId);
     const userDir = path.join(DATA_ROOT, safeId);
@@ -138,27 +138,52 @@ function persistWikiToDisk(wiki) {
     // Non-fatal fallback: in-memory cache remains active
     console.warn('[WikiStore] Disk persistence skipped:', err.message);
   }
+}
 
-  // Optional Firestore + Firebase Storage sync when configured
-  if (isFirebaseConfigured() && db) {
-    const safeId = sanitizeUserId(wiki.userId);
-    db.collection('user_wikis').doc(safeId).set({
-      userId: wiki.userId,
-      sections: wiki.sections,
-      lastUpdated: wiki.lastUpdated
-    }).catch((e) => console.warn('[WikiStore] Firestore async sync warning:', e.message));
+async function syncWikiToFirebase(wiki) {
+  if (!firebaseAdmin.isConfigured() || !firebaseAdmin.db) {
+    return;
+  }
+  const safeId = sanitizeUserId(wiki.userId);
+  const tasks = [
+    firebaseAdmin.db
+      .collection('user_wikis')
+      .doc(safeId)
+      .set({
+        userId: wiki.userId,
+        sections: wiki.sections,
+        lastUpdated: wiki.lastUpdated
+      })
+      .catch((e) => console.warn('[WikiStore] Firestore async sync warning:', e.message))
+  ];
 
-    if (bucket) {
-      for (const key of SECTION_KEYS) {
-        const section = wiki.sections[key];
-        const remotePath = `wikis/${safeId}/${section.filename}`;
-        bucket.file(remotePath).save(section.markdown, {
-          contentType: 'text/markdown; charset=utf-8',
-          resumable: false
-        }).catch((e) => console.warn('[WikiStore] Storage upload warning:', e.message));
-      }
+  if (firebaseAdmin.bucket) {
+    for (const key of SECTION_KEYS) {
+      const section = wiki.sections[key];
+      const remotePath = `wikis/${safeId}/${section.filename}`;
+      tasks.push(
+        firebaseAdmin.bucket
+          .file(remotePath)
+          .save(section.markdown, {
+            contentType: 'text/markdown; charset=utf-8',
+            resumable: false
+          })
+          .catch((e) => console.warn('[WikiStore] Storage upload warning:', e.message))
+      );
     }
   }
+
+  await Promise.all(tasks);
+}
+
+function persistWikiToDisk(wiki) {
+  writeWikiToLocalDisk(wiki);
+  syncWikiToFirebase(wiki).catch((e) => console.warn('[WikiStore] Firebase sync warning:', e.message));
+}
+
+async function persistWikiAsync(wiki) {
+  writeWikiToLocalDisk(wiki);
+  await syncWikiToFirebase(wiki);
 }
 
 async function hydrateWikiFromFirestore(userId) {
@@ -166,16 +191,11 @@ async function hydrateWikiFromFirestore(userId) {
   if (wikiCache.has(id) || purgedUsers.has(id)) {
     return ensureWiki(id);
   }
-  const fromDisk = loadWikiFromDisk(id);
-  if (fromDisk) {
-    wikiCache.set(id, fromDisk);
-    return fromDisk;
-  }
 
-  if (isFirebaseConfigured() && db) {
+  if (firebaseAdmin.isConfigured() && firebaseAdmin.db) {
     try {
       const safeId = sanitizeUserId(id);
-      const snap = await db.collection('user_wikis').doc(safeId).get();
+      const snap = await firebaseAdmin.db.collection('user_wikis').doc(safeId).get();
       if (snap.exists) {
         const data = snap.data();
         if (data && data.sections) {
@@ -194,12 +214,19 @@ async function hydrateWikiFromFirestore(userId) {
             }
           }
           wikiCache.set(id, data);
+          writeWikiToLocalDisk(data);
           return data;
         }
       }
     } catch (err) {
       console.warn('[WikiStore] Firestore hydrate warning:', err.message);
     }
+  }
+
+  const fromDisk = loadWikiFromDisk(id);
+  if (fromDisk) {
+    wikiCache.set(id, fromDisk);
+    return fromDisk;
   }
 
   return ensureWiki(id);
@@ -420,7 +447,27 @@ function replaceSectionFacts(userId, sectionKey, factsArray) {
   return formatWikiResponse(wiki);
 }
 
-function purgeWiki(userId) {
+async function deleteWikiFromFirebase(userId) {
+  if (!firebaseAdmin.isConfigured() || !firebaseAdmin.db) {
+    return;
+  }
+  const safeId = sanitizeUserId(userId);
+  const tasks = [
+    firebaseAdmin.db.collection('user_wikis').doc(safeId).delete().catch((e) => {
+      console.warn('[WikiStore] Firestore purge warning:', e.message);
+    })
+  ];
+  if (firebaseAdmin.bucket) {
+    tasks.push(
+      firebaseAdmin.bucket.deleteFiles({ prefix: `wikis/${safeId}/` }).catch((e) => {
+        console.warn('[WikiStore] Storage purge warning:', e.message);
+      })
+    );
+  }
+  await Promise.all(tasks);
+}
+
+function purgeWikiLocal(userId) {
   const id = userId || 'guest-user';
   purgedUsers.add(id);
   const empty = createEmptyWiki(id);
@@ -435,16 +482,51 @@ function purgeWiki(userId) {
   } catch (err) {
     console.warn('[WikiStore] Disk purge warning:', err.message);
   }
+  return empty;
+}
 
-  if (isFirebaseConfigured() && db) {
-    const safeId = sanitizeUserId(id);
-    db.collection('user_wikis').doc(safeId).delete().catch(() => {});
-    if (bucket) {
-      bucket.deleteFiles({ prefix: `wikis/${safeId}/` }).catch(() => {});
-    }
-  }
-
+function purgeWiki(userId) {
+  const id = userId || 'guest-user';
+  const empty = purgeWikiLocal(id);
+  deleteWikiFromFirebase(id).catch(() => {});
   return formatWikiResponse(empty);
+}
+
+async function purgeWikiAsync(userId) {
+  const id = userId || 'guest-user';
+  const empty = purgeWikiLocal(id);
+  await deleteWikiFromFirebase(id);
+  return formatWikiResponse(empty);
+}
+
+async function addFactsAsync(userId, sectionKey, newFacts) {
+  await hydrateWikiFromFirestore(userId);
+  const result = addFacts(userId, sectionKey, newFacts);
+  if (result.addedCount > 0) {
+    await syncWikiToFirebase(wikiCache.get(userId || 'guest-user'));
+  }
+  return result;
+}
+
+async function updateFactAsync(userId, sectionKey, factId, newText, newCategory) {
+  await hydrateWikiFromFirestore(userId);
+  const wikiRes = updateFact(userId, sectionKey, factId, newText, newCategory);
+  await syncWikiToFirebase(wikiCache.get(userId || 'guest-user'));
+  return wikiRes;
+}
+
+async function deleteFactAsync(userId, sectionKey, factId) {
+  await hydrateWikiFromFirestore(userId);
+  const wikiRes = deleteFact(userId, sectionKey, factId);
+  await syncWikiToFirebase(wikiCache.get(userId || 'guest-user'));
+  return wikiRes;
+}
+
+async function replaceSectionFactsAsync(userId, sectionKey, factsArray) {
+  await hydrateWikiFromFirestore(userId);
+  const wikiRes = replaceSectionFacts(userId, sectionKey, factsArray);
+  await syncWikiToFirebase(wikiCache.get(userId || 'guest-user'));
+  return wikiRes;
 }
 
 function compileWikiContext(userId) {
@@ -462,8 +544,12 @@ function compileWikiContext(userId) {
   return parts.join('\n\n');
 }
 
-function syncFromProfile(userId, profileData) {
-  if (!userId || !profileData) return;
+async function compileWikiContextAsync(userId) {
+  await hydrateWikiFromFirestore(userId);
+  return compileWikiContext(userId);
+}
+
+function buildProfileSyncFacts(profileData) {
   const profileFacts = [];
   if (profileData.stateJurisdiction) {
     profileFacts.push({
@@ -493,17 +579,46 @@ function syncFromProfile(userId, profileData) {
       source: 'Onboarding Profile'
     });
   }
+
+  const concernFacts = [];
+  if (Array.isArray(profileData.primaryConcerns) && profileData.primaryConcerns.length > 0) {
+    for (const c of profileData.primaryConcerns) {
+      concernFacts.push({
+        text: `Priority concern: ${String(c).replace(/_/g, ' ')}`,
+        category: 'Priority',
+        source: 'Onboarding Profile'
+      });
+    }
+  }
+  return { profileFacts, concernFacts };
+}
+
+function syncFromProfile(userId, profileData) {
+  if (!userId || !profileData) return;
+  const { profileFacts, concernFacts } = buildProfileSyncFacts(profileData);
   if (profileFacts.length > 0) {
     addFacts(userId, 'profile', profileFacts);
   }
-
-  if (Array.isArray(profileData.primaryConcerns) && profileData.primaryConcerns.length > 0) {
-    const concernFacts = profileData.primaryConcerns.map((c) => ({
-      text: `Priority concern: ${String(c).replace(/_/g, ' ')}`,
-      category: 'Priority',
-      source: 'Onboarding Profile'
-    }));
+  if (concernFacts.length > 0) {
     addFacts(userId, 'priorities_and_goals', concernFacts);
+  }
+}
+
+async function syncFromProfileAsync(userId, profileData) {
+  if (!userId || !profileData) return;
+  await hydrateWikiFromFirestore(userId);
+  const { profileFacts, concernFacts } = buildProfileSyncFacts(profileData);
+  let changed = false;
+  if (profileFacts.length > 0) {
+    const r1 = addFacts(userId, 'profile', profileFacts);
+    if (r1.addedCount > 0) changed = true;
+  }
+  if (concernFacts.length > 0) {
+    const r2 = addFacts(userId, 'priorities_and_goals', concernFacts);
+    if (r2.addedCount > 0) changed = true;
+  }
+  if (changed) {
+    await syncWikiToFirebase(wikiCache.get(userId));
   }
 }
 
@@ -512,11 +627,23 @@ module.exports = {
   SECTION_KEYS,
   getWiki,
   getWikiAsync,
+  hydrateWikiFromFirestore,
   addFacts,
+  addFactsAsync,
   updateFact,
+  updateFactAsync,
   deleteFact,
+  deleteFactAsync,
   replaceSectionFacts,
+  replaceSectionFactsAsync,
   purgeWiki,
+  purgeWikiAsync,
   compileWikiContext,
-  syncFromProfile
+  compileWikiContextAsync,
+  syncFromProfile,
+  syncFromProfileAsync,
+  _clearCacheForTesting: () => {
+    wikiCache.clear();
+    purgedUsers.clear();
+  }
 };

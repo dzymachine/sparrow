@@ -37,6 +37,11 @@ function loadServiceAccount() {
     }
   }
 
+  const defaultKeyPath = path.resolve(__dirname, '../../serviceAccountKey.json');
+  if (fs.existsSync(defaultKeyPath)) {
+    return JSON.parse(fs.readFileSync(defaultKeyPath, 'utf8'));
+  }
+
   return null;
 }
 
@@ -86,5 +91,10 @@ module.exports = {
   admin,
   db,
   bucket,
-  isConfigured: () => isConfigured
+  isConfigured: () => isConfigured,
+  getStatus: () => ({
+    configured: isConfigured,
+    firestore: Boolean(db),
+    storageBucket: bucket ? bucket.name : null
+  })
 };

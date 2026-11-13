@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const userRoutes = require('./routes/user');
 const agentRoutes = require('./routes/agent');
-require('./config/firebaseAdmin');
+const firebaseAdmin = require('./config/firebaseAdmin');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -15,7 +15,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
+app.use(express.json({ limit: '15mb' }));
 
 // Routes
 app.use('/api/user', userRoutes);
@@ -27,6 +27,7 @@ app.get('/api/health', (req, res) => {
     status: 'healthy',
     name: 'RuthAI Backend Service',
     description: "Know What's Yours - Divorce Financial Navigation API",
+    firebase: firebaseAdmin.getStatus(),
     time: new Date().toISOString()
   });
 });

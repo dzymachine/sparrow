@@ -3,6 +3,7 @@ const router = express.Router();
 const memoryStore = require('../store/memoryStore');
 const wikiStore = require('../store/wikiStore');
 const ruthEngine = require('../services/ruthEngine');
+const firebaseAdmin = require('../config/firebaseAdmin');
 
 // GET agent memory per user profile
 router.get('/memory/:userId', (req, res) => {
@@ -33,12 +34,13 @@ router.get('/wiki/:userId', async (req, res) => {
   return res.json({
     success: true,
     wiki,
-    stats: wiki.stats
+    stats: wiki.stats,
+    storage: firebaseAdmin.getStatus()
   });
 });
 
 // POST update specific wiki section, append facts, edit a fact, or delete a fact
-router.post('/wiki/:userId', (req, res) => {
+router.post('/wiki/:userId', async (req, res) => {
   const { userId } = req.params;
   const { action = 'add', section, factId, text, category, source, facts } = req.body || {};
 
@@ -54,15 +56,15 @@ router.post('/wiki/:userId', (req, res) => {
 
     if (action === 'update') {
       if (!factId) return res.status(400).json({ error: 'factId is required for update' });
-      wiki = wikiStore.updateFact(userId, section, factId, text, category);
+      wiki = await wikiStore.updateFactAsync(userId, section, factId, text, category);
     } else if (action === 'delete') {
       if (!factId) return res.status(400).json({ error: 'factId is required for delete' });
-      wiki = wikiStore.deleteFact(userId, section, factId);
+      wiki = await wikiStore.deleteFactAsync(userId, section, factId);
     } else if (action === 'replace') {
-      wiki = wikiStore.replaceSectionFacts(userId, section, facts || []);
+      wiki = await wikiStore.replaceSectionFactsAsync(userId, section, facts || []);
     } else {
       const payload = facts || (text ? [{ text, category: category || 'Note', source: source || 'Manual Entry' }] : []);
-      const result = wikiStore.addFacts(userId, section, payload);
+      const result = await wikiStore.addFactsAsync(userId, section, payload);
       wiki = result.wiki;
       addedCount = result.addedCount;
     }
@@ -79,9 +81,9 @@ router.post('/wiki/:userId', (req, res) => {
 });
 
 // DELETE purge all user wiki & memory (CCPA compliance & safety)
-router.delete('/wiki/:userId', (req, res) => {
+router.delete('/wiki/:userId', async (req, res) => {
   const { userId } = req.params;
-  const wiki = wikiStore.purgeWiki(userId);
+  const wiki = await wikiStore.purgeWikiAsync(userId);
   memoryStore.purgeUserMemory(userId);
   return res.json({
     success: true,
@@ -113,7 +115,7 @@ router.post('/chat', async (req, res) => {
   const newlyAddedFacts = [];
 
   for (const item of extractedCandidates) {
-    const resAdd = wikiStore.addFacts(userId, item.section, {
+    const resAdd = await wikiStore.addFactsAsync(userId, item.section, {
       text: item.text,
       category: item.category,
       source: item.source
@@ -142,7 +144,7 @@ router.post('/chat', async (req, res) => {
   };
 
   memoryStore.appendChatMessage(userId, agentMessageRecord);
-  const latestWiki = wikiStore.getWiki(userId);
+  const latestWiki = await wikiStore.getWikiAsync(userId);
 
   return res.json({
     success: true,

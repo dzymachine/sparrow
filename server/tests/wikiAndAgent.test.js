@@ -177,4 +177,90 @@ describe('Personal LLM Wiki & Ruth Agent Pipeline', () => {
     assert.match(compiled, /Jurisdiction: California/);
     assert.match(compiled, /wiki\/profile\.md/);
   });
+
+  it('persists, hydrates, and purges per-user knowledge base files in Firebase Firestore & Storage', async () => {
+    const firebaseAdmin = require('../src/config/firebaseAdmin');
+    const origDb = firebaseAdmin.db;
+    const origBucket = firebaseAdmin.bucket;
+    const origIsConfigured = firebaseAdmin.isConfigured;
+
+    const firestoreDocs = new Map();
+    const storageFiles = new Map();
+
+    firebaseAdmin.db = {
+      collection: (colName) => ({
+        doc: (docId) => ({
+          set: async (data) => {
+            firestoreDocs.set(`${colName}/${docId}`, JSON.parse(JSON.stringify(data)));
+          },
+          get: async () => {
+            const key = `${colName}/${docId}`;
+            return {
+              exists: firestoreDocs.has(key),
+              data: () => firestoreDocs.get(key)
+            };
+          },
+          delete: async () => {
+            firestoreDocs.delete(`${colName}/${docId}`);
+          }
+        })
+      })
+    };
+
+    firebaseAdmin.bucket = {
+      name: 'mock-bucket.firebasestorage.app',
+      file: (remotePath) => ({
+        save: async (content) => {
+          storageFiles.set(remotePath, String(content));
+        }
+      }),
+      deleteFiles: async ({ prefix }) => {
+        for (const k of Array.from(storageFiles.keys())) {
+          if (k.startsWith(prefix)) storageFiles.delete(k);
+        }
+      }
+    };
+    firebaseAdmin.isConfigured = () => true;
+
+    const fbUser = 'fb-user-' + Date.now();
+    try {
+      const chatRes = await request('POST', '/api/agent/chat', {
+        userId: fbUser,
+        message: 'We have a Chase savings account and a 401(k) in Texas'
+      });
+      assert.equal(chatRes.status, 200);
+      assert.ok(firestoreDocs.has(`user_wikis/${fbUser}`), 'Firestore doc should be saved per user');
+      assert.ok(
+        storageFiles.has(`wikis/${fbUser}/wiki/financial_footprint.md`),
+        'Storage financial_footprint.md should be saved per user'
+      );
+      assert.match(storageFiles.get(`wikis/${fbUser}/wiki/financial_footprint.md`), /Chase/i);
+      assert.ok(storageFiles.has(`wikis/${fbUser}/wiki/profile.md`));
+
+      // Simulate cold start: clear in-memory cache and local disk
+      wikiStore._clearCacheForTesting();
+      const localUserDir = path.join(testDataDir, fbUser);
+      if (fs.existsSync(localUserDir)) {
+        fs.rmSync(localUserDir, { recursive: true, force: true });
+      }
+
+      // Hydrate from Firestore via GET and verify facts remain intact
+      const getRes = await request('GET', `/api/agent/wiki/${fbUser}`);
+      assert.equal(getRes.status, 200);
+      assert.ok(
+        getRes.body.wiki.sections.financial_footprint.facts.some((f) => /Chase/i.test(f.text)),
+        'Should hydrate Chase fact from Firestore after cold start'
+      );
+
+      // Purge should remove both Firestore doc and Storage files
+      const delRes = await request('DELETE', `/api/agent/wiki/${fbUser}`);
+      assert.equal(delRes.status, 200);
+      assert.equal(firestoreDocs.has(`user_wikis/${fbUser}`), false);
+      assert.equal(storageFiles.has(`wikis/${fbUser}/wiki/financial_footprint.md`), false);
+    } finally {
+      firebaseAdmin.db = origDb;
+      firebaseAdmin.bucket = origBucket;
+      firebaseAdmin.isConfigured = origIsConfigured;
+    }
+  });
 });

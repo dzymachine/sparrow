@@ -283,8 +283,8 @@ function getFootprintHighlights(wiki) {
  * Generates an empathetic, trauma-informed, wiki-context-grounded response.
  */
 async function generateRuthResponse({ userId, message, profile, newlyAddedFacts = [] }) {
-  const wiki = wikiStore.getWiki(userId);
-  const compiledContext = wikiStore.compileWikiContext(userId);
+  const wiki = await wikiStore.getWikiAsync(userId);
+  const compiledContext = await wikiStore.compileWikiContextAsync(userId);
   const jurisdiction = findJurisdictionFromWiki(wiki, profile);
   const isCommunityProp = COMMUNITY_PROPERTY_STATES.has(jurisdiction);
   const marriageYears = findMarriageYearsFromWiki(wiki, profile);
