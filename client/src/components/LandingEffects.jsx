@@ -43,22 +43,22 @@ export function VideoBackground({
 
   return (
     <>
-      <div className="fixed inset-0 z-0 overflow-hidden bg-[#18120E] pointer-events-none select-none">
-        {/* Fallback / Poster image with subtle Ken Burns motion */}
+      <div className="fixed top-0 left-0 w-screen h-screen z-0 overflow-hidden bg-[#18120E] pointer-events-none select-none">
+        {/* Fallback / Poster image */}
         <img
           src={posterSrc}
           alt=""
           aria-hidden="true"
-          className={`absolute inset-0 w-full h-full object-cover animate-ken-burns transition-opacity duration-1000 ${
-            hasVideo ? 'opacity-40' : 'opacity-100'
+          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 ${
+            hasVideo ? 'opacity-30' : 'opacity-100'
           }`}
         />
 
-        {/* Veo Video Layer */}
+        {/* Veo Video Layer (un-cropped so the entire frame is visible) */}
         {hasVideo && (
           <video
             ref={videoRef}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-contain"
             autoPlay
             loop
             muted
@@ -75,7 +75,7 @@ export function VideoBackground({
           className="absolute inset-0"
           style={{
             background:
-              'linear-gradient(180deg, rgba(22, 16, 13, 0.62) 0%, rgba(22, 16, 13, 0.42) 38%, rgba(22, 16, 13, 0.72) 78%, rgba(20, 15, 12, 0.90) 100%)',
+              'linear-gradient(180deg, rgba(22, 16, 13, 0.45) 0%, rgba(22, 16, 13, 0.25) 40%, rgba(22, 16, 13, 0.55) 80%, rgba(20, 15, 12, 0.78) 100%)',
           }}
         />
         {/* Subtle radial spotlight behind hero center */}
