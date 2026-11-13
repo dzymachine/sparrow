@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const memoryStore = require('../store/memoryStore');
+const knowledgeStore = require('../store/knowledgeStore');
 
 // GET agent memory per user profile
 router.get('/memory/:userId', (req, res) => {
