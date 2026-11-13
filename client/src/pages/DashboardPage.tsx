@@ -23,6 +23,9 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useAgentMemory } from '../context/AgentMemoryContext';
 import { useDiscovery } from '../context/DiscoveryContext';
+import FlightPathWidget from '../components/FlightPathWidget';
+import FinancialInfographicSidebar from '../components/dashboard/FinancialInfographicSidebar';
+import TimelineInfographicSidebar from '../components/dashboard/TimelineInfographicSidebar';
 
 const COMMUNITY_PROPERTY_STATES = new Set([
   'Arizona',
@@ -59,7 +62,13 @@ export default function DashboardPage() {
     refreshLifeProjection();
   }, [refreshLifeProjection]);
 
-  const { accountVault, housingSandbox, privacyMode } = workspace;
+  const {
+    accountVault,
+    housingSandbox,
+    baseline,
+    ledgerProtection,
+    privacyMode
+  } = workspace;
   const collectedCategoriesCount = checklist.filter((c) => c.status !== 'Missing').length;
   const nextMissingCategory = checklist.find((c) => c.status === 'Missing') || null;
 
@@ -224,7 +233,28 @@ export default function DashboardPage() {
   }, [agentMemory?.keyQuestionsForLawyer, wikiData, profile?.marriageLengthYears, stateName]);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[292px_minmax(0,1fr)_292px] gap-6 items-start">
+        {/* Left Sidebar: Financial Snapshot Infographic */}
+        <div className="order-2 md:col-span-1 xl:order-1 xl:sticky xl:top-28">
+          <FinancialInfographicSidebar
+            privacyMode={privacyMode}
+            accountVault={accountVault}
+            housingSandbox={housingSandbox}
+            baseline={baseline}
+            checklist={checklist}
+            lifeProjection={lifeProjection}
+            userAssetShare={userAssetShare}
+            liquidShare={liquidShare}
+            retirementShare={retirementShare}
+            homeEquityShare={homeEquityShare}
+            potentialUndisclosedShare={potentialUndisclosedShare}
+            flaggedLeadsCount={flaggedLeadsCount}
+          />
+        </div>
+
+        {/* Center Main Dashboard */}
+        <div className="order-1 md:col-span-2 xl:col-span-1 xl:order-2 min-w-0 space-y-8">
       {/* 1. Calm Header with Discreet Controls */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -381,6 +411,9 @@ export default function DashboardPage() {
           </div>
         </Link>
       </section>
+
+      {/* Interactive Sparrow Flight Path */}
+      <FlightPathWidget />
 
       {/* 3. "Where You May Be Exposed" — Apple Inset Grouped List */}
       <section className="bg-white border border-[#E2DBD0] rounded-2xl overflow-hidden">
@@ -602,6 +635,22 @@ export default function DashboardPage() {
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </section>
+        </div>
+
+        {/* Right Sidebar: Divorce Timeline & Readiness Infographic */}
+        <div className="order-3 md:col-span-1 xl:order-3 xl:sticky xl:top-28">
+          <TimelineInfographicSidebar
+            stateName={stateName}
+            divorceChecklist={divorceChecklist}
+            collectedCategoriesCount={collectedCategoriesCount}
+            lawyerQuestionsCount={lawyerQuestions.length}
+            hasProjection={Boolean(lifeProjection?.canCalculate)}
+            assetSplitDeadlines={ledgerProtection?.assetSplitDeadlines || []}
+            beneficiaryRequirements={ledgerProtection?.beneficiaryRequirements || []}
+            onExportBrief={() => exportDiscoveryPacket('print')}
+          />
+        </div>
+      </div>
     </div>
   );
 }
