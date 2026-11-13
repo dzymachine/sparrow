@@ -1,6 +1,35 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+build/
+.vite/
+
+# Environment and secrets
 .env
-.env.local
+.env.*
+!.env.example
+*.pem
+*serviceAccount*.json
+*credentials*.json
+
+# Logs
 *.log
+npm-debug.log*
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# Firebase
 .firebase/
+.runtimeconfig.json
+
+# Test and coverage
+coverage/
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
