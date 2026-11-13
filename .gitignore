@@ -1,35 +1,25 @@
 # Dependencies
 node_modules/
+.pnp
+.pnp.js
 
-# Build output
+# Production build
 dist/
 build/
-.vite/
 
-# Environment and secrets
+# Environment
 .env
-.env.*
-!.env.example
-*.pem
-*serviceAccount*.json
-*credentials*.json
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Logs
-*.log
 npm-debug.log*
-firebase-debug.log*
-firestore-debug.log*
-ui-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
 
-# Firebase
-.firebase/
-.runtimeconfig.json
-
-# Test and coverage
-coverage/
-
-# OS and editors
+# OS
 .DS_Store
 Thumbs.db
-.idea/
-*.swp

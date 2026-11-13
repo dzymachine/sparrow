@@ -1,17 +1,39 @@
-import "dotenv/config";
-import cors from "cors";
-import express from "express";
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
+const userRoutes = require('./routes/user');
+const agentRoutes = require('./routes/agent');
+require('./config/firebaseAdmin');
 
 const app = express();
-const port = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5001;
 
-app.use(cors());
+// Middleware
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
-app.get("/api/health", (_req, res) => {
-  res.json({ ok: true });
+// Routes
+app.use('/api/user', userRoutes);
+app.use('/api/agent', agentRoutes);
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    name: 'RuthAI Backend Service',
+    description: "Know What's Yours - Divorce Financial Navigation API",
+    time: new Date().toISOString()
+  });
 });
 
-app.listen(port, () => {
-  console.log(`API listening on http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`===============================================`);
+  console.log(` RuthAI Server running on port ${PORT}`);
+  console.log(` Health check: http://localhost:${PORT}/api/health`);
+  console.log(`===============================================`);
 });
