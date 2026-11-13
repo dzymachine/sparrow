@@ -10,6 +10,7 @@ process.env.WIKI_DATA_DIR = testDataDir;
 
 const app = require('../src/index');
 const wikiStore = require('../src/store/wikiStore');
+const memoryStore = require('../src/store/memoryStore');
 
 let server;
 let baseUrl;
@@ -259,12 +260,32 @@ describe('Personal LLM Wiki & Ruth Agent Pipeline', () => {
 
     const fbUser = 'fb-user-' + Date.now();
     try {
+      // Save onboarding profile
+      const profileRes = await request('POST', '/api/user/profile', {
+        userId: fbUser,
+        stateJurisdiction: 'Texas',
+        marriageLengthYears: 9,
+        goal: 'preparing_divorce'
+      });
+      assert.equal(profileRes.status, 200);
+      assert.ok(firestoreDocs.has(`users/${fbUser}`), 'User profile should be saved to Firestore users/{userId}');
+      assert.ok(firestoreDocs.has(`agent_memories/${fbUser}`), 'Agent memory summary should be saved to Firestore agent_memories/{userId}');
+
+      // Save agent memory asset
+      const memRes = await request('POST', '/api/agent/memory', {
+        userId: fbUser,
+        discoveredAssets: [{ id: 'ast-fb-1', name: 'Chase Savings', type: 'Bank Account', estimatedValue: 25000 }]
+      });
+      assert.equal(memRes.status, 200);
+
+      // Chat with Finch
       const chatRes = await request('POST', '/api/agent/chat', {
         userId: fbUser,
         message: 'We have a Chase savings account and a 401(k) in Texas'
       });
       assert.equal(chatRes.status, 200);
       assert.ok(firestoreDocs.has(`user_wikis/${fbUser}`), 'Firestore doc should be saved per user');
+      assert.ok(firestoreDocs.has(`chat_histories/${fbUser}`), 'Chat history should be saved to Firestore chat_histories/{userId}');
       assert.ok(
         storageFiles.has(`wikis/${fbUser}/wiki/financial_footprint.md`),
         'Storage financial_footprint.md should be saved per user'
@@ -272,14 +293,15 @@ describe('Personal LLM Wiki & Ruth Agent Pipeline', () => {
       assert.match(storageFiles.get(`wikis/${fbUser}/wiki/financial_footprint.md`), /Chase/i);
       assert.ok(storageFiles.has(`wikis/${fbUser}/wiki/profile.md`));
 
-      // Simulate cold start: clear in-memory cache and local disk
+      // Simulate cold start: clear in-memory caches and local disk
       wikiStore._clearCacheForTesting();
+      memoryStore._clearCacheForTesting();
       const localUserDir = path.join(testDataDir, fbUser);
       if (fs.existsSync(localUserDir)) {
         fs.rmSync(localUserDir, { recursive: true, force: true });
       }
 
-      // Hydrate from Firestore via GET and verify facts remain intact
+      // Hydrate from Firestore via GET and verify wiki, profile, agent memory, and chat history remain intact
       const getRes = await request('GET', `/api/agent/wiki/${fbUser}`);
       assert.equal(getRes.status, 200);
       assert.ok(
@@ -287,10 +309,24 @@ describe('Personal LLM Wiki & Ruth Agent Pipeline', () => {
         'Should hydrate Chase fact from Firestore after cold start'
       );
 
-      // Purge should remove both Firestore doc and Storage files
+      const getProfileRes = await request('GET', `/api/user/profile/${fbUser}`);
+      assert.equal(getProfileRes.status, 200);
+      assert.equal(getProfileRes.body.profile.stateJurisdiction, 'Texas');
+
+      const getMemRes = await request('GET', `/api/agent/memory/${fbUser}`);
+      assert.equal(getMemRes.status, 200);
+      assert.equal(getMemRes.body.memory.discoveredAssets.length, 1);
+
+      const getChatRes = await request('GET', `/api/agent/chat/${fbUser}`);
+      assert.equal(getChatRes.status, 200);
+      assert.equal(getChatRes.body.history.length, 2);
+
+      // Purge should remove wiki Firestore doc, Storage files, and agent memory/chat Firestore docs
       const delRes = await request('DELETE', `/api/agent/wiki/${fbUser}`);
       assert.equal(delRes.status, 200);
       assert.equal(firestoreDocs.has(`user_wikis/${fbUser}`), false);
+      assert.equal(firestoreDocs.has(`agent_memories/${fbUser}`), false);
+      assert.equal(firestoreDocs.has(`chat_histories/${fbUser}`), false);
       assert.equal(storageFiles.has(`wikis/${fbUser}/wiki/financial_footprint.md`), false);
     } finally {
       firebaseAdmin.db = origDb;

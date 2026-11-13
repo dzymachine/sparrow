@@ -12,9 +12,9 @@ const { calculatePostDivorceProjection } = require('../services/projectionEngine
 const UPLOADS_ROOT = process.env.UPLOADS_DATA_DIR || path.join(__dirname, '../../data/uploads');
 
 // GET user profile
-router.get('/profile/:userId', (req, res) => {
+router.get('/profile/:userId', async (req, res) => {
   const { userId } = req.params;
-  const profile = memoryStore.getUserProfile(userId);
+  const profile = await memoryStore.getUserProfileAsync(userId);
   if (!profile) {
     return res.status(404).json({ error: 'Profile not found' });
   }
@@ -28,7 +28,7 @@ router.post('/profile', async (req, res) => {
     return res.status(400).json({ error: 'userId is required' });
   }
 
-  const updatedProfile = memoryStore.setUserProfile(userId, profileData);
+  const updatedProfile = await memoryStore.setUserProfileAsync(userId, profileData);
 
   // Synchronize initial agent memory based on onboarding responses
   const summaryNotes = [];
@@ -64,7 +64,7 @@ router.post('/profile', async (req, res) => {
   }
 
   if (summaryNotes.length > 0) {
-    memoryStore.updateAgentMemory(userId, {
+    await memoryStore.updateAgentMemoryAsync(userId, {
       financialProfileSummary: summaryNotes.join(' | ')
     });
   }
@@ -74,7 +74,7 @@ router.post('/profile', async (req, res) => {
 
   const checklist = generateDivorceChecklist(
     updatedProfile,
-    memoryStore.getChecklistProgress(userId)
+    await memoryStore.getChecklistProgressAsync(userId)
   );
 
   return res.json({
@@ -86,10 +86,10 @@ router.post('/profile', async (req, res) => {
 });
 
 // GET tailored divorce document checklist for a user
-router.get('/checklist/:userId', (req, res) => {
+router.get('/checklist/:userId', async (req, res) => {
   const { userId } = req.params;
-  const profile = memoryStore.getUserProfile(userId);
-  const progress = memoryStore.getChecklistProgress(userId);
+  const profile = await memoryStore.getUserProfileAsync(userId);
+  const progress = await memoryStore.getChecklistProgressAsync(userId);
   const checklist = generateDivorceChecklist(profile || {}, progress);
 
   return res.json({
@@ -100,7 +100,7 @@ router.get('/checklist/:userId', (req, res) => {
 });
 
 // POST update status or notes for a specific checklist document
-router.post('/checklist/:userId', (req, res) => {
+router.post('/checklist/:userId', async (req, res) => {
   const { userId } = req.params;
   const { docId, status, notes, completedExternally, opened } = req.body || {};
 
@@ -115,7 +115,8 @@ router.post('/checklist/:userId', (req, res) => {
     });
   }
 
-  const existingProgress = memoryStore.getChecklistProgress(userId)[docId] || {};
+  const existingProgressMap = await memoryStore.getChecklistProgressAsync(userId);
+  const existingProgress = existingProgressMap[docId] || {};
   const updates = { status, notes };
   if (completedExternally !== undefined) {
     updates.completedExternally = Boolean(completedExternally);
@@ -127,8 +128,8 @@ router.post('/checklist/:userId', (req, res) => {
     }
   }
 
-  const updatedProgress = memoryStore.updateChecklistItem(userId, docId, updates);
-  const profile = memoryStore.getUserProfile(userId);
+  const updatedProgress = await memoryStore.updateChecklistItemAsync(userId, docId, updates);
+  const profile = await memoryStore.getUserProfileAsync(userId);
   const checklist = generateDivorceChecklist(profile || {}, updatedProgress);
 
   return res.json({
@@ -171,10 +172,10 @@ function computeDraftCompletion(schema, values = {}) {
 }
 
 // Helper to resolve a checklist item + schema for a user
-function resolveDocContext(userId, docId) {
-  const profile = memoryStore.getUserProfile(userId) || {};
-  const agentMemory = memoryStore.getAgentMemory(userId) || {};
-  const progress = memoryStore.getChecklistProgress(userId);
+async function resolveDocContextAsync(userId, docId) {
+  const profile = (await memoryStore.getUserProfileAsync(userId)) || {};
+  const agentMemory = (await memoryStore.getAgentMemoryAsync(userId)) || {};
+  const progress = await memoryStore.getChecklistProgressAsync(userId);
   const checklist = generateDivorceChecklist(profile, progress);
   const docItem = checklist.items.find((i) => i.id === docId) || {
     id: docId,
@@ -186,7 +187,7 @@ function resolveDocContext(userId, docId) {
   };
   const schema = getGuidedFormSchema(docItem, profile, agentMemory);
   const defaults = buildDefaultValues(schema);
-  const savedDraft = memoryStore.getDocumentDraft(userId, docId);
+  const savedDraft = await memoryStore.getDocumentDraftAsync(userId, docId);
   const values = { ...defaults, ...(savedDraft?.values || {}) };
 
   return {
@@ -202,14 +203,15 @@ function resolveDocContext(userId, docId) {
 
 // GET guided form schema + pre-filled values for a specific document
 // Automatically marks the document as opened / in_progress if not_started
-router.get('/checklist/:userId/form/:docId', (req, res) => {
+router.get('/checklist/:userId/form/:docId', async (req, res) => {
   const { userId, docId } = req.params;
-  const ctx = resolveDocContext(userId, docId);
+  const ctx = await resolveDocContextAsync(userId, docId);
   const stats = computeDraftCompletion(ctx.schema, ctx.values);
 
-  const existingItem = memoryStore.getChecklistProgress(userId)[docId] || {};
+  const progressMap = await memoryStore.getChecklistProgressAsync(userId);
+  const existingItem = progressMap[docId] || {};
   if (!existingItem.status || existingItem.status === 'not_started') {
-    memoryStore.updateChecklistItem(userId, docId, {
+    await memoryStore.updateChecklistItemAsync(userId, docId, {
       status: 'in_progress',
       openedAt: existingItem.openedAt || new Date().toISOString(),
       filledRequiredCount: stats.filledRequiredCount,
@@ -220,7 +222,7 @@ router.get('/checklist/:userId/form/:docId', (req, res) => {
 
   const updatedChecklist = generateDivorceChecklist(
     ctx.profile,
-    memoryStore.getChecklistProgress(userId)
+    await memoryStore.getChecklistProgressAsync(userId)
   );
 
   return res.json({
@@ -234,21 +236,22 @@ router.get('/checklist/:userId/form/:docId', (req, res) => {
 });
 
 // POST save guided form draft and automatically compute checklist progress
-router.post('/checklist/:userId/form/:docId', (req, res) => {
+router.post('/checklist/:userId/form/:docId', async (req, res) => {
   const { userId, docId } = req.params;
   const { values } = req.body || {};
 
-  const saved = memoryStore.saveDocumentDraft(userId, docId, values || {});
-  const ctx = resolveDocContext(userId, docId);
+  const saved = await memoryStore.saveDocumentDraftAsync(userId, docId, values || {});
+  const ctx = await resolveDocContextAsync(userId, docId);
   const stats = computeDraftCompletion(ctx.schema, saved.values);
 
-  const existingItem = memoryStore.getChecklistProgress(userId)[docId] || {};
+  const progressMap = await memoryStore.getChecklistProgressAsync(userId);
+  const existingItem = progressMap[docId] || {};
   let nextStatus = existingItem.status || 'in_progress';
   if (nextStatus !== 'completed') {
     nextStatus = stats.isSigned && stats.isAllRequiredFilled ? 'signed_ready' : 'in_progress';
   }
 
-  memoryStore.updateChecklistItem(userId, docId, {
+  const updatedProgress = await memoryStore.updateChecklistItemAsync(userId, docId, {
     status: nextStatus,
     openedAt: existingItem.openedAt || new Date().toISOString(),
     filledRequiredCount: stats.filledRequiredCount,
@@ -256,7 +259,7 @@ router.post('/checklist/:userId/form/:docId', (req, res) => {
     fieldCompletionPercent: stats.fieldCompletionPercent
   });
 
-  const checklist = generateDivorceChecklist(ctx.profile, memoryStore.getChecklistProgress(userId));
+  const checklist = generateDivorceChecklist(ctx.profile, updatedProgress);
 
   return res.json({
     success: true,
@@ -274,12 +277,13 @@ router.post('/checklist/:userId/form/:docId/pdf', async (req, res) => {
     const { values } = req.body || {};
 
     if (values && typeof values === 'object') {
-      memoryStore.saveDocumentDraft(userId, docId, values);
+      await memoryStore.saveDocumentDraftAsync(userId, docId, values);
     }
 
-    const ctx = resolveDocContext(userId, docId);
+    const ctx = await resolveDocContextAsync(userId, docId);
     const stats = computeDraftCompletion(ctx.schema, ctx.values);
-    const existingItem = memoryStore.getChecklistProgress(userId)[docId] || {};
+    const progressMap = await memoryStore.getChecklistProgressAsync(userId);
+    const existingItem = progressMap[docId] || {};
 
     let nextStatus = 'in_progress';
     if (stats.isSigned && stats.isAllRequiredFilled) {
@@ -288,7 +292,7 @@ router.post('/checklist/:userId/form/:docId/pdf', async (req, res) => {
       nextStatus = 'signed_ready';
     }
 
-    memoryStore.updateChecklistItem(userId, docId, {
+    await memoryStore.updateChecklistItemAsync(userId, docId, {
       status: nextStatus,
       openedAt: existingItem.openedAt || new Date().toISOString(),
       completedExternally: false,
@@ -315,7 +319,7 @@ router.post('/checklist/:userId/form/:docId/pdf', async (req, res) => {
 });
 
 // POST upload an already-completed document for a checklist item
-router.post('/checklist/:userId/upload/:docId', (req, res) => {
+router.post('/checklist/:userId/upload/:docId', async (req, res) => {
   const { userId, docId } = req.params;
   const { fileName, fileSize, mimeType, dataBase64 } = req.body || {};
 
@@ -348,13 +352,13 @@ router.post('/checklist/:userId/upload/:docId', (req, res) => {
     uploadedAt: new Date().toISOString()
   };
 
-  const updatedProgress = memoryStore.updateChecklistItem(userId, docId, {
+  const updatedProgress = await memoryStore.updateChecklistItemAsync(userId, docId, {
     status: 'completed',
     completedExternally: true,
     uploadedFile
   });
 
-  const profile = memoryStore.getUserProfile(userId) || {};
+  const profile = (await memoryStore.getUserProfileAsync(userId)) || {};
   const checklist = generateDivorceChecklist(profile, updatedProgress);
 
   return res.json({
@@ -370,9 +374,10 @@ router.post('/checklist/:userId/upload/:docId', (req, res) => {
 });
 
 // GET download/view a previously uploaded completed document
-router.get('/checklist/:userId/upload/:docId', (req, res) => {
+router.get('/checklist/:userId/upload/:docId', async (req, res) => {
   const { userId, docId } = req.params;
-  const item = memoryStore.getChecklistProgress(userId)[docId];
+  const progressMap = await memoryStore.getChecklistProgressAsync(userId);
+  const item = progressMap[docId];
   const uploaded = item?.uploadedFile;
 
   if (!uploaded || !uploaded.storedPath || !fs.existsSync(uploaded.storedPath)) {
@@ -387,8 +392,8 @@ router.get('/checklist/:userId/upload/:docId', (req, res) => {
 // GET post-divorce life finance projection (recalculates from latest profile, assets, and wiki)
 router.get('/projection/:userId', async (req, res) => {
   const { userId } = req.params;
-  const profile = memoryStore.getUserProfile(userId) || {};
-  const agentMemory = memoryStore.getAgentMemory(userId) || {};
+  const profile = (await memoryStore.getUserProfileAsync(userId)) || {};
+  const agentMemory = (await memoryStore.getAgentMemoryAsync(userId)) || {};
   const wiki = await wikiStore.getWikiAsync(userId);
 
   const projection = calculatePostDivorceProjection({
@@ -432,10 +437,10 @@ router.post('/projection/:userId', async (req, res) => {
     }
   }
 
-  const updatedProfile = memoryStore.setUserProfile(userId, updates);
+  const updatedProfile = await memoryStore.setUserProfileAsync(userId, updates);
   await wikiStore.syncFromProfileAsync(userId, updatedProfile);
 
-  const agentMemory = memoryStore.getAgentMemory(userId) || {};
+  const agentMemory = (await memoryStore.getAgentMemoryAsync(userId)) || {};
   const wiki = await wikiStore.getWikiAsync(userId);
   const projection = calculatePostDivorceProjection({
     profile: updatedProfile,

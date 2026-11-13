@@ -234,14 +234,19 @@ async function callGeminiIfConfigured(promptText) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
+  const model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { temperature: 0.5, maxOutputTokens: 250 }
+        generationConfig: {
+          temperature: 0.5,
+          maxOutputTokens: 512,
+          thinkingConfig: { thinkingBudget: 0 }
+        }
       })
     });
     if (!response.ok) return null;
@@ -298,7 +303,7 @@ Style rules (strict):
 - Be VERY short and concise (2-3 short sentences max, or 3 tiny bullets if listing things).
 - Sound conversational, casual, and friendly—like a supportive, smart friend texting, not a textbook or lawyer.
 - Explain complex money or legal stuff in plain, everyday words. NO complex jargon (if you must mention a term like QDRO or Schedule B, explain it in 3-5 simple words).
-- Reference relevant facts from the user's Personal Wiki below so they feel heard.
+- Reference relevant facts (including specific account/institution names) from the user's Personal Wiki below so they feel heard.
 - End with a super brief reminder that this is just helpful info, not legal advice.
 
 USER PERSONAL LLM WIKI:

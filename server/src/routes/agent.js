@@ -7,20 +7,20 @@ const ruthEngine = require('../services/ruthEngine');
 const firebaseAdmin = require('../config/firebaseAdmin');
 
 // GET agent memory per user profile
-router.get('/memory/:userId', (req, res) => {
+router.get('/memory/:userId', async (req, res) => {
   const { userId } = req.params;
-  const memory = memoryStore.getAgentMemory(userId);
+  const memory = await memoryStore.getAgentMemoryAsync(userId);
   return res.json({ success: true, memory });
 });
 
 // POST update agent memory (add discovered assets, notes, checklist progress)
-router.post('/memory', (req, res) => {
+router.post('/memory', async (req, res) => {
   const { userId, ...memoryUpdates } = req.body;
   if (!userId) {
     return res.status(400).json({ error: 'userId is required' });
   }
 
-  const updatedMemory = memoryStore.updateAgentMemory(userId, memoryUpdates);
+  const updatedMemory = await memoryStore.updateAgentMemoryAsync(userId, memoryUpdates);
   return res.json({
     success: true,
     message: 'Agent memory updated successfully',
@@ -85,7 +85,7 @@ router.post('/wiki/:userId', async (req, res) => {
 router.delete('/wiki/:userId', async (req, res) => {
   const { userId } = req.params;
   const wiki = await wikiStore.purgeWikiAsync(userId);
-  memoryStore.purgeUserMemory(userId);
+  await memoryStore.purgeUserMemoryAsync(userId);
   return res.json({
     success: true,
     message: 'All personal wiki and conversation memory purged.',
@@ -95,9 +95,9 @@ router.delete('/wiki/:userId', async (req, res) => {
 });
 
 // GET chat history
-router.get('/chat/:userId', (req, res) => {
+router.get('/chat/:userId', async (req, res) => {
   const { userId } = req.params;
-  const history = memoryStore.getChatHistory(userId);
+  const history = await memoryStore.getChatHistoryAsync(userId);
   return res.json({ success: true, history });
 });
 
@@ -109,7 +109,7 @@ router.post('/chat', async (req, res) => {
   }
 
   // Record user message
-  memoryStore.appendChatMessage(userId, { sender: 'user', text: message });
+  await memoryStore.appendChatMessageAsync(userId, { sender: 'user', text: message });
 
   // Pass 1: Extract personal, financial, priority, and legal-prep facts into the Personal LLM Wiki
   const extractedCandidates = ruthEngine.extractFactsFromMessage(message);
@@ -129,7 +129,7 @@ router.post('/chat', async (req, res) => {
   }
 
   // Retrieve user profile & agent memory context
-  const profile = memoryStore.getUserProfile(userId) || {};
+  const profile = (await memoryStore.getUserProfileAsync(userId)) || {};
 
   // Evaluate matching deterministic rules cards for the profile
   const matchedCards = knowledgeStore.evaluateRules(profile);
@@ -161,7 +161,7 @@ router.post('/chat', async (req, res) => {
     extractedFacts: newlyAddedFacts.filter((f) => f.section !== 'interaction_log')
   };
 
-  memoryStore.appendChatMessage(userId, agentMessageRecord);
+  await memoryStore.appendChatMessageAsync(userId, agentMessageRecord);
   const latestWiki = await wikiStore.getWikiAsync(userId);
 
   return res.json({

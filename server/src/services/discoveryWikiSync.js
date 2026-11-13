@@ -244,8 +244,8 @@ async function syncDiscoveredDocumentToProfile(userId, doc) {
     addedFacts.push(...r.addedFacts.map((f) => ({ ...f, section: 'interaction_log' })));
   }
 
-  // Also sync structured assets & profile fields into memoryStore for Projection Engine
-  const existingMemory = memoryStore.getAgentMemory(userId);
+  // Also sync structured assets & profile fields into memoryStore (and Firestore) for Projection Engine
+  const existingMemory = await memoryStore.getAgentMemoryAsync(userId);
   const existingAssets = Array.isArray(existingMemory.discoveredAssets) ? [...existingMemory.discoveredAssets] : [];
   const existingQuestions = Array.isArray(existingMemory.keyQuestionsForLawyer) ? [...existingMemory.keyQuestionsForLawyer] : [];
 
@@ -320,7 +320,7 @@ async function syncDiscoveredDocumentToProfile(userId, doc) {
     }
   }
 
-  const updatedMemory = memoryStore.updateAgentMemory(userId, {
+  const updatedMemory = await memoryStore.updateAgentMemoryAsync(userId, {
     discoveredAssets: existingAssets,
     keyQuestionsForLawyer: existingQuestions.slice(0, 12)
   });
@@ -357,9 +357,9 @@ async function syncDiscoveredDocumentToProfile(userId, doc) {
     profileUpdates.healthInsuranceMonthlyCost = Number(extracted.paystubOrInsurance.insurancePremiumMonthly);
   }
 
-  let updatedProfile = memoryStore.getUserProfile(userId);
+  let updatedProfile = await memoryStore.getUserProfileAsync(userId);
   if (Object.keys(profileUpdates).length > 0) {
-    updatedProfile = memoryStore.setUserProfile(userId, profileUpdates);
+    updatedProfile = await memoryStore.setUserProfileAsync(userId, profileUpdates);
   }
 
   const latestWiki = await wikiStore.getWikiAsync(userId);
