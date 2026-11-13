@@ -54,6 +54,27 @@ npm run dev
 * **Client**: [http://localhost:5173](http://localhost:5173)
 * **Backend API**: [http://localhost:5001/api/health](http://localhost:5001/api/health)
 
+### 4. Google Maps API Key Setup (Consult a Professional)
+You can create and copy your API key in the Google Cloud Console:
+
+- **Create / View API Key:** https://console.cloud.google.com/google/maps-apis/credentials
+- **Enable Required APIs:** https://console.cloud.google.com/google/maps-apis/api-list
+- **Official Setup Guide:** https://developers.google.com/maps/documentation/javascript/get-api-key
+
+#### Quick Steps
+1. Open the **Credentials** link above, select (or create) a Google Cloud project, and click **Create Credentials → API key**.
+2. Open the **API Library** link above and enable these 3 APIs:
+   - **Maps JavaScript API**
+   - **Places API**
+   - **Geocoding API**
+3. Create `ruthAI/client/.env` (if it doesn't exist yet, copy from `ruthAI/client/.env.example`) and add:
+   ```env
+   VITE_GOOGLE_MAPS_API_KEY=your_copied_api_key
+   ```
+4. Restart your Vite dev server (`npm run dev` in `ruthAI/client`).
+
+> **Note:** If you are signed into a managed Google Workspace or `.edu` account and **No organization** is not selectable when creating a project, switch to a personal `@gmail.com` account to create the project.
+
 ---
 
 ## ⚙️ Architecture & Tech Stack
