@@ -1,19 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Shield, 
-  MapPin, 
-  Users, 
-  Coins, 
-  HeartHandshake, 
-  ArrowRight, 
-  ArrowLeft, 
-  CheckCircle2, 
-  Lock,
-  Sparkles
-} from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { ArrowRight, ArrowLeft, Check, Shield, Minus, Plus } from 'lucide-react';
 import { useAgentMemory } from '../context/AgentMemoryContext';
+import { useSmoothNavigate } from '../context/TransitionContext';
 
 const US_STATES = [
   { name: 'California', type: 'Community Property' },
@@ -25,12 +13,18 @@ const US_STATES = [
   { name: 'Other State', type: 'Varies by Jurisdiction' }
 ];
 
-export default function OnboardingPage() {
-  const { currentUser } = useAuth();
-  const { saveOnboardingProfile, isSyncing } = useAgentMemory();
-  const navigate = useNavigate();
+const TOTAL_STEPS = 11;
 
-  const [step, setStep] = useState(1);
+export default function OnboardingPage() {
+  const { saveOnboardingProfile, isSyncing } = useAgentMemory();
+  const smoothNavigate = useSmoothNavigate();
+
+  const [stepIndex, setStepIndex] = useState(0);
+  const [phase, setPhase] = useState('entering'); // 'entering' | 'visible' | 'exiting'
+  const isTransitioningRef = useRef(false);
+  const timerRef = useRef(null);
+  const advanceTimerRef = useRef(null);
+
   const [formData, setFormData] = useState({
     goal: 'pursuing_divorce',
     stateJurisdiction: 'California',
@@ -54,6 +48,64 @@ export default function OnboardingPage() {
     safetyDiscreetMode: true
   });
 
+  // Initial fade-in on mount
+  useEffect(() => {
+    const raf1 = requestAnimationFrame(() => {
+      const raf2 = requestAnimationFrame(() => {
+        setPhase('visible');
+      });
+      timerRef.current = raf2;
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    };
+  }, []);
+
+  const transitionTo = useCallback((nextIndex) => {
+    if (isTransitioningRef.current) return;
+    if (nextIndex < 0 || nextIndex >= TOTAL_STEPS) return;
+
+    isTransitioningRef.current = true;
+    setPhase('exiting');
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setStepIndex(nextIndex);
+      setPhase('entering');
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setPhase('visible');
+          isTransitioningRef.current = false;
+        });
+      });
+    }, 280);
+  }, []);
+
+  const handleNext = useCallback(() => {
+    if (stepIndex < TOTAL_STEPS - 1) {
+      transitionTo(stepIndex + 1);
+    }
+  }, [stepIndex, transitionTo]);
+
+  const handleBack = useCallback(() => {
+    if (stepIndex > 0) {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      transitionTo(stepIndex - 1);
+    }
+  }, [stepIndex, transitionTo]);
+
+  const selectAndAdvance = (updater) => {
+    if (isTransitioningRef.current) return;
+    setFormData(updater);
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    advanceTimerRef.current = setTimeout(() => {
+      transitionTo(stepIndex + 1);
+    }, 220);
+  };
+
   const handleConcernToggle = (concernKey) => {
     setFormData((prev) => {
       const exists = prev.primaryConcerns.includes(concernKey);
@@ -66,359 +118,99 @@ export default function OnboardingPage() {
     });
   };
 
-  const handleNext = () => {
-    if (step < 4) {
-      setStep(step + 1);
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
-  };
-
   const handleFinish = async () => {
     try {
       await saveOnboardingProfile(formData);
-      navigate('/dashboard');
+      smoothNavigate('/dashboard');
     } catch (err) {
       console.error('Error saving onboarding data:', err);
-      navigate('/dashboard');
+      smoothNavigate('/dashboard');
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && (stepIndex === 2 || stepIndex === 3)) {
+      e.preventDefault();
+      handleNext();
+    }
+  };
+
+  const progressPercent = ((stepIndex + 1) / TOTAL_STEPS) * 100;
+
+  const phaseClasses =
+    phase === 'visible'
+      ? 'opacity-100 translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]'
+      : phase === 'exiting'
+      ? 'opacity-0 -translate-y-1.5 transition-all duration-300 ease-out pointer-events-none'
+      : 'opacity-0 translate-y-2 transition-none';
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Progress Stepper */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
-          <span>Step {step} of 4: {
-            step === 1 ? 'Legal Context & Household' :
-            step === 2 ? 'Financial Dynamics' :
-            step === 3 ? 'Priorities & Entitlements' : 'Privacy & Safety'
-          }</span>
-          <span className="text-brand-700 font-bold">{step * 25}% Completed</span>
+    <div className="min-h-[calc(100vh-10rem)] flex flex-col justify-between max-w-xl mx-auto px-6 py-10 sm:py-14">
+      {/* Minimal Progress Hairline */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between text-[11px] text-[#5F635E]/80 tracking-wide">
+          <span>{stepIndex === TOTAL_STEPS - 1 ? 'Ready' : 'Private Intake'}</span>
+          <span className="font-mono">
+            {stepIndex + 1} / {TOTAL_STEPS}
+          </span>
         </div>
-        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+        <div className="w-full bg-[#EDE6DD] h-[2px] rounded-full overflow-hidden">
           <div
-            className="bg-brand-700 h-full transition-all duration-300 rounded-full"
-            style={{ width: `${step * 25}%` }}
+            className="bg-[#4F5E47]/75 h-full transition-all duration-500 ease-out rounded-full"
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
 
-      <div className="bg-white border border-brand-200/80 rounded-3xl p-6 sm:p-10 shadow-lg">
-        {/* Step 1: Legal Context */}
-        {step === 1 && (
-          <div className="space-y-6">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 text-brand-700 text-xs font-semibold uppercase tracking-wider">
-                <MapPin className="w-4 h-4" />
-                <span>Jurisdiction & Household</span>
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900">
-                Where are you filing, and what does your household look like?
-              </h2>
-              <p className="text-sm text-slate-500">
-                Divorce rules differ radically between Community Property states (50/50 split) and Equitable Distribution states.
+      {/* Single Question Stage */}
+      <div className={`my-auto py-10 ${phaseClasses}`} onKeyDown={handleKeyDown}>
+        {/* 1. Goal */}
+        {stepIndex === 0 && (
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1c19] leading-snug tracking-tight">
+                What brings you here today?
+              </h1>
+              <p className="text-sm text-[#5F635E]">
+                Take your time. Everything here stays private.
               </p>
             </div>
 
-            <div className="space-y-4 pt-2">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2">
-                  What is your current goal?
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {[
-                    {
-                      id: 'pursuing_divorce',
-                      title: 'Pursuing a Divorce',
-                      desc: 'Generate my full tailored divorce document checklist'
-                    },
-                    {
-                      id: 'legal_separation',
-                      title: 'Legal Separation',
-                      desc: 'Explore separation filings & financial disclosures'
-                    },
-                    {
-                      id: 'exploring_options',
-                      title: 'Just Exploring',
-                      desc: 'Learn my rights & organize finances quietly'
-                    }
-                  ].map((g) => (
-                    <button
-                      type="button"
-                      key={g.id}
-                      onClick={() => setFormData({ ...formData, goal: g.id })}
-                      className={`text-left p-3.5 rounded-xl border transition ${
-                        formData.goal === g.id
-                          ? 'border-brand-600 bg-brand-50/60 text-slate-900 ring-1 ring-brand-500'
-                          : 'border-slate-200 hover:border-slate-300 text-slate-700'
-                      }`}
-                    >
-                      <div className="text-sm font-semibold">{g.title}</div>
-                      <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">{g.desc}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2">
-                  Select State Jurisdiction
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {US_STATES.map((st) => (
-                    <button
-                      type="button"
-                      key={st.name}
-                      onClick={() => setFormData({ ...formData, stateJurisdiction: st.name })}
-                      className={`text-left p-3.5 rounded-xl border transition ${
-                        formData.stateJurisdiction === st.name
-                          ? 'border-brand-600 bg-brand-50/50 text-slate-900 font-semibold ring-1 ring-brand-500'
-                          : 'border-slate-200 hover:border-slate-300 text-slate-700'
-                      }`}
-                    >
-                      <div className="text-sm">{st.name}</div>
-                      <div className="text-xs text-brand-600 font-medium">{st.type}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Years of Marriage
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="60"
-                    value={formData.marriageLengthYears}
-                    onChange={(e) => setFormData({ ...formData, marriageLengthYears: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-brand-500"
-                  />
-                  <p className="text-[11px] text-slate-400 mt-1">Marriages 10+ years often trigger long-term support rights.</p>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Number of Children / Dependents
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="10"
-                    value={formData.childrenCount}
-                    onChange={(e) => setFormData({ ...formData, childrenCount: Number(e.target.value), hasChildren: Number(e.target.value) > 0 })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-brand-500"
-                  />
-                  <p className="text-[11px] text-slate-400 mt-1">Directly impacts child support calculations and custody costs.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Financial Role */}
-        {step === 2 && (
-          <div className="space-y-6">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 text-brand-700 text-xs font-semibold uppercase tracking-wider">
-                <Coins className="w-4 h-4" />
-                <span>Financial Dynamics</span>
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900">
-                How were marital finances handled in your household?
-              </h2>
-              <p className="text-sm text-slate-500">
-                There is zero judgment here. Most women in divorce were never given full access to the family accounts.
-              </p>
-            </div>
-
-            <div className="space-y-3 pt-2">
-              <label className="block text-xs font-bold text-slate-700 mb-2">
-                Select the statement that best describes your situation:
-              </label>
-
+            <div className="space-y-3">
               {[
                 {
-                  id: 'spouse_handled_all',
-                  title: 'Spouse managed everything',
-                  desc: 'He filed the taxes, managed investments, and handled the passwords. I had little or no visibility.'
+                  id: 'pursuing_divorce',
+                  title: 'Pursuing a divorce',
+                  desc: 'Prepare my checklist and financial picture'
                 },
                 {
-                  id: 'shared_daily_expenses_only',
-                  title: 'I managed daily household groceries & kids',
-                  desc: 'I saw the checking account, but big retirement funds, properties, and loans were handled by him.'
+                  id: 'legal_separation',
+                  title: 'Legal separation',
+                  desc: 'Explore separation filings and disclosures'
                 },
                 {
-                  id: 'equal_partnership',
-                  title: 'We handled finances jointly',
-                  desc: 'Both names are on accounts, but I want to verify that no hidden debts or accounts were opened.'
+                  id: 'exploring_options',
+                  title: 'Just exploring',
+                  desc: 'Learn my rights and organize quietly'
                 }
-              ].map((opt) => (
-                <div
-                  key={opt.id}
-                  onClick={() => setFormData({ ...formData, financialRole: opt.id })}
-                  className={`p-4 rounded-xl border cursor-pointer transition ${
-                    formData.financialRole === opt.id
-                      ? 'border-brand-600 bg-brand-50/60 ring-1 ring-brand-500'
-                      : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="font-semibold text-slate-900 text-sm">{opt.title}</div>
-                  <div className="text-xs text-slate-600 mt-0.5">{opt.desc}</div>
-                </div>
-              ))}
-
-              <div className="pt-4 space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2">
-                    Which best describes your divorce situation?
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    {[
-                      { id: 'amicable_uncontested', title: 'Amicable / Uncontested', desc: 'We expect to agree on terms' },
-                      { id: 'contested_or_uncooperative', title: 'Contested / Uncooperative', desc: 'Spouse may withhold info or contest' },
-                      { id: 'unsure', title: 'Unsure / Early Stage', desc: 'Not sure how spouse will react yet' }
-                    ].map((opt) => (
-                      <button
-                        type="button"
-                        key={opt.id}
-                        onClick={() => setFormData({ ...formData, divorcePathway: opt.id })}
-                        className={`text-left p-3 rounded-xl border transition ${
-                          formData.divorcePathway === opt.id
-                            ? 'border-brand-600 bg-brand-50/60 ring-1 ring-brand-500'
-                            : 'border-slate-200 hover:border-slate-300'
-                        }`}
-                      >
-                        <div className="font-semibold text-xs text-slate-900">{opt.title}</div>
-                        <div className="text-[11px] text-slate-500 mt-0.5">{opt.desc}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2">
-                    Do you have a Prenuptial or Postnuptial Agreement?
-                  </label>
-                  <div className="grid grid-cols-3 gap-2.5">
-                    {[
-                      { id: 'no', label: 'No Prenup' },
-                      { id: 'yes', label: 'Yes, Signed' },
-                      { id: 'unsure', label: 'Unsure' }
-                    ].map((p) => (
-                      <button
-                        type="button"
-                        key={p.id}
-                        onClick={() => setFormData({ ...formData, hasPrenup: p.id })}
-                        className={`py-2 px-3 rounded-xl border text-xs font-semibold transition ${
-                          formData.hasPrenup === p.id
-                            ? 'border-brand-600 bg-brand-50/60 text-brand-900 ring-1 ring-brand-500'
-                            : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                        }`}
-                      >
-                        {p.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2">
-                    Select any factors that apply (tailors your document checklist):
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {[
-                      { key: 'ownsHome', label: 'We own a home or real estate together' },
-                      { key: 'hasRetirementAccounts', label: 'There are 401(k), IRA, or pension accounts' },
-                      { key: 'needsFeeWaiver', label: 'I may need a court filing fee waiver' },
-                      { key: 'needsProtectiveOrder', label: 'I need protective / restraining order forms' }
-                    ].map((item) => (
-                      <label
-                        key={item.key}
-                        className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 hover:border-slate-300 cursor-pointer text-xs text-slate-700"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={Boolean(formData[item.key])}
-                          onChange={(e) => setFormData({ ...formData, [item.key]: e.target.checked })}
-                          className="h-4 w-4 text-brand-600 focus:ring-brand-500 rounded border-slate-300"
-                        />
-                        <span>{item.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <label className="flex items-start gap-3 p-3.5 rounded-xl border border-amber-200 bg-amber-50/60 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.fearOfHiddenAssets}
-                    onChange={(e) => setFormData({ ...formData, fearOfHiddenAssets: e.target.checked })}
-                    className="mt-1 h-4 w-4 text-brand-600 focus:ring-brand-500 rounded border-slate-300"
-                  />
-                  <div>
-                    <span className="font-semibold text-xs text-amber-950 block">
-                      Enable Gemini Hidden Account Discovery flags
-                    </span>
-                    <span className="text-xs text-amber-900/80">
-                      Cross-reference tax return interest schedules (Form 1040 Schedule B) to spot undeclared accounts or unusual transfers.
-                    </span>
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Priorities & Entitlements */}
-        {step === 3 && (
-          <div className="space-y-6">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 text-brand-700 text-xs font-semibold uppercase tracking-wider">
-                <HeartHandshake className="w-4 h-4" />
-                <span>Immediate Priorities</span>
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900">
-                What are your biggest financial priorities and questions?
-              </h2>
-              <p className="text-sm text-slate-500">
-                Select all that apply. Finch will customize your dashboard and lawyer prep questions accordingly.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              {[
-                { id: 'keeping_marital_home', label: 'Keeping the marital home (affordability test)' },
-                { id: 'discovering_hidden_accounts', label: 'Uncovering hidden accounts or undisclosed debt' },
-                { id: 'securing_spousal_support', label: 'Spousal support (alimony) calculation & duration' },
-                { id: 'protecting_retirement_share', label: 'Dividing 401(k), IRA & pensions via QDRO' },
-                { id: 'child_support_costs', label: 'Child custody support & healthcare coverage' },
-                { id: 'establishing_credit', label: 'Building independent credit in my own name' },
-                { id: 'lawyer_prep_brief', label: 'Preparing an organized brief before hiring a lawyer' }
-              ].map((item) => {
-                const isSelected = formData.primaryConcerns.includes(item.id);
+              ].map((g) => {
+                const selected = formData.goal === g.id;
                 return (
                   <button
                     type="button"
-                    key={item.id}
-                    onClick={() => handleConcernToggle(item.id)}
-                    className={`flex items-start gap-3 p-3.5 rounded-xl border text-left transition ${
-                      isSelected
-                        ? 'border-brand-600 bg-brand-50/50 text-slate-900 ring-1 ring-brand-500'
-                        : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                    key={g.id}
+                    onClick={() => selectAndAdvance((prev) => ({ ...prev, goal: g.id }))}
+                    className={`w-full text-left px-5 py-4 rounded-2xl border transition-all duration-200 flex items-center justify-between ${
+                      selected
+                        ? 'border-[#4F5E47] bg-[#F4EFEA] text-[#1c1c19]'
+                        : 'border-[#E2DAD0] bg-white/80 hover:border-[#8A9A7B] hover:bg-white text-[#2C332A]'
                     }`}
                   >
-                    <div className={`mt-0.5 rounded-full p-0.5 ${isSelected ? 'text-brand-700' : 'text-slate-300'}`}>
-                      <CheckCircle2 className="w-4 h-4" />
+                    <div>
+                      <div className="text-sm font-medium text-[#1c1c19]">{g.title}</div>
+                      <div className="text-xs text-[#5F635E] mt-0.5">{g.desc}</div>
                     </div>
-                    <span className="text-xs font-medium leading-snug">{item.label}</span>
+                    {selected && <Check className="w-4 h-4 text-[#4F5E47] flex-shrink-0" />}
                   </button>
                 );
               })}
@@ -426,87 +218,519 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 4: Safety & Privacy */}
-        {step === 4 && (
-          <div className="space-y-6">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 text-brand-700 text-xs font-semibold uppercase tracking-wider">
-                <Lock className="w-4 h-4" />
-                <span>Discreet Safety Setup</span>
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900">
-                Your privacy and physical safety come first.
-              </h2>
-              <p className="text-sm text-slate-500">
-                In contentious or abusive divorces, digital safety is critical.
+        {/* 2. State Jurisdiction */}
+        {stepIndex === 1 && (
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1c19] leading-snug tracking-tight">
+                Where are you filing?
+              </h1>
+              <p className="text-sm text-[#5F635E]">
+                Your state shapes how property and support are approached.
               </p>
             </div>
 
-            <div className="space-y-4 pt-2">
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2">
-                <div className="flex items-center gap-2 font-semibold text-emerald-900 text-sm">
-                  <Shield className="w-4 h-4 text-emerald-700" />
-                  <span>Always-Active Quick Safe Exit</span>
-                </div>
-                <p className="text-xs text-emerald-800 leading-relaxed">
-                  The top orange safety bar remains visible on every page. Clicking it or pressing ESC immediately replaces your tab with Weather.com.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-2xl border border-slate-200 space-y-3">
-                <div className="font-semibold text-slate-900 text-sm">Summary of your setup:</div>
-                <ul className="text-xs text-slate-600 space-y-1.5">
-                  <li>• <strong>Goal:</strong> {formData.goal.replace(/_/g, ' ')}</li>
-                  <li>• <strong>Jurisdiction:</strong> {formData.stateJurisdiction}</li>
-                  <li>• <strong>Duration:</strong> {formData.marriageLengthYears} years ({formData.hasChildren ? `${formData.childrenCount} children` : 'No dependents'})</li>
-                  <li>• <strong>Divorce Pathway:</strong> {formData.divorcePathway.replace(/_/g, ' ')} ({formData.hasPrenup === 'yes' ? 'Has Prenup' : formData.hasPrenup === 'unsure' ? 'Prenup Unsure' : 'No Prenup'})</li>
-                  <li>• <strong>Financial Dynamic:</strong> {formData.financialRole.replace(/_/g, ' ')}</li>
-                  <li>• <strong>Active Priorities:</strong> {formData.primaryConcerns.length} selected</li>
-                </ul>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-xs flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-brand-600 flex-shrink-0" />
-                <span>Your Finch agent memory will now be seeded with this context.</span>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {US_STATES.map((st) => {
+                const selected = formData.stateJurisdiction === st.name;
+                return (
+                  <button
+                    type="button"
+                    key={st.name}
+                    onClick={() =>
+                      selectAndAdvance((prev) => ({ ...prev, stateJurisdiction: st.name }))
+                    }
+                    className={`text-left px-4 py-3.5 rounded-2xl border transition-all duration-200 flex items-center justify-between ${
+                      selected
+                        ? 'border-[#4F5E47] bg-[#F4EFEA] text-[#1c1c19]'
+                        : 'border-[#E2DAD0] bg-white/80 hover:border-[#8A9A7B] hover:bg-white text-[#2C332A]'
+                    }`}
+                  >
+                    <div>
+                      <div className="text-sm font-medium">{st.name}</div>
+                      <div className="text-[11px] text-[#A07E5F] mt-0.5">{st.type}</div>
+                    </div>
+                    {selected && <Check className="w-4 h-4 text-[#4F5E47] flex-shrink-0" />}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* Action Controls */}
-        <div className="flex items-center justify-between pt-8 border-t border-slate-100 mt-8">
-          {step > 1 ? (
-            <button
-              type="button"
-              onClick={handleBack}
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 px-4 py-2.5 rounded-xl hover:bg-slate-100 transition"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back</span>
-            </button>
-          ) : <div />}
+        {/* 3. Years of Marriage */}
+        {stepIndex === 2 && (
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1c19] leading-snug tracking-tight">
+                How many years have you been married?
+              </h1>
+              <p className="text-sm text-[#5F635E]">
+                An estimate is completely fine.
+              </p>
+            </div>
 
-          {step < 4 ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              className="flex items-center gap-1.5 bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs px-6 py-2.5 rounded-xl shadow transition"
-            >
-              <span>Continue</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              disabled={isSyncing}
-              onClick={handleFinish}
-              className="flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm px-7 py-3 rounded-xl shadow-md transition disabled:opacity-50"
-            >
-              <span>{isSyncing ? 'Creating Workspace...' : 'Launch Your Workspace'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                aria-label="Decrease years"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    marriageLengthYears: Math.max(1, Number(prev.marriageLengthYears) - 1)
+                  }))
+                }
+                className="w-12 h-12 rounded-2xl border border-[#E2DAD0] bg-white hover:border-[#8A9A7B] flex items-center justify-center text-[#4F5E47] transition"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <input
+                type="number"
+                min="1"
+                max="60"
+                autoFocus
+                value={formData.marriageLengthYears}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    marriageLengthYears: Math.max(0, Number(e.target.value))
+                  })
+                }
+                className="w-28 text-center py-3 rounded-2xl bg-white border border-[#E2DAD0] text-[#1c1c19] font-mono text-2xl focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
+              />
+              <button
+                type="button"
+                aria-label="Increase years"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    marriageLengthYears: Math.min(60, Number(prev.marriageLengthYears) + 1)
+                  }))
+                }
+                className="w-12 h-12 rounded-2xl border border-[#E2DAD0] bg-white hover:border-[#8A9A7B] flex items-center justify-center text-[#4F5E47] transition"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+              <span className="text-sm text-[#5F635E]">years</span>
+            </div>
+          </div>
+        )}
+
+        {/* 4. Children / Dependents */}
+        {stepIndex === 3 && (
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1c19] leading-snug tracking-tight">
+                How many children or dependents do you have?
+              </h1>
+              <p className="text-sm text-[#5F635E]">
+                Enter 0 if none.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                aria-label="Decrease children count"
+                onClick={() =>
+                  setFormData((prev) => {
+                    const next = Math.max(0, Number(prev.childrenCount) - 1);
+                    return { ...prev, childrenCount: next, hasChildren: next > 0 };
+                  })
+                }
+                className="w-12 h-12 rounded-2xl border border-[#E2DAD0] bg-white hover:border-[#8A9A7B] flex items-center justify-center text-[#4F5E47] transition"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                autoFocus
+                value={formData.childrenCount}
+                onChange={(e) => {
+                  const val = Math.max(0, Number(e.target.value));
+                  setFormData({
+                    ...formData,
+                    childrenCount: val,
+                    hasChildren: val > 0
+                  });
+                }}
+                className="w-28 text-center py-3 rounded-2xl bg-white border border-[#E2DAD0] text-[#1c1c19] font-mono text-2xl focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
+              />
+              <button
+                type="button"
+                aria-label="Increase children count"
+                onClick={() =>
+                  setFormData((prev) => {
+                    const next = Math.min(10, Number(prev.childrenCount) + 1);
+                    return { ...prev, childrenCount: next, hasChildren: next > 0 };
+                  })
+                }
+                className="w-12 h-12 rounded-2xl border border-[#E2DAD0] bg-white hover:border-[#8A9A7B] flex items-center justify-center text-[#4F5E47] transition"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+              <span className="text-sm text-[#5F635E]">
+                {formData.childrenCount === 1 ? 'dependent' : 'dependents'}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* 5. Financial Role */}
+        {stepIndex === 4 && (
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1c19] leading-snug tracking-tight">
+                How were finances handled in your household?
+              </h1>
+              <p className="text-sm text-[#5F635E]">
+                There is zero judgment here.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                {
+                  id: 'spouse_handled_all',
+                  title: 'My spouse managed everything',
+                  desc: 'I had little or no visibility into accounts and taxes'
+                },
+                {
+                  id: 'shared_daily_expenses_only',
+                  title: 'I managed daily household expenses',
+                  desc: 'I saw checking, while investments and loans were separate'
+                },
+                {
+                  id: 'equal_partnership',
+                  title: 'We handled finances jointly',
+                  desc: 'Both names are on accounts, and I want to verify everything'
+                }
+              ].map((opt) => {
+                const selected = formData.financialRole === opt.id;
+                return (
+                  <button
+                    type="button"
+                    key={opt.id}
+                    onClick={() =>
+                      selectAndAdvance((prev) => ({ ...prev, financialRole: opt.id }))
+                    }
+                    className={`w-full text-left px-5 py-4 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-4 ${
+                      selected
+                        ? 'border-[#4F5E47] bg-[#F4EFEA] text-[#1c1c19]'
+                        : 'border-[#E2DAD0] bg-white/80 hover:border-[#8A9A7B] hover:bg-white text-[#2C332A]'
+                    }`}
+                  >
+                    <div>
+                      <div className="text-sm font-medium text-[#1c1c19]">{opt.title}</div>
+                      <div className="text-xs text-[#5F635E] mt-0.5">{opt.desc}</div>
+                    </div>
+                    {selected && <Check className="w-4 h-4 text-[#4F5E47] flex-shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 6. Divorce Pathway */}
+        {stepIndex === 5 && (
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1c19] leading-snug tracking-tight">
+                Which best describes your situation right now?
+              </h1>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                {
+                  id: 'amicable_uncontested',
+                  title: 'Amicable / Uncontested',
+                  desc: 'We expect to agree on terms'
+                },
+                {
+                  id: 'contested_or_uncooperative',
+                  title: 'Contested / Uncooperative',
+                  desc: 'My spouse may withhold information or contest'
+                },
+                {
+                  id: 'unsure',
+                  title: 'Unsure / Early stage',
+                  desc: 'I am not sure how my spouse will react yet'
+                }
+              ].map((opt) => {
+                const selected = formData.divorcePathway === opt.id;
+                return (
+                  <button
+                    type="button"
+                    key={opt.id}
+                    onClick={() =>
+                      selectAndAdvance((prev) => ({ ...prev, divorcePathway: opt.id }))
+                    }
+                    className={`w-full text-left px-5 py-4 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-4 ${
+                      selected
+                        ? 'border-[#4F5E47] bg-[#F4EFEA] text-[#1c1c19]'
+                        : 'border-[#E2DAD0] bg-white/80 hover:border-[#8A9A7B] hover:bg-white text-[#2C332A]'
+                    }`}
+                  >
+                    <div>
+                      <div className="text-sm font-medium text-[#1c1c19]">{opt.title}</div>
+                      <div className="text-xs text-[#5F635E] mt-0.5">{opt.desc}</div>
+                    </div>
+                    {selected && <Check className="w-4 h-4 text-[#4F5E47] flex-shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 7. Prenup */}
+        {stepIndex === 6 && (
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1c19] leading-snug tracking-tight">
+                Do you have a prenuptial or postnuptial agreement?
+              </h1>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                { id: 'no', label: 'No agreement' },
+                { id: 'yes', label: 'Yes, signed' },
+                { id: 'unsure', label: 'I am unsure' }
+              ].map((p) => {
+                const selected = formData.hasPrenup === p.id;
+                return (
+                  <button
+                    type="button"
+                    key={p.id}
+                    onClick={() => selectAndAdvance((prev) => ({ ...prev, hasPrenup: p.id }))}
+                    className={`w-full text-left px-5 py-4 rounded-2xl border transition-all duration-200 flex items-center justify-between ${
+                      selected
+                        ? 'border-[#4F5E47] bg-[#F4EFEA] text-[#1c1c19]'
+                        : 'border-[#E2DAD0] bg-white/80 hover:border-[#8A9A7B] hover:bg-white text-[#2C332A]'
+                    }`}
+                  >
+                    <span className="text-sm font-medium">{p.label}</span>
+                    {selected && <Check className="w-4 h-4 text-[#4F5E47] flex-shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 8. Household & Filing Factors */}
+        {stepIndex === 7 && (
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1c19] leading-snug tracking-tight">
+                Do any of these apply to you?
+              </h1>
+              <p className="text-sm text-[#5F635E]">
+                Select any that fit, or continue if none apply.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                { key: 'ownsHome', label: 'We own a home or real estate together' },
+                { key: 'hasRetirementAccounts', label: 'There are 401(k), IRA, or pension accounts' },
+                { key: 'needsFeeWaiver', label: 'I may need a court filing fee waiver' },
+                { key: 'needsProtectiveOrder', label: 'I need protective or restraining order forms' }
+              ].map((item) => {
+                const checked = Boolean(formData[item.key]);
+                return (
+                  <button
+                    type="button"
+                    key={item.key}
+                    onClick={() =>
+                      setFormData((prev) => ({ ...prev, [item.key]: !prev[item.key] }))
+                    }
+                    className={`w-full text-left px-5 py-4 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-4 ${
+                      checked
+                        ? 'border-[#4F5E47] bg-[#F4EFEA] text-[#1c1c19]'
+                        : 'border-[#E2DAD0] bg-white/80 hover:border-[#8A9A7B] hover:bg-white text-[#2C332A]'
+                    }`}
+                  >
+                    <span className="text-sm font-medium">{item.label}</span>
+                    <div
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition ${
+                        checked
+                          ? 'bg-[#4F5E47] border-[#4F5E47] text-[#FAF7F2]'
+                          : 'border-[#C5C8BE] bg-white'
+                      }`}
+                    >
+                      {checked && <Check className="w-3 h-3" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 9. Hidden Account Screening */}
+        {stepIndex === 8 && (
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1c19] leading-snug tracking-tight">
+                Should Sparrow watch for unlisted accounts?
+              </h1>
+              <p className="text-sm text-[#5F635E]">
+                We can gently flag discrepancies across tax forms and statements.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                {
+                  val: true,
+                  title: 'Yes, enable hidden account screening',
+                  desc: 'Flag interest schedules or unusual transfers automatically'
+                },
+                {
+                  val: false,
+                  title: 'No, skip this for now',
+                  desc: 'You can turn this on later in settings'
+                }
+              ].map((opt) => {
+                const selected = formData.fearOfHiddenAssets === opt.val;
+                return (
+                  <button
+                    type="button"
+                    key={String(opt.val)}
+                    onClick={() =>
+                      selectAndAdvance((prev) => ({ ...prev, fearOfHiddenAssets: opt.val }))
+                    }
+                    className={`w-full text-left px-5 py-4 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-4 ${
+                      selected
+                        ? 'border-[#4F5E47] bg-[#F4EFEA] text-[#1c1c19]'
+                        : 'border-[#E2DAD0] bg-white/80 hover:border-[#8A9A7B] hover:bg-white text-[#2C332A]'
+                    }`}
+                  >
+                    <div>
+                      <div className="text-sm font-medium text-[#1c1c19]">{opt.title}</div>
+                      <div className="text-xs text-[#5F635E] mt-0.5">{opt.desc}</div>
+                    </div>
+                    {selected && <Check className="w-4 h-4 text-[#4F5E47] flex-shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 10. Primary Priorities */}
+        {stepIndex === 9 && (
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1c19] leading-snug tracking-tight">
+                What matters most to you right now?
+              </h1>
+              <p className="text-sm text-[#5F635E]">
+                Select as many as you like.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2.5">
+              {[
+                { id: 'keeping_marital_home', label: 'Keeping the marital home' },
+                { id: 'discovering_hidden_accounts', label: 'Uncovering hidden accounts or debt' },
+                { id: 'securing_spousal_support', label: 'Understanding spousal support' },
+                { id: 'protecting_retirement_share', label: 'Dividing retirement & pensions' },
+                { id: 'child_support_costs', label: 'Child custody & healthcare costs' },
+                { id: 'establishing_credit', label: 'Building independent credit' },
+                { id: 'lawyer_prep_brief', label: 'Preparing an organized brief for a lawyer' }
+              ].map((item) => {
+                const isSelected = formData.primaryConcerns.includes(item.id);
+                return (
+                  <button
+                    type="button"
+                    key={item.id}
+                    onClick={() => handleConcernToggle(item.id)}
+                    className={`flex items-center justify-between px-4 py-3.5 rounded-2xl border text-left transition-all duration-200 ${
+                      isSelected
+                        ? 'border-[#4F5E47] bg-[#F4EFEA] text-[#1c1c19]'
+                        : 'border-[#E2DAD0] bg-white/80 hover:border-[#8A9A7B] hover:bg-white text-[#5F635E]'
+                    }`}
+                  >
+                    <span className="text-sm font-medium">{item.label}</span>
+                    <div
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition ${
+                        isSelected
+                          ? 'bg-[#4F5E47] border-[#4F5E47] text-[#FAF7F2]'
+                          : 'border-[#C5C8BE] bg-white'
+                      }`}
+                    >
+                      {isSelected && <Check className="w-3 h-3" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 11. Completion & Safety Reassurance */}
+        {stepIndex === 10 && (
+          <div className="space-y-8">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 text-xs text-[#4F5E47] font-medium">
+                <Shield className="w-4 h-4" />
+                <span>Your space is private</span>
+              </div>
+              <h1 className="font-serif text-3xl sm:text-4xl font-normal text-[#1c1c19] leading-snug tracking-tight">
+                You’re ready.
+              </h1>
+              <p className="text-sm text-[#5F635E] leading-relaxed">
+                Your workspace is quietly tailored to your answers. If you ever need to step away quickly, press <kbd className="px-1.5 py-0.5 bg-white rounded border border-[#E2DAD0] text-[11px] font-mono text-[#2C332A]">Esc</kbd> twice to leave immediately.
+              </p>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                disabled={isSyncing}
+                onClick={handleFinish}
+                className="inline-flex items-center gap-2.5 bg-[#4F5E47] hover:bg-[#384631] text-[#FAF7F2] font-medium text-sm px-7 py-3.5 rounded-2xl transition disabled:opacity-50"
+              >
+                <span>{isSyncing ? 'Preparing your workspace...' : 'Enter Your Workspace'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Minimal Footer Navigation */}
+      <div className="flex items-center justify-between pt-4">
+        {stepIndex > 0 ? (
+          <button
+            type="button"
+            onClick={handleBack}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#5F635E] hover:text-[#1c1c19] py-2 transition"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back</span>
+          </button>
+        ) : (
+          <div />
+        )}
+
+        {stepIndex < TOTAL_STEPS - 1 && (
+          <button
+            type="button"
+            onClick={handleNext}
+            className="inline-flex items-center gap-1.5 bg-[#4F5E47] hover:bg-[#384631] text-[#FAF7F2] font-medium text-xs px-5 py-2.5 rounded-xl transition"
+          >
+            <span>Continue</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
     </div>
   );

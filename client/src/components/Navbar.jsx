@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, Sparkles, LogOut, User, LogIn, AlertOctagon, Eye, EyeOff, RotateCcw, Settings } from 'lucide-react';
+import { Shield, Feather, LogOut, User, Eye, EyeOff, RotateCcw, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDiscovery } from '../context/DiscoveryContext';
 
@@ -21,71 +21,83 @@ export default function Navbar() {
     navigate('/');
   };
 
+  if (location.pathname === '/') {
+    return null;
+  }
+
   return (
-    <header className="sticky top-0 z-40 bg-[#F8F6F2]/95 backdrop-blur-md border-b border-[#E2DBD0]">
+    <header className="sticky top-0 z-40 bg-[#FAF7F2]/92 backdrop-blur-md border-b border-[#4F5E47]/10">
       {/* Top Safety Bar for Discreet Exit */}
-      <div className="bg-[#F4EFEB] border-b border-[#E2DBD0] px-4 py-1.5 text-xs text-[#5C4E43] flex justify-between items-center">
+      <div className="bg-[#F4EFEA] border-b border-[#E2DAD0] px-4 py-1.5 text-xs text-[#5F635E] flex justify-between items-center">
         <div className="flex items-center gap-2 font-normal">
-          <Shield className="w-3.5 h-3.5 text-[#435C4D]" />
-          <span>Confidential & discreet · Press <kbd className="px-1 py-0.2 bg-white rounded border border-[#E2DBD0] text-[10px] font-mono">Esc</kbd> twice quickly or click to safely leave:</span>
+          <Feather className="w-3.5 h-3.5 text-[#4F5E47]" />
+          <span>Confidential sanctuary · Press <kbd className="px-1.5 py-0.2 bg-white rounded-full border border-[#E2DAD0] text-[10px] font-mono text-[#2C332A]">Esc</kbd> twice quickly or exit discreetly:</span>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={togglePrivacyMode}
             title={workspace.privacyMode ? 'Show numeric amounts' : 'Mask sensitive numeric amounts'}
-            className="flex items-center gap-1 text-[#5C4E43] hover:text-[#261E19] text-xs px-2 py-0.5 rounded border border-[#E2DBD0] bg-white transition"
+            className="flex items-center gap-1.5 text-[#5F635E] hover:text-[#1c1c19] text-xs px-2.5 py-0.5 rounded-full border border-[#E2DAD0] bg-white transition"
           >
-            {workspace.privacyMode ? <EyeOff className="w-3 h-3 text-amber-800" /> : <Eye className="w-3 h-3 text-[#5C4E43]" />}
+            {workspace.privacyMode ? <EyeOff className="w-3 h-3 text-[#A07E5F]" /> : <Eye className="w-3 h-3 text-[#5F635E]" />}
             <span>{workspace.privacyMode ? 'Discreet Mode Active' : 'Discreet Mode'}</span>
           </button>
 
           <button
             onClick={handleQuickExit}
             title="Instantly redirects to Weather.com and clears session"
-            className="flex items-center gap-1 bg-[#7e4d41] hover:bg-[#5c3228] text-white font-medium px-2.5 py-0.5 rounded shadow-xs transition text-xs"
+            className="flex items-center gap-1.5 bg-white hover:bg-[#EDE6DD] text-[#4F5E47] border border-[#4F5E47]/40 font-medium px-3 py-0.5 rounded-full transition text-xs"
           >
-            <AlertOctagon className="w-3 h-3" />
+            <Shield className="w-3 h-3" />
             <span>Quick Safe Exit</span>
           </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-15">
+      <div className="max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
           {/* Logo & Product Name */}
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-[#435C4D] flex items-center justify-center text-white shadow-xs group-hover:bg-[#354A3E] transition">
-              <Shield className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-xl bg-[#4F5E47] flex items-center justify-center text-[#FAF7F2] shadow-sm group-hover:bg-[#384631] transition">
+              <Feather className="w-4 h-4 text-[#FAF7F2]" />
             </div>
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="font-medium text-base text-[#261E19] tracking-tight">Sparrow</span>
-                <span className="text-xs text-[#8C7D73]">·</span>
-                <span className="text-xs text-[#5C4E43]">Know What's Yours</span>
+                <span className="font-serif text-xl text-[#1c1c19] tracking-tight">Sparrow</span>
+                <span className="text-xs text-[#A07E5F]">·</span>
+                <span className="text-xs text-[#5F635E]">Know What's Yours</span>
               </div>
             </div>
           </Link>
 
           {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-[#5C4E43]">
+          <nav className="hidden md:flex items-center gap-7 text-xs font-medium text-[#5F635E]">
             <Link 
               to="/dashboard" 
-              className={`hover:text-[#261E19] transition ${location.pathname === '/dashboard' ? 'text-[#261E19] font-semibold' : ''}`}
+              className={`hover:text-[#1c1c19] transition ${location.pathname === '/dashboard' ? 'text-[#384631] font-semibold' : ''}`}
             >
               Dashboard
             </Link>
             <Link 
               to="/discovery" 
-              className={`hover:text-[#261E19] transition ${location.pathname === '/discovery' ? 'text-[#261E19] font-semibold' : ''}`}
+              className={`hover:text-[#1c1c19] transition ${location.pathname === '/discovery' ? 'text-[#384631] font-semibold' : ''}`}
             >
               Financial Discovery
             </Link>
             <Link 
               to="/consult" 
-              className={`hover:text-[#261E19] transition ${location.pathname === '/consult' ? 'text-[#261E19] font-semibold' : ''}`}
+              className={`hover:text-[#1c1c19] transition ${location.pathname === '/consult' ? 'text-[#384631] font-semibold' : ''}`}
             >
               Consult a Pro
             </Link>
+            {currentUser && (
+              <Link
+                to="/settings"
+                className={`hover:text-[#1c1c19] transition ${location.pathname === '/settings' ? 'text-[#384631] font-semibold' : ''}`}
+              >
+                Settings
+              </Link>
+            )}
           </nav>
 
           {/* User actions & Reset Workspace */}
@@ -93,7 +105,7 @@ export default function Navbar() {
             <button
               onClick={resetWorkspace}
               title="Reset all discovery test files to clean baseline"
-              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs text-[#8C7D73] hover:text-[#261E19] border border-[#E2DBD0] rounded-lg bg-white transition"
+              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs text-[#5F635E] hover:text-[#1c1c19] border border-[#E2DAD0] rounded-full bg-white transition"
             >
               <RotateCcw className="w-3 h-3" />
               <span>Reset Demo</span>
@@ -103,17 +115,17 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   to="/dashboard"
-                  className="flex items-center gap-1.5 text-xs font-medium text-[#261E19] bg-white border border-[#E2DBD0] rounded-lg px-2.5 py-1 shadow-xs hover:border-[#8C7D73] transition"
+                  className="flex items-center gap-1.5 text-xs font-medium text-[#2C332A] bg-white border border-[#E2DAD0] rounded-full px-3 py-1 hover:border-[#A07E5F] transition"
                 >
-                  <User className="w-3.5 h-3.5 text-[#435C4D]" />
+                  <User className="w-3.5 h-3.5 text-[#4F5E47]" />
                   <span className="max-w-[110px] truncate">{currentUser.displayName || currentUser.email}</span>
                 </Link>
                 <Link
                   to="/settings"
-                  className={`p-1.5 rounded-lg transition ${
+                  className={`p-1.5 rounded-full transition ${
                     location.pathname === '/settings'
-                      ? 'text-[#261E19] bg-[#F4EFEB]'
-                      : 'text-[#8C7D73] hover:text-[#261E19] hover:bg-[#F4EFEB]'
+                      ? 'text-[#384631] bg-[#EDE6DD]'
+                      : 'text-[#5F635E] hover:text-[#1c1c19] hover:bg-[#F4EFEA]'
                   }`}
                   title="Settings"
                   aria-label="Settings"
@@ -122,7 +134,7 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="p-1.5 text-[#8C7D73] hover:text-[#261E19] rounded-lg hover:bg-[#F4EFEB] transition"
+                  className="p-1.5 text-[#5F635E] hover:text-[#1c1c19] rounded-full hover:bg-[#F4EFEA] transition"
                   title="Sign Out"
                 >
                   <LogOut className="w-4 h-4" />
@@ -132,13 +144,13 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   to="/auth"
-                  className="text-xs font-medium text-[#5C4E43] hover:text-[#261E19] px-3 py-1.5 transition"
+                  className="text-xs font-medium text-[#5F635E] hover:text-[#1c1c19] px-3 py-1.5 transition"
                 >
                   Log In
                 </Link>
                 <Link
                   to="/auth"
-                  className="text-xs font-medium text-white bg-[#435C4D] hover:bg-[#354A3E] px-3 py-1.5 rounded-lg shadow-xs transition"
+                  className="text-xs font-medium text-[#FAF7F2] bg-[#4F5E47] hover:bg-[#384631] px-4 py-1.5 rounded-full transition"
                 >
                   Get Started
                 </Link>

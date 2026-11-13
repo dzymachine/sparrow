@@ -4,12 +4,16 @@
 
 @layer base {
   body {
-    @apply text-[#5C4E43] bg-[#F8F6F2] font-sans antialiased;
+    @apply text-[#2C332A] bg-[#FAF7F2] font-sans antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply text-[#261E19] font-medium tracking-tight;
+  h1, h2 {
+    @apply font-serif text-[#1c1c19] font-normal tracking-tight;
+  }
+
+  h3, h4, h5, h6 {
+    @apply text-[#1c1c19] font-medium tracking-tight;
   }
 
   .font-mono, [data-mono="true"], .tabular-nums {
@@ -22,9 +26,26 @@
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Hairline card utility */
+/* Serene Flight Editorial surface & elevation utilities */
 .card-hairline {
-  @apply bg-white border border-[#E2DBD0] rounded-xl shadow-none;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(79, 94, 71, 0.1);
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px -4px rgba(79, 94, 71, 0.05), 0 2px 6px -1px rgba(79, 94, 71, 0.03);
+}
+
+.card-oat {
+  background-color: #F4EFEA;
+  border: 1px solid #E2DAD0;
+  border-radius: 1rem;
+}
+
+.shadow-serene {
+  box-shadow: 0 8px 30px -4px rgba(79, 94, 71, 0.06), 0 2px 6px -1px rgba(79, 94, 71, 0.04);
+}
+
+.font-editorial-heading {
+  font-family: "Newsreader", Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 /* Finch bird animations */
@@ -80,4 +101,108 @@
   transform-box: fill-box;
   transform-origin: center;
   animation: finch-blink 4.5s ease-in-out infinite;
+}
+
+/* 21st.dev-inspired landing page animations */
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(220%) skewX(-18deg);
+  }
+}
+
+@keyframes fade-up-blur {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes ken-burns-slow {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.08) translate3d(-1%, -1%, 0);
+  }
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+.animate-shimmer-sweep {
+  animation: shimmer-sweep 2.8s ease-in-out infinite;
+}
+
+.animate-fade-up-blur {
+  animation: fade-up-blur 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-ken-burns {
+  animation: ken-burns-slow 26s ease-in-out infinite;
+}
+
+@keyframes page-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes serene-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes serene-fade-in-slow {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-fade-in {
+  animation: page-fade-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: serene-fade-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in-slow {
+  animation: serene-fade-in-slow 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-fade-in,
+  .animate-fade-in,
+  .animate-fade-in-slow,
+  .animate-fade-up-blur {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
 }

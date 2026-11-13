@@ -267,53 +267,53 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F6F2] py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto space-y-4">
+    <div className="min-h-screen bg-[#FAF7F2] py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto space-y-5">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
           <div>
-            <h1 className="text-2xl font-semibold text-[#261E19] tracking-tight">Settings</h1>
-            <p className="text-sm text-[#5C4E43] mt-0.5">
+            <h1 className="font-serif text-3xl sm:text-4xl font-normal text-[#1c1c19] tracking-tight">Settings</h1>
+            <p className="text-sm text-[#5F635E] mt-1">
               Expand any section below to manage your account, login credentials, or intake profile.
             </p>
           </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-[#E2DBD0] text-[#5C4E43] self-start sm:self-auto">
-            <Database className="w-3.5 h-3.5 text-[#435C4D]" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium bg-[#FFFFFF] border border-[#4F5E47]/10 text-[#5F635E] shadow-serene self-start sm:self-auto">
+            <Database className="w-3.5 h-3.5 text-[#4F5E47]" />
             <span>{isFirebaseLive ? 'Synced with Firebase DB' : 'Local / Demo Mode'}</span>
           </div>
         </div>
 
         {/* 1. Collapsible: Account Information */}
-        <div className="bg-white border border-[#E2DBD0] rounded-2xl overflow-hidden">
+        <div className="bg-[#FFFFFF] border border-[#4F5E47]/10 rounded-2xl shadow-serene overflow-hidden">
           <button
             type="button"
             onClick={() => toggleSection('account')}
             aria-expanded={openSections.account}
-            className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[#FAF9F6] transition"
+            className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[#F4EFEA]/60 transition"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[#F4EFEB] flex items-center justify-center text-[#435C4D]">
+              <div className="w-9 h-9 rounded-xl bg-[#EDE6DD] flex items-center justify-center text-[#4F5E47]">
                 <User className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-[#261E19]">Account Information</h2>
-                <p className="text-xs text-[#8C7D73]">
+                <h2 className="font-serif text-lg font-normal text-[#1c1c19]">Account Information</h2>
+                <p className="text-xs text-[#5F635E]">
                   Name, contact details, jurisdiction, and privacy preferences
                 </p>
               </div>
             </div>
             <ChevronDown
-              className={`w-5 h-5 text-[#8C7D73] transition-transform duration-200 ${
+              className={`w-5 h-5 text-[#5F635E] transition-transform duration-200 ${
                 openSections.account ? 'rotate-180' : ''
               }`}
             />
           </button>
 
           {openSections.account && (
-            <form onSubmit={handleSaveProfile} className="px-6 pb-6 pt-2 border-t border-[#EFEAE2] space-y-5">
+            <form onSubmit={handleSaveProfile} className="px-6 pb-6 pt-2 border-t border-[#E2DAD0]/70 space-y-5 animate-fade-in">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Full Name
                   </label>
                   <input
@@ -321,12 +321,12 @@ export default function SettingsPage() {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="Your full name"
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Phone Number
                   </label>
                   <input
@@ -334,18 +334,18 @@ export default function SettingsPage() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(555) 123-4567"
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     State / Jurisdiction
                   </label>
                   <select
                     value={stateVal}
                     onChange={(e) => setStateVal(e.target.value)}
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   >
                     {US_STATES.map((s) => (
                       <option key={s} value={s}>
@@ -356,7 +356,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     City
                   </label>
                   <input
@@ -364,12 +364,12 @@ export default function SettingsPage() {
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="e.g. San Francisco"
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Preferred Contact Method
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -380,8 +380,8 @@ export default function SettingsPage() {
                         onClick={() => setPreferredContact(method)}
                         className={`px-3.5 py-1.5 rounded-xl text-xs font-medium border transition capitalize ${
                           preferredContact === method
-                            ? 'bg-[#435C4D] text-white border-[#435C4D]'
-                            : 'bg-[#FAF9F6] text-[#5C4E43] border-[#E2DBD0] hover:border-[#8C7D73]'
+                            ? 'bg-[#4F5E47] text-[#FAF7F2] border-[#4F5E47]'
+                            : 'bg-[#FAF7F2] text-[#5F635E] border-[#E2DAD0] hover:border-[#8A9A7B]'
                         }`}
                       >
                         {method === 'in-app' ? 'In-App Only' : method}
@@ -392,16 +392,16 @@ export default function SettingsPage() {
               </div>
 
               {/* Privacy Preferences */}
-              <div className="pt-3 border-t border-[#EFEAE2] space-y-3">
-                <div className="flex items-center gap-2 text-xs font-semibold text-[#261E19]">
-                  <Shield className="w-3.5 h-3.5 text-[#435C4D]" />
+              <div className="pt-3 border-t border-[#E2DAD0]/70 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-[#1c1c19]">
+                  <Shield className="w-3.5 h-3.5 text-[#4F5E47]" />
                   <span>Privacy Preferences</span>
                 </div>
 
                 <label className="flex items-center justify-between gap-3 cursor-pointer">
                   <div>
-                    <p className="text-sm text-[#261E19] font-medium">Discreet notifications</p>
-                    <p className="text-xs text-[#8C7D73]">
+                    <p className="text-sm text-[#1c1c19] font-medium">Discreet notifications</p>
+                    <p className="text-xs text-[#5F635E]">
                       Use neutral phrasing without legal or divorce keywords.
                     </p>
                   </div>
@@ -409,14 +409,14 @@ export default function SettingsPage() {
                     type="checkbox"
                     checked={discreetNotifications}
                     onChange={(e) => setDiscreetNotifications(e.target.checked)}
-                    className="h-4 w-4 accent-[#435C4D] rounded"
+                    className="h-4 w-4 accent-[#4F5E47] rounded"
                   />
                 </label>
 
                 <label className="flex items-center justify-between gap-3 cursor-pointer">
                   <div>
-                    <p className="text-sm text-[#261E19] font-medium">Default to Discreet Mode</p>
-                    <p className="text-xs text-[#8C7D73]">
+                    <p className="text-sm text-[#1c1c19] font-medium">Default to Discreet Mode</p>
+                    <p className="text-xs text-[#5F635E]">
                       Mask sensitive dollar amounts when opening your dashboard.
                     </p>
                   </div>
@@ -424,7 +424,7 @@ export default function SettingsPage() {
                     type="checkbox"
                     checked={defaultDiscreetMode}
                     onChange={(e) => setDefaultDiscreetMode(e.target.checked)}
-                    className="h-4 w-4 accent-[#435C4D] rounded"
+                    className="h-4 w-4 accent-[#4F5E47] rounded"
                   />
                 </label>
               </div>
@@ -433,8 +433,8 @@ export default function SettingsPage() {
                 <div
                   className={`flex items-center gap-2 text-xs px-3.5 py-2.5 rounded-xl border ${
                     profileFeedback.type === 'success'
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                      : 'bg-rose-50 text-rose-800 border-rose-200'
+                      ? 'bg-[#F5F7F3] text-[#384631] border-[#8A9A7B]/50'
+                      : 'bg-[#FAF2F0] text-[#A86851] border-[#D9B3AC]'
                   }`}
                 >
                   {profileFeedback.type === 'success' ? (
@@ -450,7 +450,7 @@ export default function SettingsPage() {
                 <button
                   type="submit"
                   disabled={savingProfile}
-                  className="inline-flex items-center gap-2 bg-[#435C4D] hover:bg-[#354A3E] disabled:opacity-50 text-white text-xs font-medium px-4 py-2.5 rounded-xl transition"
+                  className="inline-flex items-center gap-2 bg-[#4F5E47] hover:bg-[#384631] disabled:opacity-50 text-[#FAF7F2] text-xs font-medium px-5 py-2.5 rounded-xl transition"
                 >
                   {savingProfile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                   <span>{savingProfile ? 'Saving...' : 'Save Account Info'}</span>
@@ -461,36 +461,36 @@ export default function SettingsPage() {
         </div>
 
         {/* 2. Collapsible: Login & Security */}
-        <div className="bg-white border border-[#E2DBD0] rounded-2xl overflow-hidden">
+        <div className="bg-[#FFFFFF] border border-[#4F5E47]/10 rounded-2xl shadow-serene overflow-hidden">
           <button
             type="button"
             onClick={() => toggleSection('login')}
             aria-expanded={openSections.login}
-            className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[#FAF9F6] transition"
+            className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[#F4EFEA]/60 transition"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[#F4EFEB] flex items-center justify-center text-[#435C4D]">
+              <div className="w-9 h-9 rounded-xl bg-[#EDE6DD] flex items-center justify-center text-[#4F5E47]">
                 <Lock className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-[#261E19]">Login &amp; Security</h2>
-                <p className="text-xs text-[#8C7D73]">
+                <h2 className="font-serif text-lg font-normal text-[#1c1c19]">Login &amp; Security</h2>
+                <p className="text-xs text-[#5F635E]">
                   Update your sign-in email or password
                 </p>
               </div>
             </div>
             <ChevronDown
-              className={`w-5 h-5 text-[#8C7D73] transition-transform duration-200 ${
+              className={`w-5 h-5 text-[#5F635E] transition-transform duration-200 ${
                 openSections.login ? 'rotate-180' : ''
               }`}
             />
           </button>
 
           {openSections.login && (
-            <form onSubmit={handleSaveLogin} className="px-6 pb-6 pt-2 border-t border-[#EFEAE2] space-y-5">
+            <form onSubmit={handleSaveLogin} className="px-6 pb-6 pt-2 border-t border-[#E2DAD0]/70 space-y-5 animate-fade-in">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Email Address
                   </label>
                   <input
@@ -498,25 +498,25 @@ export default function SettingsPage() {
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
-                    Current Password <span className="text-[#8C7D73] font-normal">(required for live Firebase changes)</span>
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
+                    Current Password <span className="text-[#5F635E]/80 font-normal">(required for live Firebase changes)</span>
                   </label>
                   <input
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="Enter current password"
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     New Password
                   </label>
                   <input
@@ -524,12 +524,12 @@ export default function SettingsPage() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Leave blank to keep current"
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Confirm New Password
                   </label>
                   <input
@@ -537,7 +537,7 @@ export default function SettingsPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter new password"
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   />
                 </div>
               </div>
@@ -546,8 +546,8 @@ export default function SettingsPage() {
                 <div
                   className={`flex items-center gap-2 text-xs px-3.5 py-2.5 rounded-xl border ${
                     loginFeedback.type === 'success'
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                      : 'bg-rose-50 text-rose-800 border-rose-200'
+                      ? 'bg-[#F5F7F3] text-[#384631] border-[#8A9A7B]/50'
+                      : 'bg-[#FAF2F0] text-[#A86851] border-[#D9B3AC]'
                   }`}
                 >
                   {loginFeedback.type === 'success' ? (
@@ -563,7 +563,7 @@ export default function SettingsPage() {
                 <button
                   type="submit"
                   disabled={savingLogin}
-                  className="inline-flex items-center gap-2 bg-[#261E19] hover:bg-[#3A2E27] disabled:opacity-50 text-white text-xs font-medium px-4 py-2.5 rounded-xl transition"
+                  className="inline-flex items-center gap-2 bg-[#4F5E47] hover:bg-[#384631] disabled:opacity-50 text-[#FAF7F2] text-xs font-medium px-5 py-2.5 rounded-xl transition"
                 >
                   {savingLogin ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
                   <span>{savingLogin ? 'Updating...' : 'Update Login Info'}</span>
@@ -574,42 +574,42 @@ export default function SettingsPage() {
         </div>
 
         {/* 3. Collapsible: Intake Form */}
-        <div className="bg-white border border-[#E2DBD0] rounded-2xl overflow-hidden">
+        <div className="bg-[#FFFFFF] border border-[#4F5E47]/10 rounded-2xl shadow-serene overflow-hidden">
           <button
             type="button"
             onClick={() => toggleSection('intake')}
             aria-expanded={openSections.intake}
-            className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[#FAF9F6] transition"
+            className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[#F4EFEA]/60 transition"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[#F4EFEB] flex items-center justify-center text-[#435C4D]">
+              <div className="w-9 h-9 rounded-xl bg-[#EDE6DD] flex items-center justify-center text-[#4F5E47]">
                 <ClipboardList className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-[#261E19]">Intake Form &amp; Case Profile</h2>
-                <p className="text-xs text-[#8C7D73]">
+                <h2 className="font-serif text-lg font-normal text-[#1c1c19]">Intake Form &amp; Case Profile</h2>
+                <p className="text-xs text-[#5F635E]">
                   Edit your legal context, household, financial visibility, and priorities
                 </p>
               </div>
             </div>
             <ChevronDown
-              className={`w-5 h-5 text-[#8C7D73] transition-transform duration-200 ${
+              className={`w-5 h-5 text-[#5F635E] transition-transform duration-200 ${
                 openSections.intake ? 'rotate-180' : ''
               }`}
             />
           </button>
 
           {openSections.intake && (
-            <form onSubmit={handleSaveIntake} className="px-6 pb-6 pt-2 border-t border-[#EFEAE2] space-y-5">
+            <form onSubmit={handleSaveIntake} className="px-6 pb-6 pt-2 border-t border-[#E2DAD0]/70 space-y-5 animate-fade-in">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Current Goal
                   </label>
                   <select
                     value={intakeData.goal}
                     onChange={(e) => setIntakeData({ ...intakeData, goal: e.target.value })}
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   >
                     <option value="pursuing_divorce">Pursuing a Divorce</option>
                     <option value="legal_separation">Legal Separation</option>
@@ -618,13 +618,13 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Filing State / Jurisdiction
                   </label>
                   <select
                     value={intakeData.stateJurisdiction}
                     onChange={(e) => setIntakeData({ ...intakeData, stateJurisdiction: e.target.value })}
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   >
                     {INTAKE_STATES.map((s) => (
                       <option key={s} value={s}>
@@ -635,7 +635,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Length of Marriage (years)
                   </label>
                   <input
@@ -646,18 +646,18 @@ export default function SettingsPage() {
                     onChange={(e) =>
                       setIntakeData({ ...intakeData, marriageLengthYears: Number(e.target.value) || 0 })
                     }
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm font-mono bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Divorce Pathway
                   </label>
                   <select
                     value={intakeData.divorcePathway}
                     onChange={(e) => setIntakeData({ ...intakeData, divorcePathway: e.target.value })}
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   >
                     <option value="unsure">Unsure / Deciding</option>
                     <option value="uncontested">Uncontested / Amicable</option>
@@ -667,13 +667,13 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Who Handled Finances?
                   </label>
                   <select
                     value={intakeData.financialRole}
                     onChange={(e) => setIntakeData({ ...intakeData, financialRole: e.target.value })}
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   >
                     <option value="spouse_handled_all">My spouse handled most/all finances</option>
                     <option value="shared_finances">We shared financial management</option>
@@ -682,13 +682,13 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Account Visibility
                   </label>
                   <select
                     value={intakeData.accountVisibility}
                     onChange={(e) => setIntakeData({ ...intakeData, accountVisibility: e.target.value })}
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   >
                     <option value="full_visibility">Full visibility into all accounts</option>
                     <option value="partial_visibility">Partial visibility</option>
@@ -697,13 +697,13 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#5C4E43] mb-1.5">
+                  <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                     Prenuptial Agreement
                   </label>
                   <select
                     value={intakeData.hasPrenup}
                     onChange={(e) => setIntakeData({ ...intakeData, hasPrenup: e.target.value })}
-                    className="w-full text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3.5 py-2 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25 focus:border-[#435C4D]"
+                    className="w-full text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                   >
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
@@ -712,7 +712,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex items-center gap-3 pt-5">
-                  <label className="flex items-center gap-2 text-sm text-[#261E19] cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm text-[#1c1c19] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={intakeData.hasChildren}
@@ -723,7 +723,7 @@ export default function SettingsPage() {
                           childrenCount: e.target.checked ? Math.max(1, intakeData.childrenCount) : 0
                         })
                       }
-                      className="h-4 w-4 accent-[#435C4D] rounded"
+                      className="h-4 w-4 accent-[#4F5E47] rounded"
                     />
                     <span>Minor children</span>
                   </label>
@@ -737,14 +737,14 @@ export default function SettingsPage() {
                         setIntakeData({ ...intakeData, childrenCount: Number(e.target.value) || 1 })
                       }
                       aria-label="Number of children"
-                      className="w-20 text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl px-3 py-1.5 text-[#261E19] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/25"
+                      className="w-20 text-sm font-mono bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3 py-1.5 text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
                     />
                   )}
                 </div>
               </div>
 
               {/* Household & Safety Flags */}
-              <div className="pt-3 border-t border-[#EFEAE2] grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="pt-3 border-t border-[#E2DAD0]/70 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   { key: 'ownsHome', label: 'Own marital home / real estate' },
                   { key: 'hasRetirementAccounts', label: '401(k), IRA, or pension accounts' },
@@ -752,14 +752,14 @@ export default function SettingsPage() {
                   { key: 'needsFeeWaiver', label: 'May need court fee waiver' },
                   { key: 'needsProtectiveOrder', label: 'Need protective order info' }
                 ].map((item) => (
-                  <label key={item.key} className="flex items-center gap-2.5 text-xs text-[#261E19] cursor-pointer">
+                  <label key={item.key} className="flex items-center gap-2.5 text-xs text-[#2C332A] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={Boolean((intakeData as any)[item.key])}
                       onChange={(e) =>
                         setIntakeData({ ...intakeData, [item.key]: e.target.checked })
                       }
-                      className="h-4 w-4 accent-[#435C4D] rounded"
+                      className="h-4 w-4 accent-[#4F5E47] rounded"
                     />
                     <span>{item.label}</span>
                   </label>
@@ -767,8 +767,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Primary Concerns */}
-              <div className="pt-3 border-t border-[#EFEAE2]">
-                <label className="block text-xs font-medium text-[#5C4E43] mb-2">
+              <div className="pt-3 border-t border-[#E2DAD0]/70">
+                <label className="block text-xs font-medium text-[#5F635E] mb-2">
                   Primary Priorities &amp; Concerns
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -781,8 +781,8 @@ export default function SettingsPage() {
                         onClick={() => handleConcernToggle(c.id)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition ${
                           selected
-                            ? 'bg-[#435C4D] text-white border-[#435C4D]'
-                            : 'bg-[#FAF9F6] text-[#5C4E43] border-[#E2DBD0] hover:border-[#8C7D73]'
+                            ? 'bg-[#4F5E47] text-[#FAF7F2] border-[#4F5E47]'
+                            : 'bg-[#FAF7F2] text-[#5F635E] border-[#E2DAD0] hover:border-[#8A9A7B]'
                         }`}
                       >
                         {c.label}
@@ -796,8 +796,8 @@ export default function SettingsPage() {
                 <div
                   className={`flex items-center gap-2 text-xs px-3.5 py-2.5 rounded-xl border ${
                     intakeFeedback.type === 'success'
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                      : 'bg-rose-50 text-rose-800 border-rose-200'
+                      ? 'bg-[#F5F7F3] text-[#384631] border-[#8A9A7B]/50'
+                      : 'bg-[#FAF2F0] text-[#A86851] border-[#D9B3AC]'
                   }`}
                 >
                   {intakeFeedback.type === 'success' ? (
@@ -813,7 +813,7 @@ export default function SettingsPage() {
                 <button
                   type="submit"
                   disabled={savingIntake}
-                  className="inline-flex items-center gap-2 bg-[#435C4D] hover:bg-[#354A3E] disabled:opacity-50 text-white text-xs font-medium px-4 py-2.5 rounded-xl transition"
+                  className="inline-flex items-center gap-2 bg-[#4F5E47] hover:bg-[#384631] disabled:opacity-50 text-[#FAF7F2] text-xs font-medium px-5 py-2.5 rounded-xl transition"
                 >
                   {savingIntake ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                   <span>{savingIntake ? 'Saving Intake...' : 'Save Intake Form'}</span>

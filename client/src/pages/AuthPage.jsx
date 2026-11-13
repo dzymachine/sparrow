@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Shield, Sparkles, Lock, ArrowRight, Check, Eye } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useSmoothNavigate } from '../context/TransitionContext';
 
 export default function AuthPage() {
   const [searchParams] = useSearchParams();
@@ -17,6 +18,11 @@ export default function AuthPage() {
   const [submitted, setSubmitted] = useState(false);
   const { signIn, signUp, loginWithGoogle, loginWithDemo, currentUser } = useAuth();
   const navigate = useNavigate();
+  const smoothNavigate = useSmoothNavigate();
+
+  useEffect(() => {
+    setIsSignUp(searchParams.get('mode') === 'signup');
+  }, [searchParams]);
 
   useEffect(() => {
     if (currentUser && !submitted) {
@@ -33,10 +39,10 @@ export default function AuthPage() {
     try {
       if (isSignUp) {
         await signUp(email, password, name);
-        navigate('/onboarding');
+        smoothNavigate('/onboarding');
       } else {
         await signIn(email, password);
-        navigate('/dashboard');
+        smoothNavigate('/dashboard');
       }
     } catch (err) {
       console.error(err);
@@ -53,7 +59,7 @@ export default function AuthPage() {
     setSubmitted(true);
     try {
       await loginWithGoogle();
-      navigate('/dashboard');
+      smoothNavigate('/dashboard');
     } catch (err) {
       console.error(err);
       setError('Google Sign-In failed: ' + err.message);
@@ -65,21 +71,21 @@ export default function AuthPage() {
 
   const handleDemoAccess = () => {
     loginWithDemo();
-    navigate('/dashboard');
+    smoothNavigate('/dashboard');
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white border border-brand-200/80 rounded-3xl p-8 sm:p-10 shadow-lg">
+    <div className="min-h-[85vh] bg-[#FAF7F2] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-7 bg-[#FFFFFF] border border-[#4F5E47]/10 rounded-2xl p-8 sm:p-10 shadow-serene animate-fade-in">
         {/* Brand header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 rounded-2xl bg-brand-100 text-brand-700 mb-2">
+          <div className="inline-flex p-3 rounded-2xl bg-[#EDE6DD] text-[#4F5E47] mb-2">
             <Shield className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          <h2 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1c19] tracking-tight">
             {isSignUp ? 'Create your private account' : 'Welcome back to Sparrow'}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500">
+          <p className="text-xs sm:text-sm text-[#5F635E]">
             {isSignUp
               ? 'Your private financial discovery workspace begins here.'
               : 'Log in to access your document vault and divorce projections.'}
@@ -87,12 +93,12 @@ export default function AuthPage() {
         </div>
 
         {/* Tab switch */}
-        <div className="flex bg-slate-100 p-1 rounded-xl text-sm font-semibold text-slate-600">
+        <div className="flex bg-[#F4EFEA] p-1 rounded-xl text-sm font-medium text-[#5F635E] border border-[#E2DAD0]/60">
           <button
             type="button"
             onClick={() => { setIsSignUp(false); setError(''); }}
             className={`flex-1 py-2 rounded-lg transition ${
-              !isSignUp ? 'bg-white text-slate-900 shadow-sm' : 'hover:text-slate-900'
+              !isSignUp ? 'bg-[#FFFFFF] text-[#1c1c19] shadow-serene' : 'hover:text-[#1c1c19]'
             }`}
           >
             Sign In
@@ -101,7 +107,7 @@ export default function AuthPage() {
             type="button"
             onClick={() => { setIsSignUp(true); setError(''); }}
             className={`flex-1 py-2 rounded-lg transition ${
-              isSignUp ? 'bg-white text-slate-900 shadow-sm' : 'hover:text-slate-900'
+              isSignUp ? 'bg-[#FFFFFF] text-[#1c1c19] shadow-serene' : 'hover:text-[#1c1c19]'
             }`}
           >
             Create Account
@@ -109,7 +115,7 @@ export default function AuthPage() {
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs leading-relaxed">
+          <div className="p-3.5 rounded-xl bg-[#FAF2F0] border border-[#D9B3AC] text-[#A86851] text-xs leading-relaxed">
             {error}
           </div>
         )}
@@ -118,16 +124,16 @@ export default function AuthPage() {
         <button
           type="button"
           onClick={handleDemoAccess}
-          className="w-full flex items-center justify-center gap-2 bg-brand-50 hover:bg-brand-100 text-brand-900 font-semibold py-2.5 px-4 rounded-xl border border-brand-200 transition text-sm shadow-sm"
+          className="w-full flex items-center justify-center gap-2 bg-[#F4EFEA] hover:bg-[#EDE6DD] text-[#4F5E47] font-medium py-2.5 px-4 rounded-xl border border-[#8A9A7B]/60 transition text-sm"
         >
-          <Eye className="w-4 h-4 text-brand-700" />
+          <Eye className="w-4 h-4 text-[#A07E5F]" />
           <span>One-Click Demo Mode (Instant Evaluation)</span>
         </button>
 
         <div className="relative flex py-1 items-center">
-          <div className="flex-grow border-t border-slate-200"></div>
-          <span className="flex-shrink mx-4 text-slate-400 text-xs font-medium uppercase tracking-wider">or sign in with</span>
-          <div className="flex-grow border-t border-slate-200"></div>
+          <div className="flex-grow border-t border-[#E2DAD0]"></div>
+          <span className="flex-shrink mx-4 text-[#5F635E] text-xs font-medium uppercase tracking-wider">or sign in with</span>
+          <div className="flex-grow border-t border-[#E2DAD0]"></div>
         </div>
 
         {/* Google Auth Button */}
@@ -135,7 +141,7 @@ export default function AuthPage() {
           type="button"
           onClick={handleGoogleAuth}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 text-slate-700 font-medium py-2.5 px-4 rounded-xl border border-slate-300 shadow-sm transition text-sm"
+          className="w-full flex items-center justify-center gap-3 bg-transparent hover:bg-[#F4EFEA] text-[#4F5E47] font-medium py-2.5 px-4 rounded-xl border border-[#8A9A7B] transition text-sm"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path
@@ -162,7 +168,7 @@ export default function AuthPage() {
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           {isSignUp && (
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
                 Your Preferred Name
               </label>
               <input
@@ -171,13 +177,13 @@ export default function AuthPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Sarah"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#E2DAD0] text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F] text-sm"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
               Email Address
             </label>
             <input
@@ -186,12 +192,12 @@ export default function AuthPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#E2DAD0] text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F] text-sm"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-medium text-[#5F635E] mb-1.5">
               Password
             </label>
             <input
@@ -200,14 +206,14 @@ export default function AuthPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#E2DAD0] text-[#1c1c19] focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F] text-sm"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold py-3 px-4 rounded-xl shadow transition text-sm disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 bg-[#4F5E47] hover:bg-[#384631] text-[#FAF7F2] font-medium py-3 px-4 rounded-xl transition text-sm disabled:opacity-50"
           >
             <span>{isSignUp ? 'Create Private Account' : 'Sign In'}</span>
             <ArrowRight className="w-4 h-4" />
@@ -215,8 +221,8 @@ export default function AuthPage() {
         </form>
 
         {/* Privacy Note */}
-        <div className="pt-2 text-center text-xs text-slate-400 flex items-center justify-center gap-1.5">
-          <Lock className="w-3.5 h-3.5 text-emerald-600" />
+        <div className="pt-2 text-center text-xs text-[#5F635E] flex items-center justify-center gap-1.5">
+          <Lock className="w-3.5 h-3.5 text-[#4F5E47]" />
           <span>Your session is private. Use the Quick Safe Exit bar anytime.</span>
         </div>
       </div>

@@ -248,7 +248,7 @@ export default function RuthBuddyWidget() {
           onClick={() => setIsDiscreetHidden(false)}
           title="Restore Finch"
           aria-label="Restore Finch"
-          className="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 text-slate-500 flex items-center justify-center shadow-sm border border-slate-300/60 transition"
+          className="w-8 h-8 rounded-full bg-[#F4EFEA]/90 hover:bg-[#EDE6DD] text-[#5F635E] flex items-center justify-center shadow-serene border border-[#E2DAD0] transition-smooth"
         >
           <Eye className="w-3.5 h-3.5" />
         </button>
@@ -262,15 +262,15 @@ export default function RuthBuddyWidget() {
       <div className="fixed bottom-4 right-5 z-50 flex flex-col items-end gap-2">
         {/* Ambient Speech / Thought Bubble */}
         {!isBubbleDismissed && (
-          <div className="relative max-w-[270px] sm:max-w-[295px] bg-white/95 backdrop-blur-sm border border-[#E2DBD0] rounded-2xl shadow-lg shadow-[#261E19]/10 p-3.5 text-left transition-all duration-300">
+          <div className="relative max-w-[270px] sm:max-w-[295px] bg-white/95 backdrop-blur-sm border border-[#4F5E47]/15 rounded-2xl shadow-serene p-3.5 text-left transition-all duration-300">
             <div className="flex items-center justify-between gap-2 mb-1">
               <span
                 className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                   activeThought.type === 'Did you know?'
-                    ? 'bg-amber-50 text-amber-800 border border-amber-200/80'
+                    ? 'bg-[#FAF2F0] text-[#A07E5F] border border-[#D9B3AC]/70'
                     : activeThought.type === 'Tip'
-                    ? 'bg-[#EDF3EF] text-[#354A3E] border border-[#C7D7CD]'
-                    : 'bg-[#F4EFEB] text-[#5C4E43] border border-[#E2DBD0]'
+                    ? 'bg-[#F4EFEA] text-[#384631] border border-[#8A9A7B]/40'
+                    : 'bg-[#EDE6DD] text-[#5F635E] border border-[#E2DAD0]'
                 }`}
               >
                 {activeThought.type}
@@ -282,7 +282,7 @@ export default function RuthBuddyWidget() {
                 }}
                 title="Dismiss thought"
                 aria-label="Dismiss thought"
-                className="p-0.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+                className="p-0.5 rounded-full text-[#5F635E] hover:text-[#2C332A] hover:bg-[#F4EFEA] transition-smooth"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -292,16 +292,16 @@ export default function RuthBuddyWidget() {
               onClick={handleTalkAboutThought}
               className="text-left group/bubble w-full focus:outline-none"
             >
-              <p className="text-xs text-[#261E19] leading-relaxed">
+              <p className="text-xs text-[#2C332A] leading-relaxed">
                 {activeThought.text}
               </p>
-              <span className="inline-block mt-1.5 text-[11px] font-medium text-[#435C4D] group-hover/bubble:underline">
+              <span className="inline-block mt-1.5 text-[11px] font-medium text-[#4F5E47] group-hover/bubble:underline">
                 Ask Finch about this →
               </span>
             </button>
 
             {/* Speech bubble tail pointing down to Finch */}
-            <div className="absolute -bottom-1.5 right-12 w-3 h-3 bg-white border-r border-b border-[#E2DBD0] rotate-45" />
+            <div className="absolute -bottom-1.5 right-12 w-3 h-3 bg-white border-r border-b border-[#4F5E47]/15 rotate-45" />
           </div>
         )}
 
@@ -311,7 +311,7 @@ export default function RuthBuddyWidget() {
             onClick={() => setIsDiscreetHidden(true)}
             title="Discreetly hide Finch"
             aria-label="Discreetly hide Finch"
-            className="mb-3 p-1.5 rounded-full bg-white/90 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-brand-200/80 shadow-sm opacity-0 group-hover/finch:opacity-100 transition-opacity duration-200"
+            className="mb-3 p-1.5 rounded-full bg-white/90 hover:bg-[#F4EFEA] text-[#5F635E] hover:text-[#4F5E47] border border-[#E2DAD0] shadow-serene opacity-0 group-hover/finch:opacity-100 transition-opacity duration-200"
           >
             <EyeOff className="w-3.5 h-3.5" />
           </button>
@@ -327,7 +327,7 @@ export default function RuthBuddyWidget() {
             className="group relative p-1 transition-transform duration-200 hover:scale-105 active:scale-95 focus:outline-none"
           >
             <FinchBird
-              className="w-28 h-28 sm:w-32 sm:h-32 drop-shadow-[0_8px_16px_rgba(38,30,25,0.2)]"
+              className="w-28 h-28 sm:w-32 sm:h-32 drop-shadow-[0_8px_16px_rgba(56,70,49,0.18)]"
               isThinking={isUpdatingWiki}
             />
           </button>
@@ -340,32 +340,32 @@ export default function RuthBuddyWidget() {
   return (
     <div
       data-testid="ruth-buddy-drawer"
-      className="fixed bottom-4 right-4 z-50 w-[390px] sm:w-[440px] max-w-[calc(100vw-2rem)] h-[610px] max-h-[calc(100vh-2rem)] bg-[#FAF9F6] border border-brand-200 rounded-3xl shadow-2xl shadow-brand-900/20 flex flex-col overflow-hidden"
+      className="fixed bottom-4 right-4 z-50 w-[390px] sm:w-[440px] max-w-[calc(100vw-2rem)] h-[610px] max-h-[calc(100vh-2rem)] bg-[#FAF7F2] border border-[#4F5E47]/15 rounded-3xl shadow-2xl shadow-[#384631]/15 flex flex-col overflow-hidden animate-fade-in"
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-brand-800 via-brand-700 to-brand-600 text-white px-4 py-3.5 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-[#384631] to-[#4F5E47] text-[#FAF7F2] px-4 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm border border-white/40 flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-[#FAF7F2]/95 backdrop-blur-sm border border-[#FAF7F2]/40 flex items-center justify-center shadow-sm">
               <FinchBird className="w-8 h-8" isThinking={isUpdatingWiki} />
             </div>
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-brand-800" />
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#8A9A7B] border-2 border-[#384631]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-sm tracking-tight text-white">Finch</h3>
+              <h3 className="font-serif font-medium text-base tracking-tight text-[#FAF7F2]">Finch</h3>
               {isUpdatingWiki ? (
-                <span className="inline-flex items-center gap-1 text-[10px] bg-amber-400/20 text-amber-100 border border-amber-300/30 px-2 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-1 text-[10px] bg-[#FAF7F2]/15 text-[#FAF7F2] border border-[#FAF7F2]/25 px-2 py-0.5 rounded-full">
                   <Loader2 className="w-2.5 h-2.5 animate-spin" />
                   Updating Wiki...
                 </span>
               ) : (
-                <span className="text-[10px] bg-white/15 text-brand-50 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] bg-[#FAF7F2]/15 text-[#FAF7F2] px-2 py-0.5 rounded-full">
                   {totalFacts} memories
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-brand-100/90">
+            <p className="text-[11px] text-[#FAF7F2]/80">
               Empathetic &amp; State-Grounded
             </p>
           </div>
@@ -378,14 +378,14 @@ export default function RuthBuddyWidget() {
               setIsDiscreetHidden(true);
             }}
             title="Discreetly hide widget"
-            className="p-1.5 rounded-lg text-brand-100 hover:text-white hover:bg-white/10 transition"
+            className="p-1.5 rounded-lg text-[#FAF7F2]/80 hover:text-[#FAF7F2] hover:bg-[#FAF7F2]/10 transition-smooth"
           >
             <EyeOff className="w-4 h-4" />
           </button>
           <button
             onClick={handleQuickSafeExit}
             title="Quick Safe Exit (opens Weather.com)"
-            className="flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-semibold px-2 py-1 rounded-lg transition"
+            className="flex items-center gap-1 bg-[#FAF7F2]/15 hover:bg-[#FAF7F2]/25 text-[#FAF7F2] border border-[#FAF7F2]/30 text-[11px] font-semibold px-2.5 py-1 rounded-full transition-smooth"
           >
             <AlertOctagon className="w-3 h-3" />
             Exit
@@ -394,7 +394,7 @@ export default function RuthBuddyWidget() {
             onClick={closeBuddyDrawer}
             title="Minimize"
             aria-label="Minimize Finch"
-            className="p-1.5 rounded-lg text-brand-100 hover:text-white hover:bg-white/10 transition"
+            className="p-1.5 rounded-lg text-[#FAF7F2]/80 hover:text-[#FAF7F2] hover:bg-[#FAF7F2]/10 transition-smooth"
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -402,13 +402,13 @@ export default function RuthBuddyWidget() {
       </div>
 
       {/* Tab Switcher */}
-      <div className="bg-white border-b border-brand-200/80 px-3 py-2 flex gap-2">
+      <div className="bg-white border-b border-[#E2DAD0] px-3 py-2 flex gap-2">
         <button
           onClick={() => setActiveTab('chat')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-semibold transition ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-semibold transition-smooth ${
             activeTab === 'chat'
-              ? 'bg-brand-100 text-brand-900 border border-brand-200'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-[#F4EFEA] text-[#384631] border border-[#8A9A7B]/40'
+              : 'text-[#5F635E] hover:bg-[#FAF7F2]'
           }`}
         >
           <MessageCircleHeart className="w-3.5 h-3.5" />
@@ -417,15 +417,15 @@ export default function RuthBuddyWidget() {
         <button
           onClick={() => setActiveTab('memory')}
           data-testid="memory-inspector-tab"
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-semibold transition ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-semibold transition-smooth ${
             activeTab === 'memory'
-              ? 'bg-sage-100 text-sage-700 border border-sage-500/30'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-[#F4EFEA] text-[#384631] border border-[#8A9A7B]/40'
+              : 'text-[#5F635E] hover:bg-[#FAF7F2]'
           }`}
         >
           <Brain className="w-3.5 h-3.5" />
           What Finch Remembers
-          <span className="text-[10px] bg-white/80 px-1.5 py-0.2 rounded-full border border-slate-200">
+          <span className="text-[10px] bg-white px-1.5 py-0.2 rounded-full border border-[#E2DAD0] text-[#4F5E47]">
             {totalFacts}
           </span>
         </button>
@@ -433,17 +433,17 @@ export default function RuthBuddyWidget() {
 
       {/* TAB 1: CHAT */}
       {activeTab === 'chat' && (
-        <>
+        <div key="chat" className="flex-1 flex flex-col min-h-0 animate-fade-in">
           <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
             {chatMessages.map((msg, idx) => {
               const isUser = msg.sender === 'user';
               return (
                 <div key={idx} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
                   <div
-                    className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-[13px] leading-relaxed shadow-sm ${
+                    className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-[13px] leading-relaxed ${
                       isUser
-                        ? 'bg-brand-700 text-white rounded-br-sm'
-                        : 'bg-white border border-brand-200/80 text-slate-800 rounded-bl-sm'
+                        ? 'bg-[#4F5E47] text-[#FAF7F2] rounded-br-sm shadow-sm'
+                        : 'bg-white border border-[#4F5E47]/10 text-[#2C332A] rounded-bl-sm shadow-serene'
                     }`}
                   >
                     {msg.text}
@@ -456,9 +456,9 @@ export default function RuthBuddyWidget() {
                         <button
                           key={fact.id || fIdx}
                           onClick={() => setActiveTab('memory')}
-                          className="inline-flex items-center gap-1 text-[10px] font-medium bg-sage-50 text-sage-700 border border-sage-500/30 px-2 py-0.5 rounded-full hover:bg-sage-100 transition"
+                          className="inline-flex items-center gap-1 text-[10px] font-medium bg-[#F4EFEA] text-[#4F5E47] border border-[#8A9A7B]/40 px-2 py-0.5 rounded-full hover:bg-[#EDE6DD] transition-smooth"
                         >
-                          <Sparkles className="w-2.5 h-2.5" />
+                          <Sparkles className="w-2.5 h-2.5 text-[#A07E5F]" />
                           Saved: {fact.category}
                         </button>
                       ))}
@@ -469,7 +469,7 @@ export default function RuthBuddyWidget() {
             })}
 
             {isUpdatingWiki && (
-              <div className="flex items-center gap-2 text-xs text-brand-700 bg-brand-50 border border-brand-200 rounded-xl px-3 py-2">
+              <div className="flex items-center gap-2 text-xs text-[#4F5E47] bg-[#F4EFEA] border border-[#E2DAD0] rounded-xl px-3 py-2">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 <span>Finch is thinking &amp; updating your Personal Wiki...</span>
               </div>
@@ -478,11 +478,11 @@ export default function RuthBuddyWidget() {
           </div>
 
           {/* Quick Suggestion Chips */}
-          <div className="px-3 py-2 bg-white/80 border-t border-brand-100 flex gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="px-3 py-2 bg-white/90 border-t border-[#E2DAD0] flex gap-1.5 overflow-x-auto no-scrollbar">
             <button
               onClick={() => handleChipClick(`Tell me more about: "${activeThought.text}"`)}
               disabled={isUpdatingWiki}
-              className="flex-shrink-0 text-[11px] bg-[#EDF3EF] hover:bg-[#DFECE4] text-[#354A3E] border border-[#C7D7CD] rounded-full px-2.5 py-1 transition truncate max-w-[230px] font-medium"
+              className="flex-shrink-0 text-[11px] bg-[#F4EFEA] hover:bg-[#EDE6DD] text-[#384631] border border-[#8A9A7B]/50 rounded-full px-2.5 py-1 transition-smooth truncate max-w-[230px] font-medium"
               title={activeThought.text}
             >
               Ask about: {activeThought.topic}
@@ -492,7 +492,7 @@ export default function RuthBuddyWidget() {
                 key={idx}
                 onClick={() => handleChipClick(chip)}
                 disabled={isUpdatingWiki}
-                className="flex-shrink-0 text-[11px] bg-brand-50 hover:bg-brand-100 text-brand-800 border border-brand-200/80 rounded-full px-2.5 py-1 transition truncate max-w-[220px]"
+                className="flex-shrink-0 text-[11px] bg-[#FAF7F2] hover:bg-[#F4EFEA] text-[#4F5E47] border border-[#E2DAD0] rounded-full px-2.5 py-1 transition-smooth truncate max-w-[220px]"
                 title={chip}
               >
                 {chip}
@@ -503,43 +503,43 @@ export default function RuthBuddyWidget() {
           {/* Input Bar */}
           <form
             onSubmit={handleSend}
-            className="p-3 bg-white border-t border-brand-200/80 flex items-center gap-2"
+            className="p-3 bg-white border-t border-[#E2DAD0] flex items-center gap-2"
           >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Share a detail or ask Finch anything..."
-              className="flex-1 text-xs sm:text-sm bg-[#FAF9F6] border border-brand-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500"
+              className="flex-1 text-xs sm:text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3 py-2 text-[#2C332A] placeholder-[#5F635E]/60 focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
             />
             <button
               type="submit"
               disabled={!input.trim() || isUpdatingWiki}
               aria-label="Send message"
-              className="p-2.5 rounded-xl bg-brand-700 hover:bg-brand-800 disabled:opacity-40 text-white transition shadow-sm"
+              className="p-2.5 rounded-xl bg-[#4F5E47] hover:bg-[#384631] disabled:opacity-40 text-[#FAF7F2] transition-smooth shadow-sm"
             >
               <Send className="w-4 h-4" />
             </button>
           </form>
-        </>
+        </div>
       )}
 
       {/* TAB 2: MEMORY INSPECTOR ("What Ruth Remembers About You") */}
       {activeTab === 'memory' && (
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div key="memory" className="flex-1 flex flex-col overflow-hidden animate-fade-in">
           {/* Inspector Sub-header */}
-          <div className="px-4 py-2.5 bg-sage-50 border-b border-sage-500/20 flex items-center justify-between">
+          <div className="px-4 py-2.5 bg-[#F4EFEA] border-b border-[#E2DAD0] flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-sage-700">Personal LLM Wiki</p>
-              <p className="text-[11px] text-slate-600">
+              <p className="text-xs font-semibold text-[#384631]">Personal LLM Wiki</p>
+              <p className="text-[11px] text-[#5F635E]">
                 {totalFacts} {totalFacts === 1 ? 'fact' : 'facts'} organized across 5 living files
               </p>
             </div>
-            <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-0.5">
+            <div className="flex items-center gap-1 bg-white border border-[#E2DAD0] rounded-lg p-0.5">
               <button
                 onClick={() => setViewMode('structured')}
-                className={`flex items-center gap-1 text-[11px] px-2 py-1 rounded-md font-medium transition ${
-                  viewMode === 'structured' ? 'bg-sage-100 text-sage-700' : 'text-slate-500'
+                className={`flex items-center gap-1 text-[11px] px-2 py-1 rounded-md font-medium transition-smooth ${
+                  viewMode === 'structured' ? 'bg-[#EDE6DD] text-[#384631]' : 'text-[#5F635E]'
                 }`}
               >
                 <ListChecks className="w-3 h-3" />
@@ -547,8 +547,8 @@ export default function RuthBuddyWidget() {
               </button>
               <button
                 onClick={() => setViewMode('markdown')}
-                className={`flex items-center gap-1 text-[11px] px-2 py-1 rounded-md font-medium transition ${
-                  viewMode === 'markdown' ? 'bg-sage-100 text-sage-700' : 'text-slate-500'
+                className={`flex items-center gap-1 text-[11px] px-2 py-1 rounded-md font-medium transition-smooth ${
+                  viewMode === 'markdown' ? 'bg-[#EDE6DD] text-[#384631]' : 'text-[#5F635E]'
                 }`}
               >
                 <FileCode2 className="w-3 h-3" />
@@ -567,13 +567,13 @@ export default function RuthBuddyWidget() {
               return (
                 <div
                   key={sectionKey}
-                  className="bg-white border border-brand-200/80 rounded-2xl p-3 shadow-sm space-y-2"
+                  className="bg-white border border-[#4F5E47]/10 rounded-2xl p-3 shadow-serene space-y-2"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <h4 className="text-xs font-bold text-slate-900">{section.title}</h4>
-                        <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+                        <h4 className="text-xs font-semibold text-[#1c1c19]">{section.title}</h4>
+                        <span className="text-[10px] font-mono bg-[#F4EFEA] text-[#5F635E] px-1.5 py-0.5 rounded">
                           {section.filename}
                         </span>
                       </div>
@@ -584,7 +584,7 @@ export default function RuthBuddyWidget() {
                         setNewFactText('');
                       }}
                       title={`Add note to ${section.title}`}
-                      className="text-[11px] flex items-center gap-0.5 text-brand-700 hover:text-brand-900 font-medium px-1.5 py-0.5 rounded hover:bg-brand-50 transition"
+                      className="text-[11px] flex items-center gap-0.5 text-[#4F5E47] hover:text-[#384631] font-medium px-1.5 py-0.5 rounded hover:bg-[#F4EFEA] transition-smooth"
                     >
                       <Plus className="w-3 h-3" />
                       Add
@@ -599,11 +599,11 @@ export default function RuthBuddyWidget() {
                         value={newFactText}
                         onChange={(e) => setNewFactText(e.target.value)}
                         placeholder={`Add to ${section.title}...`}
-                        className="flex-1 text-xs bg-[#FAF9F6] border border-brand-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                        className="flex-1 text-xs bg-[#FAF7F2] border border-[#E2DAD0] rounded-lg px-2.5 py-1.5 text-[#2C332A] focus:outline-none focus:ring-1 focus:ring-[#A07E5F]"
                       />
                       <button
                         onClick={() => handleAddManualFact(sectionKey)}
-                        className="p-1.5 bg-brand-700 text-white rounded-lg hover:bg-brand-800"
+                        className="p-1.5 bg-[#4F5E47] text-[#FAF7F2] rounded-lg hover:bg-[#384631]"
                       >
                         <Check className="w-3.5 h-3.5" />
                       </button>
@@ -611,11 +611,11 @@ export default function RuthBuddyWidget() {
                   )}
 
                   {viewMode === 'markdown' ? (
-                    <pre className="text-[11px] font-mono bg-slate-50 border border-slate-200 rounded-xl p-2.5 whitespace-pre-wrap text-slate-700 overflow-x-auto">
+                    <pre className="text-[11px] font-mono bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl p-2.5 whitespace-pre-wrap text-[#2C332A] overflow-x-auto">
                       {section.markdown}
                     </pre>
                   ) : facts.length === 0 ? (
-                    <p className="text-[11px] italic text-slate-400">
+                    <p className="text-[11px] italic text-[#5F635E]/70">
                       No facts recorded in this section yet.
                     </p>
                   ) : (
@@ -625,7 +625,7 @@ export default function RuthBuddyWidget() {
                         return (
                           <li
                             key={fact.id}
-                            className="group bg-[#FAF9F6] border border-brand-100 rounded-xl p-2 text-xs text-slate-800"
+                            className="group bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl p-2 text-xs text-[#2C332A]"
                           >
                             {isEditing ? (
                               <div className="flex items-center gap-1.5">
@@ -635,19 +635,19 @@ export default function RuthBuddyWidget() {
                                   onChange={(e) =>
                                     setEditingFact({ ...editingFact, text: e.target.value })
                                   }
-                                  className="flex-1 text-xs bg-white border border-brand-300 rounded-lg px-2 py-1 focus:outline-none"
+                                  className="flex-1 text-xs bg-white border border-[#E2DAD0] rounded-lg px-2 py-1 focus:outline-none focus:border-[#A07E5F]"
                                 />
                                 <button
                                   onClick={handleSaveEdit}
                                   title="Save"
-                                  className="p-1 bg-sage-600 text-white rounded-md hover:bg-sage-700"
+                                  className="p-1 bg-[#4F5E47] text-[#FAF7F2] rounded-md hover:bg-[#384631]"
                                 >
                                   <Check className="w-3 h-3" />
                                 </button>
                                 <button
                                   onClick={() => setEditingFact(null)}
                                   title="Cancel"
-                                  className="p-1 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300"
+                                  className="p-1 bg-[#EDE6DD] text-[#5F635E] rounded-md hover:bg-[#E2DAD0]"
                                 >
                                   <X className="w-3 h-3" />
                                 </button>
@@ -655,7 +655,7 @@ export default function RuthBuddyWidget() {
                             ) : (
                               <div className="flex items-start justify-between gap-2">
                                 <div className="space-y-0.5">
-                                  <span className="inline-block text-[10px] font-semibold text-brand-700 bg-brand-100/70 px-1.5 py-0.2 rounded mr-1.5">
+                                  <span className="inline-block text-[10px] font-semibold text-[#4F5E47] bg-[#EDE6DD] px-1.5 py-0.2 rounded mr-1.5">
                                     {fact.category}
                                   </span>
                                   <span>{fact.text}</span>
@@ -670,14 +670,14 @@ export default function RuthBuddyWidget() {
                                       })
                                     }
                                     title="Edit fact"
-                                    className="p-1 text-slate-500 hover:text-brand-700 rounded hover:bg-white"
+                                    className="p-1 text-[#5F635E] hover:text-[#4F5E47] rounded hover:bg-white"
                                   >
                                     <Pencil className="w-3 h-3" />
                                   </button>
                                   <button
                                     onClick={() => handleDeleteFact(sectionKey, fact.id)}
                                     title="Delete fact"
-                                    className="p-1 text-slate-500 hover:text-rose-600 rounded hover:bg-white"
+                                    className="p-1 text-[#5F635E] hover:text-[#A86851] rounded hover:bg-white"
                                   >
                                     <Trash2 className="w-3 h-3" />
                                   </button>
@@ -695,12 +695,12 @@ export default function RuthBuddyWidget() {
           </div>
 
           {/* Footer: Purge All Memory (CCPA Compliance & Safety) */}
-          <div className="p-3 bg-white border-t border-brand-200/80">
+          <div className="p-3 bg-white border-t border-[#E2DAD0]">
             {!confirmPurge ? (
               <button
                 onClick={() => setConfirmPurge(true)}
                 data-testid="purge-memory-btn"
-                className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl py-2 transition"
+                className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-[#A86851] bg-[#FAF2F0] hover:bg-[#F4E6E2] border border-[#D9B3AC] rounded-xl py-2 transition-smooth"
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
                 Purge All Memory (CCPA &amp; Safety)
@@ -709,13 +709,13 @@ export default function RuthBuddyWidget() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handlePurge}
-                  className="flex-1 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl py-2 transition"
+                  className="flex-1 text-xs font-bold bg-[#A86851] hover:bg-[#8F5541] text-[#FAF7F2] rounded-xl py-2 transition-smooth"
                 >
                   Confirm Permanent Purge
                 </button>
                 <button
                   onClick={() => setConfirmPurge(false)}
-                  className="px-3 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl py-2 transition"
+                  className="px-3 text-xs font-semibold bg-[#F4EFEA] hover:bg-[#EDE6DD] text-[#5F635E] rounded-xl py-2 transition-smooth"
                 >
                   Cancel
                 </button>

@@ -1,311 +1,499 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  FileSearch, 
-  CheckCircle2, 
-  TrendingUp, 
-  FileText, 
-  ShieldCheck, 
-  Lock, 
-  ArrowRight, 
-  Sparkles,
+import {
+  FileSearch,
+  CheckCircle2,
+  TrendingUp,
+  FileText,
+  ShieldCheck,
+  Lock,
+  ArrowRight,
   HelpCircle,
-  Eye,
-  AlertTriangle
+  ChevronDown,
+  Feather,
+  AlertOctagon,
+  User,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useSmoothNavigate } from '../context/TransitionContext';
+import {
+  VideoBackground,
+  SpotlightCard,
+  ShimmerButton,
+  BlurFade,
+} from '../components/LandingEffects';
 
 export default function LandingPage() {
-  const { currentUser, loginWithDemo } = useAuth();
+  const { currentUser } = useAuth();
+  const smoothNavigate = useSmoothNavigate();
+
+  const handleEnterPlatform = () => {
+    smoothNavigate(currentUser ? '/dashboard' : '/auth?mode=signup');
+  };
+
+  const handleGuidedAssessment = () => {
+    smoothNavigate(currentUser ? '/onboarding' : '/auth?mode=signup');
+  };
+
+  const handleSmoothLink = (e, to) => {
+    e.preventDefault();
+    smoothNavigate(to);
+  };
+
+  const handleQuickExit = () => {
+    window.location.replace('https://weather.com');
+  };
 
   return (
-    <div className="space-y-24 pb-20">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24">
-        {/* Soft decorative gradient backdrop */}
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.brand.100),theme(colors.slate.50))] opacity-40" />
+    <div className="relative min-h-screen overflow-x-clip text-white">
+      {/* Full-Page Replaying Veo Video Background: Sparrow Taking Flight */}
+      <VideoBackground
+        videoSrc="/sparrow-flight.mp4"
+        posterSrc="/sparrow-poster.jpg"
+      />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-100 text-brand-900 border border-brand-200 text-xs font-semibold tracking-wide">
-              <Sparkles className="w-3.5 h-3.5 text-brand-600" />
-              <span>Google AI Hackathon for Women's Social Good</span>
+      {/* Minimal Floating Top Bar: Brand Left + Small Sign Up / Login Top Right */}
+      <header className="relative z-20 w-full">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-5 flex items-center justify-between">
+          {/* Brand */}
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-amber-200 group-hover:bg-white/25 transition">
+              <Feather className="w-4 h-4" />
             </div>
-
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
-              If he handled all the money,{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-700 via-brand-600 to-amber-700">
-                you can still do this.
+            <div className="flex items-baseline gap-2">
+              <span className="font-semibold text-base text-white tracking-tight">
+                Sparrow
               </span>
-            </h1>
+              <span className="hidden sm:inline text-xs text-white/40">·</span>
+              <span className="hidden sm:inline text-xs text-stone-200/80">
+                Know What&apos;s Yours
+              </span>
+            </div>
+          </Link>
 
-            <p className="text-lg sm:text-xl text-slate-600 leading-relaxed">
-              Divorce hits women's finances hardest when they were kept out of the accounts. 
-              <strong> Know What's Yours</strong> reconstructs your household finances from whatever messy documents you can find—citing every account, debt, and entitlement so you don't get shortchanged.
-            </p>
+          {/* Small Sign Up / Login + Safe Exit on Top Right */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleQuickExit}
+              title="Quick Safe Exit to Weather.com"
+              className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-stone-200/90 hover:text-white bg-black/25 hover:bg-[#7e4d41]/80 backdrop-blur-md border border-white/15 px-2.5 py-1.5 rounded-lg transition"
+            >
+              <AlertOctagon className="w-3 h-3" />
+              <span>Safe Exit</span>
+            </button>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            {currentUser ? (
               <Link
-                to={currentUser ? "/dashboard" : "/auth?mode=signup"}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold px-8 py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all text-base"
+                to="/dashboard"
+                onClick={(e) => handleSmoothLink(e, '/dashboard')}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-lg transition"
               >
-                <span>{currentUser ? "Go to Your Dashboard" : "Start Your Free Evaluation"}</span>
-                <ArrowRight className="w-4 h-4" />
+                <User className="w-3.5 h-3.5 text-amber-200" />
+                <span>Dashboard</span>
               </Link>
-              
-              {!currentUser && (
+            ) : (
+              <>
                 <Link
-                  to="/dashboard"
-                  onClick={() => loginWithDemo()}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-800 font-semibold px-6 py-3.5 rounded-xl border border-slate-300 shadow-sm transition-all text-base"
+                  to="/auth?mode=login"
+                  onClick={(e) => handleSmoothLink(e, '/auth?mode=login')}
+                  className="text-xs font-medium text-stone-100 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/15 px-3 py-1.5 rounded-lg transition"
                 >
-                  <Eye className="w-4 h-4 text-brand-600" />
-                  <span>Try Demo Account (Instant Access)</span>
+                  Log in
                 </Link>
-              )}
-            </div>
-
-            {/* Privacy trust banner */}
-            <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs text-slate-500 font-medium">
-              <span className="flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-emerald-600" />
-                100% Private & Encrypted
-              </span>
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                Zero Training on Your Personal Files
-              </span>
-              <span className="flex items-center gap-1.5">
-                <FileCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
-                Page-by-Page Citations
-              </span>
-            </div>
+                <Link
+                  to="/auth?mode=signup"
+                  onClick={(e) => handleSmoothLink(e, '/auth?mode=signup')}
+                  className="text-xs font-semibold text-[#1C1512] bg-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded-lg shadow-md transition"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* The Divorce Gender Gap: Shocking Statistics */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-brand-900 text-white rounded-3xl p-8 sm:p-12 shadow-xl relative overflow-hidden">
-          <div className="max-w-3xl mb-10">
-            <span className="text-brand-300 uppercase font-semibold text-xs tracking-wider">The Reality Nobody Talks About</span>
-            <h2 className="text-2xl sm:text-3xl font-bold mt-2">
-              Why traditional divorce tools fail women
-            </h2>
-            <p className="text-brand-100 text-sm sm:text-base mt-2">
-              Most calculators ask: <em>"What is your fair share?"</em> and require you to type in what you own. But if you were never given the passwords or tax returns, you can't type what you don't know exists.
-            </p>
+      {/* Foreground Content Layer */}
+      <div className="relative z-10 space-y-28 pb-24">
+        {/* 1. Centered Fullscreen Hero over Replaying Veo Video */}
+        <section className="relative min-h-[calc(100vh-5.5rem)] flex flex-col justify-center pt-4 pb-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div className="max-w-3xl mx-auto text-center space-y-7">
+              {/* 21st.dev Animated Status Pill Badge */}
+              <BlurFade delay={0}>
+                <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-medium tracking-wide text-amber-100 shadow-lg">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-300" />
+                  </span>
+                  <span>Sparrow</span>
+                  <span className="text-white/40">•</span>
+                  <span className="text-amber-200/95">
+                    Financial Clarity for Your Next Chapter
+                  </span>
+                </div>
+              </BlurFade>
+
+              {/* Editorial Metaphor Headline */}
+              <BlurFade delay={100}>
+                <h1 className="text-4xl sm:text-6xl lg:text-[4.25rem] font-semibold text-white tracking-tight leading-[1.08] drop-shadow-[0_4px_24px_rgba(0,0,0,0.55)]">
+                  It&apos;s scary to fly away{' '}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-[#ADC2B5]">
+                    for the first time.
+                  </span>
+                </h1>
+              </BlurFade>
+
+              {/* Sparrow Marriage-Flight Quip / Metaphor */}
+              <BlurFade delay={200}>
+                <p className="text-lg sm:text-xl text-stone-100/95 leading-relaxed max-w-2xl mx-auto font-normal drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]">
+                  Leaving a marriage—especially when you were kept out of the accounts—feels like
+                  stepping off a branch into open air.{' '}
+                  <strong className="text-white font-semibold">Sparrow</strong> gives you steady
+                  wings before you leap: uncovering hidden assets, mapping what&apos;s yours, and
+                  helping you land safely.
+                </p>
+              </BlurFade>
+
+              {/* Centered Entry into the Platform */}
+              <BlurFade delay={300}>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3">
+                  <ShimmerButton
+                    type="button"
+                    onClick={handleEnterPlatform}
+                    className="w-full sm:w-auto px-9 py-4 text-base"
+                  >
+                    <span>Enter Sparrow Platform</span>
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                  </ShimmerButton>
+
+                  <button
+                    type="button"
+                    onClick={handleGuidedAssessment}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold px-6 py-4 rounded-xl border border-white/25 shadow-lg transition-all text-base"
+                  >
+                    <span>Guided Assessment</span>
+                    <ArrowRight className="w-4 h-4 text-amber-200" />
+                  </button>
+                </div>
+              </BlurFade>
+
+              {/* Glassmorphic Trust Bar */}
+              <BlurFade delay={400}>
+                <div className="inline-flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-5 py-2.5 rounded-full bg-black/30 backdrop-blur-md border border-white/15 text-xs text-stone-200 font-medium mt-2">
+                  <span className="flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-[#ADC2B5]" />
+                    100% Private &amp; Encrypted
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#ADC2B5]" />
+                    Zero Training on Your Personal Files
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <FileCheckIcon className="w-3.5 h-3.5 text-[#ADC2B5]" />
+                    Page-by-Page Citations
+                  </span>
+                </div>
+              </BlurFade>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-brand-800/60 border border-brand-700/60 rounded-2xl p-6">
-              <div className="text-4xl font-extrabold text-amber-300 mb-2">41% vs 23%</div>
-              <h3 className="font-semibold text-white text-base mb-1">Severe Income Drop</h3>
-              <p className="text-xs text-brand-200 leading-relaxed">
-                Women's household income drops by an average of 41% after divorce, nearly double the 23% decline for men (U.S. GAO Study).
-              </p>
-            </div>
-
-            <div className="bg-brand-800/60 border border-brand-700/60 rounded-2xl p-6">
-              <div className="text-4xl font-extrabold text-amber-300 mb-2">-41%</div>
-              <h3 className="font-semibold text-white text-base mb-1">Retirement Savings Hit</h3>
-              <p className="text-xs text-brand-200 leading-relaxed">
-                Women over 50 face a 41% drop in retirement savings, while needing funds to stretch 21+ more years on average.
-              </p>
-            </div>
-
-            <div className="bg-brand-800/60 border border-brand-700/60 rounded-2xl p-6">
-              <div className="text-4xl font-extrabold text-amber-300 mb-2">1 in 2</div>
-              <h3 className="font-semibold text-white text-base mb-1">Financial Reliance</h3>
-              <p className="text-xs text-brand-200 leading-relaxed">
-                More than half of divorces involve a spouse who had zero visibility into household accounts, investments, or debt obligations.
-              </p>
-            </div>
+          {/* Subtle Scroll Indicator */}
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/70 text-[11px] tracking-widest uppercase">
+            <span>Why Sparrow</span>
+            <ChevronDown className="w-4 h-4 animate-bounce" />
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* The 4 Core Pillars */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="text-brand-700 font-semibold text-xs tracking-wider uppercase">How It Works</span>
-          <h2 className="text-3xl font-bold text-slate-900 mt-2">
-            The 4 Pillars of Financial Clarity
-          </h2>
-          <p className="text-slate-600 text-sm mt-2">
-            Built to take you from overwhelmed and in the dark to equipped and legally prepared.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Pillar 1: Financial Discovery Engine (Showpiece) */}
-          <div className="bg-white border border-brand-200/80 rounded-2xl p-8 shadow-sm hover:shadow-md transition">
-            <div className="w-12 h-12 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center mb-6">
-              <FileSearch className="w-6 h-6" />
-            </div>
-            <div className="inline-block text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200 mb-3">
-              Showpiece AI Engine
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">
-              1. Multimodal Document Discovery
-            </h3>
-            <p className="text-slate-600 text-sm leading-relaxed mb-4">
-              Upload whatever paperwork you can access: messy tax returns, pay stubs, bank statements, or mortgage slips. 
-              Gemini cross-references Schedule B interest items and dividend lines to surface hidden accounts, undisclosed brokerage funds, and missing filings.
-            </p>
-            <ul className="text-xs text-slate-500 space-y-2">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Every claim cited to the exact document page
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Detects gaps and documents referenced but missing
-              </li>
-            </ul>
-          </div>
-
-          {/* Pillar 2: Entitlements Checklist */}
-          <div className="bg-white border border-brand-200/80 rounded-2xl p-8 shadow-sm hover:shadow-md transition">
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-6">
-              <CheckCircle2 className="w-6 h-6" />
-            </div>
-            <div className="inline-block text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-900 border border-emerald-200 mb-3">
-              State-Specific Rights
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">
-              2. "What You May Be Entitled To" Checklist
-            </h3>
-            <p className="text-slate-600 text-sm leading-relaxed mb-4">
-              Plain-language guidance tailored to your jurisdiction (Community Property vs Equitable Distribution). 
-              Understand rights to 401(k) / pension division through QDROs, spousal maintenance duration, COBRA health continuation, and marital debt protection.
-            </p>
-            <ul className="text-xs text-slate-500 space-y-2">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Plain-language legal explanations, no jargon
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Interactive checklist that tracks your readiness
-              </li>
-            </ul>
-          </div>
-
-          {/* Pillar 3: Post-Divorce Life Projection */}
-          <div className="bg-white border border-brand-200/80 rounded-2xl p-8 shadow-sm hover:shadow-md transition">
-            <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center mb-6">
-              <TrendingUp className="w-6 h-6" />
-            </div>
-            <div className="inline-block text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-900 border border-blue-200 mb-3">
-              5-Year Scenario Simulator
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">
-              3. "Can I Afford The House?" Life Projection
-            </h3>
-            <p className="text-slate-600 text-sm leading-relaxed mb-4">
-              Women are often steered toward fighting for the marital home, only to find property taxes, insurance, and maintenance unaffordable on a single income. 
-              Our simulator models month-by-month cash flows under 3 realistic settlement scenarios.
-            </p>
-            <ul className="text-xs text-slate-500 space-y-2">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Simulates child care costs and spousal support phaseouts
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Refinancing rate calculator and cash-buffer targets
-              </li>
-            </ul>
-          </div>
-
-          {/* Pillar 4: Lawyer Prep Brief */}
-          <div className="bg-white border border-brand-200/80 rounded-2xl p-8 shadow-sm hover:shadow-md transition">
-            <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center mb-6">
-              <FileText className="w-6 h-6" />
-            </div>
-            <div className="inline-block text-xs font-semibold px-2 py-0.5 rounded bg-purple-50 text-purple-900 border border-purple-200 mb-3">
-              Save $400/Hour
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">
-              4. Lawyer Consultation Dossier
-            </h3>
-            <p className="text-slate-600 text-sm leading-relaxed mb-4">
-              Don't waste expensive billable hours having an attorney search for basic document references. 
-              Download a 2-page brief summarizing discovered accounts, red flags, and 5 targeted questions to ask your counsel on day one.
-            </p>
-            <ul className="text-xs text-slate-500 space-y-2">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Instant printable PDF / Markdown export
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Grounded questions specific to your state laws
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* Grounded Story Callout */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-amber-50 border border-amber-200 rounded-3xl p-8 sm:p-10">
-          <div className="flex flex-col sm:flex-row gap-6 items-start">
-            <div className="p-3 bg-white rounded-2xl shadow-sm text-brand-700">
-              <HelpCircle className="w-8 h-8" />
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-lg font-bold text-amber-950">
-                "She walked room to room cataloguing every household item, but had no idea what was in the 401(k)."
-              </h3>
-              <p className="text-sm text-amber-900/80 leading-relaxed">
-                This project was inspired by a real story: a mother of two going through a divorce who was never the one handling family investments or tax filings. 
-                She spent hours counting furniture for attorneys, while missing out on significant settlement entitlements simply because nobody showed her where to look.
-              </p>
-              <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-brand-800">
-                <span>Sparrow was built so no woman has to face that uncertainty alone.</span>
+        {/* 2. The Divorce Gender Gap: Glassmorphic Statistics */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <BlurFade>
+            <SpotlightCard className="p-8 sm:p-12">
+              <div className="max-w-3xl mb-10">
+                <span className="text-amber-200/90 uppercase font-semibold text-xs tracking-widest">
+                  The Reality Nobody Talks About
+                </span>
+                <h2 className="text-2xl sm:text-4xl font-semibold text-white mt-2">
+                  Why traditional divorce tools fail women
+                </h2>
+                <p className="text-stone-200/90 text-sm sm:text-base mt-3 leading-relaxed">
+                  Most calculators ask: <em>&ldquo;What is your fair share?&rdquo;</em> and require you
+                  to type in what you own. But if you were never given the passwords or tax returns,
+                  you can&apos;t type what you don&apos;t know exists.
+                </p>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Bottom CTA */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-        <h2 className="text-3xl font-extrabold text-slate-900">
-          Ready to take control of your financial story?
-        </h2>
-        <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto">
-          Start your confidential evaluation today. It takes less than 3 minutes to complete the initial assessment.
-        </p>
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link
-            to="/onboarding"
-            className="inline-flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold px-8 py-3.5 rounded-xl shadow-md hover:shadow-lg transition text-base"
-          >
-            <span>Begin Guided Onboarding</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-          <Link
-            to="/consult"
-            className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-800 font-semibold px-6 py-3.5 rounded-xl border border-slate-300 shadow-sm transition text-base"
-          >
-            <span>Consult a Professional</span>
-            <ArrowRight className="w-4 h-4 text-brand-700" />
-          </Link>
-        </div>
-      </section>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white/5 border border-white/15 rounded-2xl p-6 hover:bg-white/10 transition">
+                  <div className="text-4xl font-bold text-amber-200 font-mono mb-2">
+                    41% vs 23%
+                  </div>
+                  <h3 className="font-semibold text-white text-base mb-1.5">
+                    Severe Income Drop
+                  </h3>
+                  <p className="text-xs text-stone-300 leading-relaxed">
+                    Women&apos;s household income drops by an average of 41% after divorce, nearly
+                    double the 23% decline for men (U.S. GAO Study).
+                  </p>
+                </div>
+
+                <div className="bg-white/5 border border-white/15 rounded-2xl p-6 hover:bg-white/10 transition">
+                  <div className="text-4xl font-bold text-amber-200 font-mono mb-2">-41%</div>
+                  <h3 className="font-semibold text-white text-base mb-1.5">
+                    Retirement Savings Hit
+                  </h3>
+                  <p className="text-xs text-stone-300 leading-relaxed">
+                    Women over 50 face a 41% drop in retirement savings, while needing funds to
+                    stretch 21+ more years on average.
+                  </p>
+                </div>
+
+                <div className="bg-white/5 border border-white/15 rounded-2xl p-6 hover:bg-white/10 transition">
+                  <div className="text-4xl font-bold text-amber-200 font-mono mb-2">1 in 2</div>
+                  <h3 className="font-semibold text-white text-base mb-1.5">
+                    Financial Reliance
+                  </h3>
+                  <p className="text-xs text-stone-300 leading-relaxed">
+                    More than half of divorces involve a spouse who had zero visibility into
+                    household accounts, investments, or debt obligations.
+                  </p>
+                </div>
+              </div>
+            </SpotlightCard>
+          </BlurFade>
+        </section>
+
+        {/* 3. The 4 Core Pillars: 21st.dev Bento Grid */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <BlurFade>
+            <div className="text-center max-w-2xl mx-auto mb-14">
+              <span className="text-amber-200 font-semibold text-xs tracking-widest uppercase">
+                How Sparrow Works
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-semibold text-white mt-2">
+                The 4 Pillars of Financial Clarity
+              </h2>
+              <p className="text-stone-200/85 text-sm sm:text-base mt-3">
+                Built to take you from overwhelmed and in the dark to equipped and legally prepared.
+              </p>
+            </div>
+          </BlurFade>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+            {/* Pillar 1 */}
+            <BlurFade delay={50}>
+              <SpotlightCard className="p-8 h-full">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-amber-200/15 border border-amber-200/30 text-amber-200 flex items-center justify-center">
+                    <FileSearch className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-amber-200/15 text-amber-100 border border-amber-200/25">
+                    Showpiece AI Engine
+                  </span>
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-3">
+                  1. Multimodal Document Discovery
+                </h3>
+                <p className="text-stone-200/90 text-sm leading-relaxed mb-5">
+                  Upload whatever paperwork you can access: messy tax returns, pay stubs, bank
+                  statements, or mortgage slips. Gemini cross-references Schedule B interest items
+                  and dividend lines to surface hidden accounts, undisclosed brokerage funds, and
+                  missing filings.
+                </p>
+                <ul className="text-xs text-stone-300 space-y-2.5">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#ADC2B5] shrink-0" />
+                    <span>Every claim cited to the exact document page</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#ADC2B5] shrink-0" />
+                    <span>Detects gaps and documents referenced but missing</span>
+                  </li>
+                </ul>
+              </SpotlightCard>
+            </BlurFade>
+
+            {/* Pillar 2 */}
+            <BlurFade delay={120}>
+              <SpotlightCard className="p-8 h-full">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-[#ADC2B5]/15 border border-[#ADC2B5]/30 text-[#ADC2B5] flex items-center justify-center">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#ADC2B5]/15 text-[#D1DDD6] border border-[#ADC2B5]/25">
+                    State-Specific Rights
+                  </span>
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-3">
+                  2. &ldquo;What You May Be Entitled To&rdquo; Checklist
+                </h3>
+                <p className="text-stone-200/90 text-sm leading-relaxed mb-5">
+                  Plain-language guidance tailored to your jurisdiction (Community Property vs
+                  Equitable Distribution). Understand rights to 401(k) / pension division through
+                  QDROs, spousal maintenance duration, COBRA health continuation, and marital debt
+                  protection.
+                </p>
+                <ul className="text-xs text-stone-300 space-y-2.5">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#ADC2B5] shrink-0" />
+                    <span>Plain-language legal explanations, no jargon</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#ADC2B5] shrink-0" />
+                    <span>Interactive checklist that tracks your readiness</span>
+                  </li>
+                </ul>
+              </SpotlightCard>
+            </BlurFade>
+
+            {/* Pillar 3 */}
+            <BlurFade delay={190}>
+              <SpotlightCard className="p-8 h-full">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-sky-300/15 border border-sky-300/30 text-sky-200 flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-sky-300/15 text-sky-100 border border-sky-300/25">
+                    5-Year Scenario Simulator
+                  </span>
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-3">
+                  3. &ldquo;Can I Afford The House?&rdquo; Life Projection
+                </h3>
+                <p className="text-stone-200/90 text-sm leading-relaxed mb-5">
+                  Women are often steered toward fighting for the marital home, only to find property
+                  taxes, insurance, and maintenance unaffordable on a single income. Our simulator
+                  models month-by-month cash flows under 3 realistic settlement scenarios.
+                </p>
+                <ul className="text-xs text-stone-300 space-y-2.5">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#ADC2B5] shrink-0" />
+                    <span>Simulates child care costs and spousal support phaseouts</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#ADC2B5] shrink-0" />
+                    <span>Refinancing rate calculator and cash-buffer targets</span>
+                  </li>
+                </ul>
+              </SpotlightCard>
+            </BlurFade>
+
+            {/* Pillar 4 */}
+            <BlurFade delay={260}>
+              <SpotlightCard className="p-8 h-full">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-purple-300/15 border border-purple-300/30 text-purple-200 flex items-center justify-center">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-purple-300/15 text-purple-100 border border-purple-300/25">
+                    Save $400/Hour
+                  </span>
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-3">
+                  4. Lawyer Consultation Dossier
+                </h3>
+                <p className="text-stone-200/90 text-sm leading-relaxed mb-5">
+                  Don&apos;t waste expensive billable hours having an attorney search for basic
+                  document references. Download a 2-page brief summarizing discovered accounts, red
+                  flags, and 5 targeted questions to ask your counsel on day one.
+                </p>
+                <ul className="text-xs text-stone-300 space-y-2.5">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#ADC2B5] shrink-0" />
+                    <span>Instant printable PDF / Markdown export</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#ADC2B5] shrink-0" />
+                    <span>Grounded questions specific to your state laws</span>
+                  </li>
+                </ul>
+              </SpotlightCard>
+            </BlurFade>
+          </div>
+        </section>
+
+        {/* 4. Grounded Story Callout */}
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <BlurFade>
+            <SpotlightCard className="p-8 sm:p-10 bg-[#241A14]/65 border-amber-200/25">
+              <div className="flex flex-col sm:flex-row gap-6 items-start">
+                <div className="p-3.5 bg-amber-200/15 border border-amber-200/25 rounded-2xl text-amber-200 shrink-0">
+                  <HelpCircle className="w-7 h-7" />
+                </div>
+                <div className="space-y-3">
+                  <h3 className="text-lg sm:text-xl font-semibold text-white leading-snug">
+                    &ldquo;She walked room to room cataloguing every household item, but had no idea
+                    what was in the 401(k).&rdquo;
+                  </h3>
+                  <p className="text-sm text-stone-200/90 leading-relaxed">
+                    This project was inspired by a real story: a mother of two going through a
+                    divorce who was never the one handling family investments or tax filings. She
+                    spent hours counting furniture for attorneys, while missing out on significant
+                    settlement entitlements simply because nobody showed her where to look.
+                  </p>
+                  <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-amber-200">
+                    <Feather className="w-3.5 h-3.5" />
+                    <span>Sparrow was built so no woman has to face that uncertainty alone.</span>
+                  </div>
+                </div>
+              </div>
+            </SpotlightCard>
+          </BlurFade>
+        </section>
+
+        {/* 5. Bottom CTA */}
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <BlurFade>
+            <SpotlightCard className="p-10 sm:p-14 space-y-6">
+              <h2 className="text-3xl sm:text-4xl font-semibold text-white">
+                Ready to take flight on your own terms?
+              </h2>
+              <p className="text-stone-200/90 text-sm sm:text-base max-w-xl mx-auto">
+                Enter Sparrow for free and uncover what&apos;s yours in under 3 minutes.
+              </p>
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <ShimmerButton
+                  type="button"
+                  onClick={handleEnterPlatform}
+                  className="w-full sm:w-auto px-8 py-3.5 text-base"
+                >
+                  <span>Enter Sparrow Platform</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                </ShimmerButton>
+
+                <Link
+                  to="/consult"
+                  onClick={(e) => handleSmoothLink(e, '/consult')}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold px-6 py-3.5 rounded-xl border border-white/25 transition text-base"
+                >
+                  <span>Consult a Professional</span>
+                  <ArrowRight className="w-4 h-4 text-amber-200" />
+                </Link>
+              </div>
+            </SpotlightCard>
+          </BlurFade>
+        </section>
+      </div>
     </div>
   );
 }
 
 function FileCheckIcon(props) {
   return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-      <polyline points="14 2 14 8 20 8"/>
-      <path d="m9 15 2 2 4-4"/>
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <path d="m9 15 2 2 4-4" />
     </svg>
   );
 }
