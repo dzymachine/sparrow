@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, Feather, LogOut, User, Eye, EyeOff, RotateCcw, Settings } from 'lucide-react';
+import { Feather, LogOut, User, Eye, EyeOff, RotateCcw, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDiscovery } from '../context/DiscoveryContext';
 
@@ -9,12 +9,6 @@ export default function Navbar() {
   const { workspace, togglePrivacyMode, resetWorkspace } = useDiscovery();
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Quick Discreet Exit function for user safety
-  const handleQuickExit = () => {
-    // Overwrite history and navigate immediately to weather.com
-    window.location.replace('https://weather.com');
-  };
 
   const handleLogout = async () => {
     await logout();
@@ -27,11 +21,11 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 bg-[#FAF7F2]/92 backdrop-blur-md border-b border-[#4F5E47]/10">
-      {/* Top Safety Bar for Discreet Exit */}
+      {/* Top Safety Bar */}
       <div className="bg-[#F4EFEA] border-b border-[#E2DAD0] px-4 py-1.5 text-xs text-[#5F635E] flex justify-between items-center">
         <div className="flex items-center gap-2 font-normal">
           <Feather className="w-3.5 h-3.5 text-[#4F5E47]" />
-          <span>Confidential sanctuary · Press <kbd className="px-1.5 py-0.2 bg-white rounded-full border border-[#E2DAD0] text-[10px] font-mono text-[#2C332A]">Esc</kbd> twice quickly or exit discreetly:</span>
+          <span>Confidential sanctuary</span>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -42,22 +36,13 @@ export default function Navbar() {
             {workspace.privacyMode ? <EyeOff className="w-3 h-3 text-[#A07E5F]" /> : <Eye className="w-3 h-3 text-[#5F635E]" />}
             <span>{workspace.privacyMode ? 'Discreet Mode Active' : 'Discreet Mode'}</span>
           </button>
-
-          <button
-            onClick={handleQuickExit}
-            title="Instantly redirects to Weather.com and clears session"
-            className="flex items-center gap-1.5 bg-white hover:bg-[#EDE6DD] text-[#4F5E47] border border-[#4F5E47]/40 font-medium px-3 py-0.5 rounded-full transition text-xs"
-          >
-            <Shield className="w-3 h-3" />
-            <span>Quick Safe Exit</span>
-          </button>
         </div>
       </div>
 
       <div className="max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Product Name */}
-          <Link to="/" className="flex items-center gap-2.5 group">
+          <Link to="/dashboard" className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 rounded-xl bg-[#4F5E47] flex items-center justify-center text-[#FAF7F2] shadow-sm group-hover:bg-[#384631] transition">
               <Feather className="w-4 h-4 text-[#FAF7F2]" />
             </div>
@@ -73,16 +58,16 @@ export default function Navbar() {
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center gap-7 text-xs font-medium text-[#5F635E]">
             <Link 
-              to="/dashboard" 
-              className={`hover:text-[#1c1c19] transition ${location.pathname === '/dashboard' ? 'text-[#384631] font-semibold' : ''}`}
-            >
-              Dashboard
-            </Link>
-            <Link 
               to="/discovery" 
               className={`hover:text-[#1c1c19] transition ${location.pathname === '/discovery' ? 'text-[#384631] font-semibold' : ''}`}
             >
               Financial Discovery
+            </Link>
+            <Link 
+              to="/checklist" 
+              className={`hover:text-[#1c1c19] transition ${location.pathname === '/checklist' ? 'text-[#384631] font-semibold' : ''}`}
+            >
+              Document Checklist
             </Link>
             <Link 
               to="/consult" 
