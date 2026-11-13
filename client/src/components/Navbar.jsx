@@ -69,12 +69,6 @@ export default function Navbar() {
             >
               Dashboard
             </Link>
-            <Link 
-              to="/onboarding" 
-              className={`hover:text-brand-800 transition ${location.pathname === '/onboarding' ? 'text-brand-800 font-semibold' : ''}`}
-            >
-              Onboarding
-            </Link>
           </nav>
 
           {/* User actions */}
