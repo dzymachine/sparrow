@@ -50,5 +50,30 @@ export const api = {
     });
     if (!res.ok) throw new Error('Failed to send message to agent');
     return res.json();
+  },
+
+  // Personal LLM Wiki
+  async getWiki(userId) {
+    const res = await fetch(`${API_BASE}/agent/wiki/${encodeURIComponent(userId)}`);
+    if (!res.ok) throw new Error('Failed to fetch personal wiki');
+    return res.json();
+  },
+
+  async updateWiki(userId, payload) {
+    const res = await fetch(`${API_BASE}/agent/wiki/${encodeURIComponent(userId)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('Failed to update personal wiki');
+    return res.json();
+  },
+
+  async purgeWiki(userId) {
+    const res = await fetch(`${API_BASE}/agent/wiki/${encodeURIComponent(userId)}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to purge personal wiki');
+    return res.json();
   }
 };

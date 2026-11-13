@@ -20,6 +20,11 @@ yarn-debug.log*
 yarn-error.log*
 *.log
 
+# Runtime Wiki Data & Firebase Secrets
+server/data/
+server/serviceAccountKey.json
+*serviceAccountKey*.json
+
 # OS
 .DS_Store
 Thumbs.db
