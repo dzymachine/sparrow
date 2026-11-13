@@ -117,5 +117,9 @@ module.exports = {
     });
     chatHistories.set(userId, history);
     return history;
+  },
+  purgeUserMemory: (userId) => {
+    agentMemories.delete(userId);
+    chatHistories.delete(userId);
   }
 };

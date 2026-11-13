@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const memoryStore = require('../store/memoryStore');
+const wikiStore = require('../store/wikiStore');
 
 // GET user profile
 router.get('/profile/:userId', (req, res) => {
@@ -42,6 +43,9 @@ router.post('/profile', (req, res) => {
       financialProfileSummary: summaryNotes.join(' | ')
     });
   }
+
+  // Sync onboarding responses into the Personal LLM Wiki
+  wikiStore.syncFromProfile(userId, updatedProfile);
 
   return res.json({
     success: true,

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const memoryStore = require('../store/memoryStore');
+const wikiStore = require('../store/wikiStore');
+const ruthEngine = require('../services/ruthEngine');
 
 // GET agent memory per user profile
 router.get('/memory/:userId', (req, res) => {
@@ -24,6 +26,71 @@ router.post('/memory', (req, res) => {
   });
 });
 
+// GET user Personal LLM Wiki sections and memory statistics
+router.get('/wiki/:userId', (req, res) => {
+  const { userId } = req.params;
+  const wiki = wikiStore.getWiki(userId);
+  return res.json({
+    success: true,
+    wiki,
+    stats: wiki.stats
+  });
+});
+
+// POST update specific wiki section, append facts, edit a fact, or delete a fact
+router.post('/wiki/:userId', (req, res) => {
+  const { userId } = req.params;
+  const { action = 'add', section, factId, text, category, source, facts } = req.body || {};
+
+  if (!section || !wikiStore.WIKI_SECTIONS[section]) {
+    return res.status(400).json({
+      error: `Valid section is required (${wikiStore.SECTION_KEYS.join(', ')})`
+    });
+  }
+
+  try {
+    let wiki;
+    let addedCount = 0;
+
+    if (action === 'update') {
+      if (!factId) return res.status(400).json({ error: 'factId is required for update' });
+      wiki = wikiStore.updateFact(userId, section, factId, text, category);
+    } else if (action === 'delete') {
+      if (!factId) return res.status(400).json({ error: 'factId is required for delete' });
+      wiki = wikiStore.deleteFact(userId, section, factId);
+    } else if (action === 'replace') {
+      wiki = wikiStore.replaceSectionFacts(userId, section, facts || []);
+    } else {
+      const payload = facts || (text ? [{ text, category: category || 'Note', source: source || 'Manual Entry' }] : []);
+      const result = wikiStore.addFacts(userId, section, payload);
+      wiki = result.wiki;
+      addedCount = result.addedCount;
+    }
+
+    return res.json({
+      success: true,
+      wiki,
+      stats: wiki.stats,
+      addedCount
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
+// DELETE purge all user wiki & memory (CCPA compliance & safety)
+router.delete('/wiki/:userId', (req, res) => {
+  const { userId } = req.params;
+  const wiki = wikiStore.purgeWiki(userId);
+  memoryStore.purgeUserMemory(userId);
+  return res.json({
+    success: true,
+    message: 'All personal wiki and conversation memory purged.',
+    wiki,
+    stats: wiki.stats
+  });
+});
+
 // GET chat history
 router.get('/chat/:userId', (req, res) => {
   const { userId } = req.params;
@@ -31,7 +98,7 @@ router.get('/chat/:userId', (req, res) => {
   return res.json({ success: true, history });
 });
 
-// POST chat message with Ruth AI agent
+// POST chat message with Ruth AI agent (Dual-pass: Fact Extraction + Context-Injected Response)
 router.post('/chat', async (req, res) => {
   const { userId, message } = req.body;
   if (!userId || !message) {
@@ -41,44 +108,49 @@ router.post('/chat', async (req, res) => {
   // Record user message
   memoryStore.appendChatMessage(userId, { sender: 'user', text: message });
 
-  // Retrieve user profile & agent memory context
-  const profile = memoryStore.getUserProfile(userId) || {};
-  const memory = memoryStore.getAgentMemory(userId) || {};
+  // Pass 1: Extract personal, financial, priority, and legal-prep facts into the Personal LLM Wiki
+  const extractedCandidates = ruthEngine.extractFactsFromMessage(message);
+  const newlyAddedFacts = [];
 
-  // Empathetic, grounded divorce finance response generation
-  // (In production, this hooks into Google Gemini with long context & grounding citations)
-  let agentReply = '';
-  const lowerMsg = message.toLowerCase();
-
-  if (lowerMsg.includes('house') || lowerMsg.includes('home') || lowerMsg.includes('mortgage')) {
-    agentReply = `I understand how deeply important keeping the family home feels right now, especially for stability. Based on your profile in ${profile.stateJurisdiction || 'your state'}, keeping the house requires looking closely at not just the mortgage, but property taxes, maintenance, and whether you'd need to refinance to buy out your spouse's share of equity. Our Post-Divorce Life Projection tool can run this 5-year affordability simulation for you.`;
-  } else if (lowerMsg.includes('hidden') || lowerMsg.includes('account') || lowerMsg.includes('tax') || lowerMsg.includes('bank')) {
-    agentReply = `If your spouse handled the accounts, it's very common to feel unsure of what exists. Tax returns are our best investigative tool—Schedule B lists interest and dividends from accounts he may not have mentioned, and Schedule D shows stock sales. Upload any joint tax return from the last 3 years to your Document Vault and I'll extract all account references.`;
-  } else if (lowerMsg.includes('lawyer') || lowerMsg.includes('attorney') || lowerMsg.includes('cost')) {
-    agentReply = `Attorneys bill between $350–$650/hour. Don't spend those costly hours having them organize your basic paperwork. We've compiled your known assets and a targeted list of 3 specific questions in your Lawyer Prep Brief so your first consultation is focused and high-leverage.`;
-  } else if (lowerMsg.includes('alimony') || lowerMsg.includes('support') || lowerMsg.includes('maintenance')) {
-    const years = profile.marriageLengthYears || 10;
-    agentReply = `Given your ${years}-year marriage, spousal support eligibility depends heavily on statutory duration rules in ${profile.stateJurisdiction || 'your jurisdiction'}. For marriages over 10 years, many states consider this a marriage of long duration, which significantly strengthens your position for ongoing transitional support.`;
-  } else {
-    agentReply = `I hear you, and you are not alone in this. Taking control of the financial details step-by-step is the most empowering thing you can do. Let's make sure we have your documents in the Vault and verify every asset you are legally entitled to. What area would you like to review first?`;
+  for (const item of extractedCandidates) {
+    const resAdd = wikiStore.addFacts(userId, item.section, {
+      text: item.text,
+      category: item.category,
+      source: item.source
+    });
+    if (resAdd.addedFacts.length > 0) {
+      for (const f of resAdd.addedFacts) {
+        newlyAddedFacts.push({ ...f, section: item.section });
+      }
+    }
   }
+
+  // Retrieve user profile & generate wiki-context-injected response
+  const profile = memoryStore.getUserProfile(userId) || {};
+  const generated = await ruthEngine.generateRuthResponse({
+    userId,
+    message,
+    profile,
+    newlyAddedFacts
+  });
 
   const agentMessageRecord = {
     sender: 'agent',
-    text: agentReply,
-    suggestedActions: [
-      'Review Discovered Assets',
-      'Run 5-Year Life Projection',
-      'Download Lawyer Prep Brief'
-    ]
+    text: generated.reply,
+    suggestedActions: generated.suggestedActions,
+    extractedFacts: newlyAddedFacts.filter((f) => f.section !== 'interaction_log')
   };
 
   memoryStore.appendChatMessage(userId, agentMessageRecord);
+  const latestWiki = wikiStore.getWiki(userId);
 
   return res.json({
     success: true,
-    reply: agentReply,
-    messageRecord: agentMessageRecord
+    reply: generated.reply,
+    messageRecord: agentMessageRecord,
+    extractedFacts: agentMessageRecord.extractedFacts,
+    wiki: latestWiki,
+    wikiStats: latestWiki.stats
   });
 });
 

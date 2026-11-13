@@ -6,6 +6,7 @@ import { AgentMemoryProvider } from './context/AgentMemoryContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
+import RuthBuddyWidget from './components/RuthBuddyWidget';
 
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
@@ -52,6 +53,7 @@ export default function App() {
               </Routes>
             </main>
             <Footer />
+            <RuthBuddyWidget />
           </div>
         </AgentMemoryProvider>
       </AuthProvider>
