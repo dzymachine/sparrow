@@ -4,16 +4,23 @@
   "description": "Express Node.js backend for RuthAI profile and agent memory persistence",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "start": "tsx src/server.ts",
+    "dev": "tsx watch src/server.ts",
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {
+    "@google/genai": "^3.3.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "multer": "^2.5.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^26.6.6",
+    "nodemon": "^3.1.9",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   }
 }
