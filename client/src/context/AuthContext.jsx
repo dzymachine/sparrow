@@ -4,7 +4,8 @@ import {
   createUserWithEmailAndPassword, 
   signInWithPopup, 
   signOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  updateProfile
 } from 'firebase/auth';
 import { auth, googleProvider, isFirebaseActive } from '../services/firebase';
 
@@ -44,6 +45,23 @@ export function AuthProvider({ children }) {
           };
           setCurrentUser(formatted);
           localStorage.setItem('ruthai_current_user', JSON.stringify(formatted));
+        } else {
+          // If not in demo mode, clear local user state when firebase user logs out
+          const stored = localStorage.getItem('ruthai_current_user');
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              if (!parsed.isDemo) {
+                setCurrentUser(null);
+                localStorage.removeItem('ruthai_current_user');
+              }
+            } catch (e) {
+              setCurrentUser(null);
+              localStorage.removeItem('ruthai_current_user');
+            }
+          } else {
+            setCurrentUser(null);
+          }
         }
         setLoading(false);
       });
@@ -80,6 +98,13 @@ export function AuthProvider({ children }) {
   const signUp = async (email, password, displayName) => {
     if (isFirebaseActive && auth) {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
+      if (displayName && cred.user) {
+        try {
+          await updateProfile(cred.user, { displayName });
+        } catch (e) {
+          console.warn('Failed to update displayName on firebase user:', e);
+        }
+      }
       return cred.user;
     } else {
       const user = {

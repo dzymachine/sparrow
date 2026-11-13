@@ -13,7 +13,10 @@ import {
   Shield,
   HelpCircle,
   Home,
-  DollarSign
+  DollarSign,
+  Calendar,
+  Baby,
+  FileCheck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useAgentMemory } from '../context/AgentMemoryContext';
@@ -60,11 +63,17 @@ export default function DashboardPage() {
   };
 
   const handleDownloadBrief = () => {
+    const childrenStr = profile?.hasChildren && profile?.childrenCount
+      ? `${profile.childrenCount} child(ren) ${profile.childrenAges?.length ? `(Ages: ${profile.childrenAges.join(', ')})` : ''}`
+      : 'No minor children';
     const briefContent = `
 KNOW WHAT'S YOURS | LAWYER CONSULTATION BRIEF
 Prepared for: ${currentUser?.displayName || 'Client'}
 State Jurisdiction: ${profile?.stateJurisdiction || 'California (Community Property)'}
-Marriage Length: ${profile?.marriageLengthYears || 15} Years | Children: ${profile?.childrenCount || 2}
+Marriage Length: ${profile?.marriageLengthYears || 15} Years | Children: ${childrenStr}
+Goal: ${profile?.goal ? String(profile.goal).replace(/_/g, ' ') : 'Financial Rights'}
+Marital Status: ${profile?.maritalStatus ? String(profile.maritalStatus).replace(/_/g, ' ') : 'Considering Divorce'}
+Tax Filing Status: ${profile?.taxFilingStatus ? String(profile.taxFilingStatus).replace(/_/g, ' ') : 'Joint'}
 Date Generated: ${new Date().toLocaleDateString()}
 
 ============================================================
@@ -127,6 +136,66 @@ DISCLAIMER: This brief is compiled by RuthAI for attorney consultation prep only
             <Download className="w-4 h-4" />
             <span>Export Lawyer Consultation Brief</span>
           </button>
+        </div>
+      </div>
+
+      {/* Dynamic Profile-Driven Guidance Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Card 1: Divorce Intent & Statutory Timeline */}
+        <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
+          <div className="flex items-center gap-2 font-bold text-amber-950 text-xs uppercase tracking-wider">
+            <Calendar className="w-4 h-4 text-amber-700" />
+            <span>Statutory Timeline Notice</span>
+          </div>
+          <p className="text-xs text-amber-900 leading-relaxed">
+            {profile?.stateJurisdiction === 'California' || !profile?.stateJurisdiction ? (
+              <>
+                <strong>6-Month Mandatory Waiting Period (CA Fam. Code § 2339):</strong> Divorce cannot be finalized until 6 months after FL-100 Summons service. Requires 6 months CA & 3 months county residency.
+              </>
+            ) : (
+              <>
+                <strong>Jurisdiction Statutory Notice ({profile?.stateJurisdiction}):</strong> Residency and waiting periods vary by state. Prepare financial disclosures (FL-140/FL-150 equivalent) early.
+              </>
+            )}
+          </p>
+        </div>
+
+        {/* Card 2: Children & Custody Support */}
+        <div className="p-4 rounded-2xl bg-brand-50/70 border border-brand-200 space-y-2">
+          <div className="flex items-center gap-2 font-bold text-brand-950 text-xs uppercase tracking-wider">
+            <Baby className="w-4 h-4 text-brand-700" />
+            <span>Child Custody & Support</span>
+          </div>
+          <p className="text-xs text-brand-900 leading-relaxed">
+            {profile?.hasChildren && profile?.childrenCount > 0 ? (
+              <>
+                <strong>{profile.childrenCount} Minor Child(ren) {profile.childrenAges?.length ? `(Ages: ${profile.childrenAges.join(', ')})` : ''}:</strong> Guideline child support uses algebraic Formula K (CA Fam. Code § 4055) based on higher earner net income and parenting time percentage.
+              </>
+            ) : (
+              <>
+                <strong>No Minor Children Specified:</strong> Financial split focuses on spousal support (alimony), community real estate, and retirement accounts (QDROs).
+              </>
+            )}
+          </p>
+        </div>
+
+        {/* Card 3: Tax Return Account Discovery Vault */}
+        <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2">
+          <div className="flex items-center gap-2 font-bold text-emerald-950 text-xs uppercase tracking-wider">
+            <FileCheck className="w-4 h-4 text-emerald-700" />
+            <span>Schedule B Asset Discovery</span>
+          </div>
+          <p className="text-xs text-emerald-900 leading-relaxed">
+            {profile?.taxFilingStatus === 'married_filing_jointly' || profile?.fearOfHiddenAssets ? (
+              <>
+                <strong>Form 1040 Schedule B Active:</strong> Joint tax returns list interest & dividend payouts. Gemini automatically extracts unlisted bank & brokerage accounts from line items.
+              </>
+            ) : (
+              <>
+                <strong>Independent Tax Filing Profile:</strong> Request complete 3-year state and federal tax returns during preliminary financial disclosures (FL-142 / Schedule of Assets and Debts).
+              </>
+            )}
+          </p>
         </div>
       </div>
 

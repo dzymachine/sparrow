@@ -35,11 +35,23 @@ router.post('/profile', async (req, res) => {
   if (profileData.goal) {
     summaryNotes.push(`Goal: ${String(profileData.goal).replace(/_/g, ' ')}`);
   }
+  if (profileData.maritalStatus) {
+    summaryNotes.push(`Marital status: ${String(profileData.maritalStatus).replace(/_/g, ' ')}`);
+  }
   if (profileData.stateJurisdiction) {
     summaryNotes.push(`Jurisdiction: ${profileData.stateJurisdiction}`);
   }
   if (profileData.marriageLengthYears) {
     summaryNotes.push(`Length of marriage: ${profileData.marriageLengthYears} years`);
+  }
+  if (profileData.hasChildren && profileData.childrenCount) {
+    const ages = Array.isArray(profileData.childrenAges) && profileData.childrenAges.length
+      ? ` (Ages: ${profileData.childrenAges.join(', ')})`
+      : '';
+    summaryNotes.push(`Children: ${profileData.childrenCount}${ages}`);
+  }
+  if (profileData.taxFilingStatus) {
+    summaryNotes.push(`Tax filing status: ${String(profileData.taxFilingStatus).replace(/_/g, ' ')}`);
   }
   if (profileData.divorcePathway) {
     summaryNotes.push(`Pathway: ${String(profileData.divorcePathway).replace(/_/g, ' ')}`);

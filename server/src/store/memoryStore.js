@@ -7,6 +7,8 @@
 const userProfiles = new Map();
 const agentMemories = new Map();
 const chatHistories = new Map();
+const checklistProgress = new Map();
+const documentDrafts = new Map();
 
 // Seed default demo user for instant testing
 const DEMO_USER_ID = 'demo-user-123';
@@ -15,10 +17,14 @@ userProfiles.set(DEMO_USER_ID, {
   userId: DEMO_USER_ID,
   email: 'demo.user@ruthai.org',
   displayName: 'Sarah',
+  goal: 'understanding_rights',
+  maritalStatus: 'married_considering_divorce',
   stateJurisdiction: 'California',
   marriageLengthYears: 18,
   hasChildren: true,
   childrenCount: 2,
+  childrenAges: ['8', '14'],
+  taxFilingStatus: 'married_filing_jointly',
   financialRole: 'spouse_managed_all',
   primaryConcerns: [
     'keeping_marital_home',
@@ -121,5 +127,34 @@ module.exports = {
   purgeUserMemory: (userId) => {
     agentMemories.delete(userId);
     chatHistories.delete(userId);
+    checklistProgress.delete(userId);
+    documentDrafts.delete(userId);
+  },
+  getChecklistProgress: (userId) => checklistProgress.get(userId) || {},
+  updateChecklistItem: (userId, docId, updates) => {
+    const userMap = checklistProgress.get(userId) || {};
+    const existing = userMap[docId] || {};
+    const updatedItem = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    userMap[docId] = updatedItem;
+    checklistProgress.set(userId, userMap);
+    return userMap;
+  },
+  getDocumentDraft: (userId, docId) => {
+    const userDrafts = documentDrafts.get(userId) || {};
+    return userDrafts[docId] || null;
+  },
+  saveDocumentDraft: (userId, docId, values) => {
+    const userDrafts = documentDrafts.get(userId) || {};
+    const draft = {
+      values,
+      updatedAt: new Date().toISOString()
+    };
+    userDrafts[docId] = draft;
+    documentDrafts.set(userId, userDrafts);
+    return draft;
   }
 };
