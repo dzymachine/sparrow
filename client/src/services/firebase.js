@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -22,6 +22,9 @@ try {
   if (import.meta.env.VITE_FIREBASE_API_KEY && !import.meta.env.VITE_FIREBASE_API_KEY.includes('MockKey')) {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
     auth = getAuth(app);
+    setPersistence(auth, browserLocalPersistence).catch((err) => {
+      console.warn('[Firebase Client] Error setting auth persistence:', err.message);
+    });
     db = getFirestore(app);
     googleProvider = new GoogleAuthProvider();
     isFirebaseActive = true;

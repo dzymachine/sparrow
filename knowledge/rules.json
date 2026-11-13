@@ -1,0 +1,93 @@
+{
+  "_note": "Hackathon draft, not legal advice. The rules engine evaluates 'condition' against the user profile and shows matching cards. The model only explains the card in plain English using the linked topic file. Fields used: income_self, income_spouse, has_children, years_married, has_access_to_accounts, owns_home, case_filed, stage.",
+  "rules": [
+    {
+      "id": "temporary-support",
+      "type": "right",
+      "condition": "income_self < income_spouse",
+      "because": "Because you earn less than your spouse",
+      "title": "You may be able to ask for help with bills while your case is open",
+      "summary": "The court can order your spouse to help with living costs during the case, based on your need and their ability to pay.",
+      "forms": ["FL-300", "FL-150"],
+      "topic": "topics/temporary-support.md",
+      "sources": ["S1", "S10", "S19"]
+    },
+    {
+      "id": "attorney-fees",
+      "type": "right",
+      "condition": "income_self < income_spouse",
+      "because": "Because you earn less than your spouse",
+      "title": "You may be able to ask your spouse to help pay for your lawyer",
+      "summary": "If there is a gap in access to legal help and your spouse can pay for both sides, the court can order them to contribute.",
+      "forms": ["FL-300", "FL-319", "FL-150", "FL-158"],
+      "topic": "topics/attorney-fees.md",
+      "sources": ["S3", "S4", "S5"]
+    },
+    {
+      "id": "mutual-disclosure",
+      "type": "right",
+      "condition": "always",
+      "because": "Because every divorcing spouse must disclose",
+      "title": "Your spouse has to show you their finances too",
+      "summary": "Both sides must share income, assets and debts, at filing or within 60 days.",
+      "forms": ["FL-140", "FL-142", "FL-150", "FL-141"],
+      "topic": "topics/financial-disclosure.md",
+      "sources": ["S6", "S7"]
+    },
+    {
+      "id": "document-gaps",
+      "type": "right",
+      "condition": "has_access_to_accounts == false",
+      "because": "Because you don't have full access to the family accounts",
+      "title": "We can help you find what to ask about",
+      "summary": "Upload what you can find. We'll flag possible gaps, like income with no matching account, to add to your lawyer brief.",
+      "forms": [],
+      "topic": "topics/financial-disclosure.md",
+      "sources": ["S7", "S8"]
+    },
+    {
+      "id": "start-forms",
+      "type": "form_group",
+      "condition": "case_filed == false",
+      "because": "Because your case hasn't been filed yet",
+      "title": "Forms to start your case",
+      "summary": "The petition and summons start the case and tell your spouse.",
+      "forms": ["FL-100", "FL-110"],
+      "topic": "topics/forms.md",
+      "sources": ["S6"]
+    },
+    {
+      "id": "children-form",
+      "type": "form_group",
+      "condition": "has_children == true",
+      "because": "Because you have children with your spouse",
+      "title": "An extra form about your children",
+      "summary": "Add FL-105 at filing, which covers where your children have lived.",
+      "forms": ["FL-105"],
+      "topic": "topics/forms.md",
+      "sources": ["S6"]
+    },
+    {
+      "id": "fee-waiver",
+      "type": "right",
+      "condition": "income_self == 0 || income_self < income_spouse",
+      "because": "Because court fees may be hard to afford on your income",
+      "title": "You may be able to skip court filing fees",
+      "summary": "A fee waiver lets you file without paying the fee if you qualify.",
+      "forms": ["FW-001", "FW-003"],
+      "topic": "topics/timeline-and-costs.md",
+      "sources": ["S9"]
+    },
+    {
+      "id": "six-month-minimum",
+      "type": "info",
+      "condition": "always",
+      "because": "For everyone in California",
+      "title": "The earliest your divorce can be final is six months and a day",
+      "summary": "The clock starts when your spouse is served and cannot be shortened. Contested cases usually take longer.",
+      "forms": [],
+      "topic": "topics/timeline-and-costs.md",
+      "sources": ["S11"]
+    }
+  ]
+}

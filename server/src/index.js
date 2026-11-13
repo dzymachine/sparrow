@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const userRoutes = require('./routes/user');
 const agentRoutes = require('./routes/agent');
+const knowledgeRoutes = require('./routes/knowledge');
 const firebaseAdmin = require('./config/firebaseAdmin');
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(express.json({ limit: '15mb' }));
 // Routes
 app.use('/api/user', userRoutes);
 app.use('/api/agent', agentRoutes);
+app.use('/api/knowledge', knowledgeRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

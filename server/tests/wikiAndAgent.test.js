@@ -58,7 +58,12 @@ describe('Personal LLM Wiki & Ruth Agent Pipeline', () => {
   });
 
   after(async () => {
-    await new Promise((resolve) => server.close(resolve));
+    if (server) {
+      if (typeof server.closeAllConnections === 'function') {
+        server.closeAllConnections();
+      }
+      await new Promise((resolve) => server.close(resolve));
+    }
     if (fs.existsSync(testDataDir)) {
       fs.rmSync(testDataDir, { recursive: true, force: true });
     }
@@ -176,6 +181,36 @@ describe('Personal LLM Wiki & Ruth Agent Pipeline', () => {
     const compiled = wikiStore.compileWikiContext(ctxUser);
     assert.match(compiled, /Jurisdiction: California/);
     assert.match(compiled, /wiki\/profile\.md/);
+  });
+
+  it('syncs onboarding profile into wiki/profile.md with goal, children ages, and tax status', async () => {
+    const onboardUser = 'onboard-user-' + Date.now();
+    const res = await request('POST', '/api/user/profile', {
+      userId: onboardUser,
+      goal: 'preparing_divorce',
+      maritalStatus: 'married_considering_divorce',
+      stateJurisdiction: 'California',
+      marriageLengthYears: 12,
+      hasChildren: true,
+      childrenCount: 2,
+      childrenAges: ['4', '9'],
+      taxFilingStatus: 'married_filing_jointly',
+      financialRole: 'spouse_handled_all',
+      primaryConcerns: ['keeping_marital_home', 'discovering_hidden_accounts']
+    });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.success, true);
+
+    const wikiRes = await request('GET', `/api/agent/wiki/${onboardUser}`);
+    assert.equal(wikiRes.status, 200);
+
+    const profileFacts = wikiRes.body.wiki.sections.profile.facts;
+    assert.ok(profileFacts.some((f) => /preparing divorce/i.test(f.text)), 'Goal fact in profile');
+    assert.ok(profileFacts.some((f) => /married considering divorce/i.test(f.text)), 'Marital status fact in profile');
+    assert.ok(profileFacts.some((f) => /12 years/i.test(f.text) && /4336/i.test(f.text)), 'Long duration threshold fact in profile');
+    assert.ok(profileFacts.some((f) => /2 children/i.test(f.text) && /Ages: 4, 9/i.test(f.text)), 'Children & ages fact in profile');
+    assert.ok(profileFacts.some((f) => /married filing jointly/i.test(f.text) && /Schedule B/i.test(f.text)), 'Tax status fact in profile');
   });
 
   it('persists, hydrates, and purges per-user knowledge base files in Firebase Firestore & Storage', async () => {
