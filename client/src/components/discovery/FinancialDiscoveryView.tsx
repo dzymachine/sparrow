@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   UploadCloud,
   FileText,
@@ -104,8 +105,18 @@ export default function FinancialDiscoveryView() {
   } = useDiscovery();
 
   const { wikiData } = useAgentMemory() as any;
+  const location = useLocation();
 
+  const [activeSegment, setActiveSegment] = useState<'picture' | 'documents'>(
+    location.hash === '#projection-engine' ? 'picture' : 'documents'
+  );
   const [dragActive, setDragActive] = useState(false);
+
+  useEffect(() => {
+    if (location.hash === '#projection-engine') {
+      setActiveSegment('picture');
+    }
+  }, [location.hash]);
   const [pendingCategoryHint, setPendingCategoryHint] = useState<DiscoveryCategoryKey | undefined>(undefined);
   const [notApplicableKeys, setNotApplicableKeys] = useState<DiscoveryCategoryKey[]>([]);
   const [selectedTabKey, setSelectedTabKey] = useState<DiscoveryCategoryKey>('tax_returns');
@@ -211,118 +222,149 @@ export default function FinancialDiscoveryView() {
 
   return (
     <div className="space-y-8">
-      {/* View Header with Calm Reassurance */}
-      <div className="border-b border-[#E2DBD0] pb-4 flex flex-col md:flex-row md:items-end justify-between gap-3">
+      {/* View Header with Apple Segmented Control */}
+      <div className="border-b border-[#E2DBD0] pb-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-medium text-[#261E19] tracking-tight">
-            Your Financial Picture &amp; Document Guide
+            Financial Discovery &amp; Projection
           </h1>
-          <p className="text-xs text-[#5C4E43] mt-1 max-w-3xl leading-relaxed">
-            Import your financial and legal documents one step at a time. We read each file in plain English,
-            build a clear picture of what you have, and save it securely to your private profile.
+          <p className="text-xs text-[#5C4E43] mt-1 max-w-2xl leading-relaxed">
+            Your private financial picture, imported records, and post-divorce projection—organized in one place.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          {/* Apple-style Segmented Control */}
+          <div className="inline-flex p-1 rounded-xl bg-[#EFEBE4] border border-[#E2DBD0]">
+            <button
+              type="button"
+              onClick={() => setActiveSegment('picture')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition ${
+                activeSegment === 'picture'
+                  ? 'bg-white text-[#261E19] shadow-xs'
+                  : 'text-[#5C4E43] hover:text-[#261E19]'
+              }`}
+            >
+              Financial Picture &amp; Projection
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSegment('documents')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition inline-flex items-center gap-1.5 ${
+                activeSegment === 'documents'
+                  ? 'bg-white text-[#261E19] shadow-xs'
+                  : 'text-[#5C4E43] hover:text-[#261E19]'
+              }`}
+            >
+              <span>Documents &amp; Intake</span>
+              <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[#E6ECE6] text-[#435C4D]">
+                {resolvedCount}/{checklist.length}
+              </span>
+            </button>
+          </div>
+
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FAF9F6] border border-[#E2DBD0] text-xs text-[#435C4D] font-medium">
             <Database className="w-3.5 h-3.5" />
             <span>
               {isSyncingToWiki
-                ? 'Saving to Private Profile...'
-                : `Private Profile: ${wikiTotalFacts} details saved`}
+                ? 'Saving...'
+                : `${wikiTotalFacts} Saved`}
             </span>
           </span>
         </div>
       </div>
 
-      {/* 1. MAIN FINANCIAL PICTURE & VISUALIZATION (FRONT & TOP) */}
-      <div className="bg-white border border-[#E2DBD0] rounded-xl p-5 sm:p-6 space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#F0EAE1] pb-3">
-          <div>
-            <h2 className="text-lg font-medium text-[#261E19]">
-              Your Financial Picture
-            </h2>
-            <p className="text-xs text-[#5C4E43] mt-0.5">
-              A live summary of your household accounts, monthly cash flow, and housing—updated as you import documents.
-            </p>
+      {/* Apple Inset Grouped Summary Strip (Always Visible, Zero Duplication) */}
+      <div className="bg-white border border-[#E2DBD0] rounded-2xl grid grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#F0EAE1] overflow-hidden">
+        <div className="p-4 space-y-1">
+          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8C7D73] font-medium">
+            <Landmark className="w-3.5 h-3.5 text-[#435C4D]" />
+            <span>Discovered Assets</span>
           </div>
-          <span className="text-xs font-mono text-[#435C4D] bg-[#E6ECE6] px-2.5 py-1 rounded-full self-start sm:self-auto">
-            {documents.length} Document{documents.length === 1 ? '' : 's'} Imported
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="p-3.5 rounded-xl border border-[#E2DBD0] bg-[#FAF9F6] space-y-1">
-            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8C7D73] font-medium">
-              <Landmark className="w-3.5 h-3.5 text-[#435C4D]" />
-              <span>Discovered Accounts</span>
-            </div>
-            <div className="text-lg font-mono font-semibold text-[#261E19]">
-              {maskMoney(totalAssets)}
-            </div>
-            <div className="text-[11px] text-[#5C4E43]">
-              {accountVault.length} accounts · {unlistedLeadsCount} unlisted lead{unlistedLeadsCount === 1 ? '' : 's'}
-            </div>
+          <div className="text-lg font-mono tabular-nums font-semibold text-[#261E19]">
+            {maskMoney(totalAssets)}
           </div>
-
-          <div className="p-3.5 rounded-xl border border-[#E2DBD0] bg-[#FAF9F6] space-y-1">
-            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8C7D73] font-medium">
-              <Wallet className="w-3.5 h-3.5 text-[#435C4D]" />
-              <span>Income &amp; Baseline</span>
-            </div>
-            <div className="text-lg font-mono font-semibold text-[#261E19]">
-              {maskMoney(baseline.monthlyInflow)} <span className="text-xs font-normal text-[#8C7D73]">/ mo in</span>
-            </div>
-            <div className="text-[11px] text-[#5C4E43]">
-              Outflow: {maskMoney(totalMonthlyOutflow)} · Monthly Cushion: {monthlyGap >= 0 ? '+' : ''}{maskMoney(monthlyGap)}
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl border border-[#E2DBD0] bg-[#FAF9F6] space-y-1">
-            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8C7D73] font-medium">
-              <Home className="w-3.5 h-3.5 text-[#435C4D]" />
-              <span>Housing &amp; Mortgage</span>
-            </div>
-            <div className="text-lg font-mono font-semibold text-[#261E19]">
-              {maskMoney(housingSandbox.mortgageBalance)}
-            </div>
-            <div className="text-[11px] text-[#5C4E43]">
-              {maskMoney(housingSandbox.monthlyMortgageTotal)}/mo (mortgage, taxes &amp; ins.) @ {housingSandbox.interestRate}%
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl border border-[#E2DBD0] bg-[#FAF9F6] space-y-1">
-            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8C7D73] font-medium">
-              <Scale className="w-3.5 h-3.5 text-[#435C4D]" />
-              <span>Support &amp; Split</span>
-            </div>
-            <div className="text-lg font-mono font-semibold text-[#261E19]">
-              {maskMoney(baseline.spousalSupport + baseline.childSupport)} <span className="text-xs font-normal text-[#8C7D73]">/ mo</span>
-            </div>
-            <div className="text-[11px] text-[#5C4E43]">
-              Spousal {maskMoney(baseline.spousalSupport)} · Child {maskMoney(baseline.childSupport)}
-            </div>
+          <div className="text-xs text-[#5C4E43]">
+            {accountVault.length} accounts · {unlistedLeadsCount} to verify
           </div>
         </div>
 
-        {/* Visual Financial Situation Breakdown */}
-        <FinancialSituationVisuals
-          totalAssets={totalAssets}
-          retirementAssets={retirementAssets}
-          liquidOtherAssets={liquidOtherAssets}
-          unlistedAssets={unlistedAssets}
-          mortgageDebt={mortgageDebt}
-          netEstate={netEstate}
-          totalMonthlyInflowWithSupport={totalMonthlyInflowWithSupport}
-          mustPaysTotal={mustPaysTotal}
-          lifeKidsTotal={lifeKidsTotal}
-          totalMonthlyOutflow={totalMonthlyOutflow}
-          monthlyCushion={monthlyGap}
-          privacyMode={privacyMode}
-        />
+        <div className="p-4 space-y-1">
+          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8C7D73] font-medium">
+            <Wallet className="w-3.5 h-3.5 text-[#435C4D]" />
+            <span>Monthly Cushion</span>
+          </div>
+          <div className={`text-lg font-mono tabular-nums font-semibold ${monthlyGap >= 0 ? 'text-[#435C4D]' : 'text-rose-700'}`}>
+            {monthlyGap >= 0 ? '+' : ''}{maskMoney(monthlyGap)} <span className="text-xs font-normal text-[#8C7D73]">/ mo</span>
+          </div>
+          <div className="text-xs text-[#5C4E43]">
+            {maskMoney(baseline.monthlyInflow)} in · {maskMoney(totalMonthlyOutflow)} out
+          </div>
+        </div>
+
+        <div className="p-4 space-y-1">
+          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8C7D73] font-medium">
+            <Home className="w-3.5 h-3.5 text-[#435C4D]" />
+            <span>Mortgage Balance</span>
+          </div>
+          <div className="text-lg font-mono tabular-nums font-semibold text-[#261E19]">
+            {maskMoney(housingSandbox.mortgageBalance)}
+          </div>
+          <div className="text-xs text-[#5C4E43]">
+            {maskMoney(housingSandbox.monthlyMortgageTotal)}/mo @ {housingSandbox.interestRate}%
+          </div>
+        </div>
+
+        <div className="p-4 space-y-1">
+          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8C7D73] font-medium">
+            <Scale className="w-3.5 h-3.5 text-[#435C4D]" />
+            <span>Support on File</span>
+          </div>
+          <div className="text-lg font-mono tabular-nums font-semibold text-[#261E19]">
+            {maskMoney(baseline.spousalSupport + baseline.childSupport)} <span className="text-xs font-normal text-[#8C7D73]">/ mo</span>
+          </div>
+          <div className="text-xs text-[#5C4E43]">
+            Spousal {maskMoney(baseline.spousalSupport)} · Child {maskMoney(baseline.childSupport)}
+          </div>
+        </div>
       </div>
 
-      {/* 2. TWO-COLUMN WORKSPACE: Imported Documents (Left/Main) + Compact Side Uploader (Right/Side) */}
+      {/* SEGMENT 1: COHESIVE FINANCIAL PICTURE & POST-DIVORCE PROJECTION */}
+      {activeSegment === 'picture' && (
+        <div className="space-y-6">
+          <div className="bg-white border border-[#E2DBD0] rounded-2xl p-5 sm:p-6 space-y-4">
+            <div>
+              <h2 className="text-base font-medium text-[#261E19]">
+                Visual Financial Breakdown
+              </h2>
+              <p className="text-xs text-[#5C4E43] mt-0.5">
+                How your assets, monthly cash flow, and 50/50 marital share look right now.
+              </p>
+            </div>
+            <FinancialSituationVisuals
+              totalAssets={totalAssets}
+              retirementAssets={retirementAssets}
+              liquidOtherAssets={liquidOtherAssets}
+              unlistedAssets={unlistedAssets}
+              mortgageDebt={mortgageDebt}
+              netEstate={netEstate}
+              totalMonthlyInflowWithSupport={totalMonthlyInflowWithSupport}
+              mustPaysTotal={mustPaysTotal}
+              lifeKidsTotal={lifeKidsTotal}
+              totalMonthlyOutflow={totalMonthlyOutflow}
+              monthlyCushion={monthlyGap}
+              privacyMode={privacyMode}
+            />
+          </div>
+
+          <div id="projection-engine">
+            <LifeProjectionTab discoveryVersion={documents.length + accountVault.length} />
+          </div>
+        </div>
+      )}
+
+      {/* SEGMENT 2: DOCUMENTS & GUIDED INTAKE */}
+      {activeSegment === 'documents' && (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT (7 cols): Imported Documents as Clickable Document Icons + Quick Demo */}
         <div className="lg:col-span-7 space-y-5">
@@ -671,6 +713,7 @@ export default function FinancialDiscoveryView() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Document Reader Modal */}
       {modalDoc && (
@@ -846,11 +889,6 @@ export default function FinancialDiscoveryView() {
           </div>
         </div>
       )}
-
-      {/* STAGE 4: Post-Divorce Life Finance Projection Engine */}
-      <div id="projection-engine" className="pt-2">
-        <LifeProjectionTab discoveryVersion={documents.length + accountVault.length} />
-      </div>
     </div>
   );
 }

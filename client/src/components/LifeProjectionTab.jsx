@@ -30,6 +30,7 @@ export default function LifeProjectionTab({ discoveryVersion = 0 } = {}) {
     saveLifeProjectionInputs
   } = useAgentMemory();
 
+  const [showInputsEditor, setShowInputsEditor] = useState(false);
   const [formValues, setFormValues] = useState({
     stateJurisdiction: 'California',
     marriageLengthYears: '',
@@ -167,52 +168,54 @@ export default function LifeProjectionTab({ discoveryVersion = 0 } = {}) {
   return (
     <div className="space-y-6">
       {/* Header Bar */}
-      <div className="bg-white border border-brand-200/80 rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white border border-[#E2DBD0] rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-brand-700" />
-            <h2 className="text-lg sm:text-xl font-extrabold text-slate-900">
-              Post-Divorce Life Finance Projection
+          <div className="flex items-center gap-2 flex-wrap">
+            <TrendingUp className="w-5 h-5 text-[#435C4D]" />
+            <h2 className="text-lg font-medium text-[#261E19] tracking-tight">
+              Post-Divorce Projection
             </h2>
             {lifeProjection?.status === 'complete_estimate' && (
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+              <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#E6ECE6] text-[#435C4D]">
                 Up-to-Date Estimate
               </span>
             )}
             {lifeProjection?.status === 'partial_estimate' && (
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                Initial Estimate (Can Refine)
+              <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900">
+                Initial Estimate
               </span>
             )}
             {isInsufficient && (
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800">
+              <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800">
                 Missing Required Info
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500">
-            Recalculates automatically from your latest profile, discovered accounts, and divorce details to model what your finances would look like if you divorced today.
+          <p className="text-xs text-[#5C4E43]">
+            Calculated from your profile and imported documents to model what life looks like post-divorce.
           </p>
-          {lifeProjection?.dataSourcesUsed?.length > 0 && (
-            <p className="text-[11px] text-slate-400">
-              Sources synced: {lifeProjection.dataSourcesUsed.join(' • ')} • Updated{' '}
-              {new Date(lifeProjection.calculatedAt).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </p>
-          )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => refreshLifeProjection()}
-          disabled={isCalculatingProjection}
-          className="inline-flex items-center justify-center gap-2 bg-brand-700 hover:bg-brand-800 disabled:opacity-60 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition self-start sm:self-auto"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isCalculatingProjection ? 'animate-spin' : ''}`} />
-          <span>{isCalculatingProjection ? 'Recalculating...' : 'Recalculate Today'}</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          {!isInsufficient && (
+            <button
+              type="button"
+              onClick={() => setShowInputsEditor((prev) => !prev)}
+              className="inline-flex items-center justify-center gap-1.5 bg-[#FAF9F6] hover:bg-white text-[#261E19] border border-[#E2DBD0] hover:border-[#435C4D] text-xs font-medium px-3.5 py-2 rounded-lg transition"
+            >
+              <span>{showInputsEditor ? 'Hide Assumptions' : 'Adjust Assumptions'}</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => refreshLifeProjection()}
+            disabled={isCalculatingProjection}
+            className="inline-flex items-center justify-center gap-2 bg-[#435C4D] hover:bg-[#354A3E] disabled:opacity-60 text-white text-xs font-medium px-4 py-2 rounded-lg transition"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isCalculatingProjection ? 'animate-spin' : ''}`} />
+            <span>{isCalculatingProjection ? 'Recalculating...' : 'Recalculate'}</span>
+          </button>
+        </div>
       </div>
 
       {/* STATE 1: INSUFFICIENT DATA */}
@@ -485,12 +488,13 @@ export default function LifeProjectionTab({ discoveryVersion = 0 } = {}) {
             </div>
           )}
 
-          {/* Main Grid: Inputs Editor + Detailed Cash Flow & Housing Outlook */}
+          {/* Main Grid: Stored-Away Inputs Editor + Detailed Cash Flow & Housing Outlook */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column: Update Latest Inputs */}
+            {/* Left Column: Update Latest Inputs (Progressive Disclosure) */}
+            {showInputsEditor && (
             <form
               onSubmit={handleSaveAndRecalculate}
-              className="lg:col-span-1 bg-white border border-brand-200/80 rounded-3xl p-6 shadow-sm space-y-4"
+              className="lg:col-span-1 bg-white border border-[#E2DBD0] rounded-2xl p-6 space-y-4"
             >
               <div>
                 <h3 className="font-bold text-slate-900 text-base">
@@ -662,9 +666,10 @@ export default function LifeProjectionTab({ discoveryVersion = 0 } = {}) {
                 <span>Save & Recalculate</span>
               </button>
             </form>
+            )}
 
             {/* Right Column: Cash Flow, Housing Comparison, Asset Split & 5-Year Outlook */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className={`${showInputsEditor ? 'lg:col-span-2' : 'lg:col-span-3'} space-y-6`}>
               {/* Monthly Cash Flow Card */}
               <div className="bg-white border border-brand-200/80 rounded-3xl p-6 shadow-sm space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
