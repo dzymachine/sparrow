@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { AgentMemoryProvider } from './context/AgentMemoryContext';
 import { DiscoveryProvider } from './context/DiscoveryContext';
 import { TransitionProvider } from './context/TransitionContext';
@@ -21,7 +21,11 @@ import ConsultProfessionalPage from './pages/ConsultProfessionalPage.tsx';
 
 function AppShell() {
   const location = useLocation();
+  const { currentUser } = useAuth();
   const isLanding = location.pathname === '/';
+  const showFinch =
+    Boolean(currentUser) &&
+    !['/', '/auth', '/onboarding'].includes(location.pathname);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -102,7 +106,7 @@ function AppShell() {
         </div>
       </main>
       <Footer />
-      <RuthBuddyWidget />
+      {showFinch && <RuthBuddyWidget />}
     </div>
   );
 }
