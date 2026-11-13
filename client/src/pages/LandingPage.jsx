@@ -5,8 +5,6 @@ import {
   CheckCircle2,
   TrendingUp,
   FileText,
-  ShieldCheck,
-  Lock,
   ArrowRight,
   HelpCircle,
   ChevronDown,
@@ -29,10 +27,6 @@ export default function LandingPage() {
 
   const handleEnterPlatform = () => {
     smoothNavigate(currentUser ? '/dashboard' : '/auth?mode=signup');
-  };
-
-  const handleGuidedAssessment = () => {
-    smoothNavigate(currentUser ? '/onboarding' : '/auth?mode=signup');
   };
 
   const handleSmoothLink = (e, to) => {
@@ -120,23 +114,8 @@ export default function LandingPage() {
         <section className="relative min-h-[calc(100vh-5.5rem)] flex flex-col justify-center pt-4 pb-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="max-w-3xl mx-auto text-center space-y-7">
-              {/* 21st.dev Animated Status Pill Badge */}
-              <BlurFade delay={0}>
-                <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-medium tracking-wide text-amber-100 shadow-lg">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-300" />
-                  </span>
-                  <span>Sparrow</span>
-                  <span className="text-white/40">•</span>
-                  <span className="text-amber-200/95">
-                    Financial Clarity for Your Next Chapter
-                  </span>
-                </div>
-              </BlurFade>
-
               {/* Editorial Metaphor Headline */}
-              <BlurFade delay={100}>
+              <BlurFade delay={50}>
                 <h1 className="text-4xl sm:text-6xl lg:text-[4.25rem] font-semibold text-white tracking-tight leading-[1.08] drop-shadow-[0_4px_24px_rgba(0,0,0,0.55)]">
                   It&apos;s scary to fly away{' '}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-[#ADC2B5]">
@@ -146,7 +125,7 @@ export default function LandingPage() {
               </BlurFade>
 
               {/* Sparrow Marriage-Flight Quip / Metaphor */}
-              <BlurFade delay={200}>
+              <BlurFade delay={150}>
                 <p className="text-lg sm:text-xl text-stone-100/95 leading-relaxed max-w-2xl mx-auto font-normal drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]">
                   Leaving a marriage—especially when you were kept out of the accounts—feels like
                   stepping off a branch into open air.{' '}
@@ -157,8 +136,8 @@ export default function LandingPage() {
               </BlurFade>
 
               {/* Centered Entry into the Platform */}
-              <BlurFade delay={300}>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3">
+              <BlurFade delay={250}>
+                <div className="flex items-center justify-center pt-3">
                   <ShimmerButton
                     type="button"
                     onClick={handleEnterPlatform}
@@ -167,33 +146,6 @@ export default function LandingPage() {
                     <span>Enter Sparrow Platform</span>
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                   </ShimmerButton>
-
-                  <button
-                    type="button"
-                    onClick={handleGuidedAssessment}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold px-6 py-4 rounded-xl border border-white/25 shadow-lg transition-all text-base"
-                  >
-                    <span>Guided Assessment</span>
-                    <ArrowRight className="w-4 h-4 text-amber-200" />
-                  </button>
-                </div>
-              </BlurFade>
-
-              {/* Glassmorphic Trust Bar */}
-              <BlurFade delay={400}>
-                <div className="inline-flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-5 py-2.5 rounded-full bg-black/30 backdrop-blur-md border border-white/15 text-xs text-stone-200 font-medium mt-2">
-                  <span className="flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5 text-[#ADC2B5]" />
-                    100% Private &amp; Encrypted
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#ADC2B5]" />
-                    Zero Training on Your Personal Files
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <FileCheckIcon className="w-3.5 h-3.5 text-[#ADC2B5]" />
-                    Page-by-Page Citations
-                  </span>
                 </div>
               </BlurFade>
             </div>
@@ -476,24 +428,5 @@ export default function LandingPage() {
         </section>
       </div>
     </div>
-  );
-}
-
-function FileCheckIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <path d="m9 15 2 2 4-4" />
-    </svg>
   );
 }
