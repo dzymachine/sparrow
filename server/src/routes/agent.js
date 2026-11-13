@@ -27,9 +27,9 @@ router.post('/memory', (req, res) => {
 });
 
 // GET user Personal LLM Wiki sections and memory statistics
-router.get('/wiki/:userId', (req, res) => {
+router.get('/wiki/:userId', async (req, res) => {
   const { userId } = req.params;
-  const wiki = wikiStore.getWiki(userId);
+  const wiki = await wikiStore.getWikiAsync(userId);
   return res.json({
     success: true,
     wiki,

@@ -1,6 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Users can only read/write their own Personal LLM Wiki and profile
+    match /user_wikis/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    // Deny all other client-side access by default (Admin SDK bypasses rules)
     match /{document=**} {
       allow read, write: if false;
     }

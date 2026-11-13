@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { admin, isConfigured: isFirebaseConfigured } = require('../config/firebaseAdmin');
+const { db, bucket, isConfigured: isFirebaseConfigured } = require('../config/firebaseAdmin');
 
 const DATA_ROOT = process.env.WIKI_DATA_DIR || path.join(__dirname, '../../data/wikis');
 
@@ -139,18 +139,75 @@ function persistWikiToDisk(wiki) {
     console.warn('[WikiStore] Disk persistence skipped:', err.message);
   }
 
-  // Optional Firestore sync when configured
-  if (isFirebaseConfigured() && admin) {
-    try {
-      admin.firestore().collection('user_wikis').doc(sanitizeUserId(wiki.userId)).set({
-        userId: wiki.userId,
-        sections: wiki.sections,
-        lastUpdated: wiki.lastUpdated
-      }).catch((e) => console.warn('[WikiStore] Firestore async sync warning:', e.message));
-    } catch (err) {
-      console.warn('[WikiStore] Firestore sync skipped:', err.message);
+  // Optional Firestore + Firebase Storage sync when configured
+  if (isFirebaseConfigured() && db) {
+    const safeId = sanitizeUserId(wiki.userId);
+    db.collection('user_wikis').doc(safeId).set({
+      userId: wiki.userId,
+      sections: wiki.sections,
+      lastUpdated: wiki.lastUpdated
+    }).catch((e) => console.warn('[WikiStore] Firestore async sync warning:', e.message));
+
+    if (bucket) {
+      for (const key of SECTION_KEYS) {
+        const section = wiki.sections[key];
+        const remotePath = `wikis/${safeId}/${section.filename}`;
+        bucket.file(remotePath).save(section.markdown, {
+          contentType: 'text/markdown; charset=utf-8',
+          resumable: false
+        }).catch((e) => console.warn('[WikiStore] Storage upload warning:', e.message));
+      }
     }
   }
+}
+
+async function hydrateWikiFromFirestore(userId) {
+  const id = userId || 'guest-user';
+  if (wikiCache.has(id) || purgedUsers.has(id)) {
+    return ensureWiki(id);
+  }
+  const fromDisk = loadWikiFromDisk(id);
+  if (fromDisk) {
+    wikiCache.set(id, fromDisk);
+    return fromDisk;
+  }
+
+  if (isFirebaseConfigured() && db) {
+    try {
+      const safeId = sanitizeUserId(id);
+      const snap = await db.collection('user_wikis').doc(safeId).get();
+      if (snap.exists) {
+        const data = snap.data();
+        if (data && data.sections) {
+          for (const key of SECTION_KEYS) {
+            if (!data.sections[key]) {
+              data.sections[key] = {
+                ...WIKI_SECTIONS[key],
+                facts: [],
+                markdown: renderSectionMarkdown(WIKI_SECTIONS[key], [])
+              };
+            } else {
+              data.sections[key].markdown = renderSectionMarkdown(
+                WIKI_SECTIONS[key],
+                data.sections[key].facts || []
+              );
+            }
+          }
+          wikiCache.set(id, data);
+          return data;
+        }
+      }
+    } catch (err) {
+      console.warn('[WikiStore] Firestore hydrate warning:', err.message);
+    }
+  }
+
+  return ensureWiki(id);
+}
+
+async function getWikiAsync(userId) {
+  const wiki = await hydrateWikiFromFirestore(userId);
+  return formatWikiResponse(wiki);
 }
 
 function loadWikiFromDisk(userId) {
@@ -379,11 +436,11 @@ function purgeWiki(userId) {
     console.warn('[WikiStore] Disk purge warning:', err.message);
   }
 
-  if (isFirebaseConfigured() && admin) {
-    try {
-      admin.firestore().collection('user_wikis').doc(sanitizeUserId(id)).delete().catch(() => {});
-    } catch (err) {
-      // ignore
+  if (isFirebaseConfigured() && db) {
+    const safeId = sanitizeUserId(id);
+    db.collection('user_wikis').doc(safeId).delete().catch(() => {});
+    if (bucket) {
+      bucket.deleteFiles({ prefix: `wikis/${safeId}/` }).catch(() => {});
     }
   }
 
@@ -454,6 +511,7 @@ module.exports = {
   WIKI_SECTIONS,
   SECTION_KEYS,
   getWiki,
+  getWikiAsync,
   addFacts,
   updateFact,
   deleteFact,
