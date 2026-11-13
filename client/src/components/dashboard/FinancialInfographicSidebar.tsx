@@ -1,14 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import {
-  PieChart,
-  TrendingUp,
-  AlertTriangle,
-  ChevronRight,
-  FileCheck2,
-  ShieldAlert,
-  ArrowUpRight
-} from 'lucide-react';
 import { CategoryChecklistItem, DiscoveryWorkspaceState } from '../../types/discovery';
 
 interface FinancialInfographicSidebarProps {
@@ -50,7 +41,7 @@ export default function FinancialInfographicSidebar({
     return formatMoney(val);
   };
 
-  // Fallback asset breakdown from vault if lifeProjection isn't ready
+  // Fallback breakdown from vault when projection is incomplete
   const vaultRetirement = accountVault
     .filter((a) => !a.isUnlistedDiscovery && /401|ira|pension|retire/i.test(a.accountType + a.name))
     .reduce((s, a) => s + (a.balance || 0), 0);
@@ -72,23 +63,14 @@ export default function FinancialInfographicSidebar({
   const homeVal = hasProjection ? Math.max(0, homeEquityShare) : Math.round(vaultHomeEquity * 0.5);
   const flaggedVal = Math.max(0, potentialUndisclosedShare || Math.round(vaultUnlisted * 0.5));
 
-  const totalConfirmedShare = retVal + liqVal + homeVal;
-  const donutTotal = totalConfirmedShare + flaggedVal;
-  const denom = donutTotal > 0 ? donutTotal : 1;
-
-  // SVG Donut math (r = 36, C = 2 * pi * 36 ≈ 226.19)
-  const r = 36;
-  const C = 2 * Math.PI * r;
-  const retLen = (retVal / denom) * C;
-  const liqLen = (liqVal / denom) * C;
-  const homeLen = (homeVal / denom) * C;
-  const flaggedLen = (flaggedVal / denom) * C;
+  const totalEstate = retVal + liqVal + homeVal + flaggedVal;
+  const pct = (v: number) => (totalEstate > 0 ? Math.round((v / totalEstate) * 100) : 0);
 
   const totalDebt = hasProjection
     ? lifeProjection?.assetDivision?.totalDebts ?? housingSandbox?.mortgageBalance ?? 0
     : housingSandbox?.mortgageBalance ?? 0;
 
-  // Monthly Cash Flow Infographic data
+  // Monthly cash flow
   const baselineOutflow = [...(baseline?.mustPays || []), ...(baseline?.lifeAndKids || [])].reduce(
     (s, e) => s + (e.amount || 0),
     0
@@ -106,261 +88,145 @@ export default function FinancialInfographicSidebar({
     ? lifeProjection?.monthlyCashFlow?.housingToIncomeRatio ?? 0
     : 0;
 
-  const earnedNet = hasProjection ? lifeProjection?.monthlyTakeHome?.earnedIncome ?? 0 : 0;
-  const spousalMid = hasProjection
-    ? lifeProjection?.monthlyTakeHome?.spousalSupport?.monthlyMid ?? 0
-    : 0;
-  const childMid = hasProjection
-    ? lifeProjection?.monthlyTakeHome?.childSupport?.monthlyMid ?? 0
-    : 0;
-
   const maxFlow = Math.max(monthlyInflow, monthlyOutflow, 1);
-  const inflowPct = Math.min(100, Math.round((monthlyInflow / maxFlow) * 100));
-  const outflowPct = Math.min(100, Math.round((monthlyOutflow / maxFlow) * 100));
+  const inflowWidth = Math.min(100, Math.round((monthlyInflow / maxFlow) * 100));
+  const outflowWidth = Math.min(100, Math.round((monthlyOutflow / maxFlow) * 100));
 
-  // Discovery 7-category coverage
-  const reviewedCount = checklist.filter((c) => c.status === 'Reviewed').length;
-  const uploadedCount = checklist.filter((c) => c.status === 'Uploaded').length;
-  const missingCount = checklist.filter((c) => c.status === 'Missing').length;
-  const coveredCount = reviewedCount + uploadedCount;
+  const coveredCount = checklist.filter((c) => c.status !== 'Missing').length;
 
-  const pct = (v: number) => (donutTotal > 0 ? Math.round((v / donutTotal) * 100) : 0);
+  const segments = [
+    { label: 'Retirement', value: retVal, color: '#346538' },
+    { label: 'Cash & Liquid', value: liqVal, color: '#839E8D' },
+    { label: 'Home Equity', value: homeVal, color: '#C5B8A5' },
+    ...(flaggedVal > 0 ? [{ label: `Unlisted (${flaggedLeadsCount})`, value: flaggedVal, color: '#D9A441' }] : [])
+  ];
 
   return (
-    <aside aria-label="Financial Snapshot Infographic" className="space-y-4">
-      {/* Header Pill */}
-      <div className="flex items-center justify-between px-1">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-[#546347] flex items-center gap-1.5">
-          <PieChart className="w-3.5 h-3.5" />
-          <span>Financial Infographic</span>
+    <aside aria-label="Financial Snapshot" className="space-y-4">
+      {/* Section Eyebrow */}
+      <div className="flex items-center justify-between px-0.5">
+        <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#787774]">
+          Financial Snapshot
         </span>
         <Link
           to="/discovery"
-          className="text-[11px] font-medium text-[#435C4D] hover:underline inline-flex items-center gap-0.5"
+          className="text-[11px] font-medium text-[#2F3437] hover:text-[#111111] transition-colors"
         >
-          <span>Full View</span>
-          <ArrowUpRight className="w-3 h-3" />
+          Details →
         </Link>
       </div>
 
-      {/* CARD 1: Estate & Asset Mix Donut */}
-      <div className="bg-white border border-[#E2DBD0] rounded-2xl p-4 space-y-4 shadow-xs">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h2 className="text-xs font-semibold text-[#261E19] font-sans">
-              Your 50% Estate Breakdown
-            </h2>
-            <p className="text-[11px] text-[#8C7D73]">
-              Confirmed share + flagged leads
-            </p>
+      {/* Card 1: Estate Breakdown */}
+      <section className="bg-white border border-[#EAEAEA] rounded-xl p-5 space-y-5">
+        <div className="space-y-1">
+          <div className="text-[11px] text-[#787774]">Estimated 50% Share</div>
+          <div className="font-serif text-3xl tracking-[-0.03em] leading-[1.1] text-[#111111] tabular-nums">
+            {mask(userAssetShare)}
           </div>
           {totalDebt > 0 && (
-            <span className="text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-[#FAF7F2] border border-[#E2DBD0] text-[#5C4E43] shrink-0">
-              Debt {mask(totalDebt)}
-            </span>
+            <div className="text-[11px] text-[#787774] pt-0.5 tabular-nums">
+              Net of {mask(totalDebt)} shared debt
+            </div>
           )}
         </div>
 
-        {/* SVG Donut + Center Readout */}
-        <div className="flex items-center justify-center py-1">
-          <div className="relative w-32 h-32 flex items-center justify-center">
-            <svg viewBox="0 0 96 96" className="w-full h-full -rotate-90">
-              <circle
-                cx="48"
-                cy="48"
-                r={r}
-                fill="none"
-                stroke="#F0EAE1"
-                strokeWidth="11"
-              />
-              {donutTotal > 0 && (
-                <>
-                  <circle
-                    cx="48"
-                    cy="48"
-                    r={r}
-                    fill="none"
-                    stroke="#435C4D"
-                    strokeWidth="11"
-                    strokeDasharray={`${retLen} ${C}`}
-                    strokeDashoffset={0}
-                    className="transition-all duration-500"
+        {/* Single Minimalist Stacked Bar */}
+        <div className="space-y-2">
+          <div
+            className="w-full h-2 rounded-sm bg-[#F7F6F3] overflow-hidden flex gap-px"
+            role="img"
+            aria-label="Asset allocation breakdown"
+          >
+            {totalEstate > 0 &&
+              segments.map((seg) =>
+                seg.value > 0 ? (
+                  <div
+                    key={seg.label}
+                    style={{ width: `${pct(seg.value)}%`, backgroundColor: seg.color }}
+                    className="h-full transition-all duration-500"
+                    title={`${seg.label}: ${pct(seg.value)}%`}
                   />
-                  <circle
-                    cx="48"
-                    cy="48"
-                    r={r}
-                    fill="none"
-                    stroke="#839E8D"
-                    strokeWidth="11"
-                    strokeDasharray={`${liqLen} ${C}`}
-                    strokeDashoffset={-retLen}
-                    className="transition-all duration-500"
-                  />
-                  <circle
-                    cx="48"
-                    cy="48"
-                    r={r}
-                    fill="none"
-                    stroke="#A07E5F"
-                    strokeWidth="11"
-                    strokeDasharray={`${homeLen} ${C}`}
-                    strokeDashoffset={-(retLen + liqLen)}
-                    className="transition-all duration-500"
-                  />
-                  {flaggedVal > 0 && (
-                    <circle
-                      cx="48"
-                      cy="48"
-                      r={r}
-                      fill="none"
-                      stroke="#D97706"
-                      strokeWidth="11"
-                      strokeDasharray={`${flaggedLen} ${C}`}
-                      strokeDashoffset={-(retLen + liqLen + homeLen)}
-                      className="transition-all duration-500"
-                    />
-                  )}
-                </>
+                ) : null
               )}
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
-              <span className="text-[9px] uppercase tracking-wider text-[#8C7D73]">
-                Est. Share
-              </span>
-              <span className="text-sm font-mono tabular-nums font-semibold text-[#261E19]">
-                {mask(userAssetShare)}
-              </span>
-            </div>
           </div>
         </div>
 
-        {/* Segmented Legend Rows with Mini Proportion Bars */}
-        <div className="space-y-2 pt-1 border-t border-[#F0EAE1]">
-          {[
-            { label: 'Retirement (QDRO)', value: retVal, color: '#435C4D' },
-            { label: 'Liquid & Cash', value: liqVal, color: '#839E8D' },
-            { label: 'Home Equity', value: homeVal, color: '#A07E5F' },
-            ...(flaggedVal > 0
-              ? [{ label: `Flagged (${flaggedLeadsCount})`, value: flaggedVal, color: '#D97706' }]
-              : [])
-          ].map((item) => (
-            <div key={item.label} className="space-y-1">
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="inline-flex items-center gap-1.5 text-[#5C4E43] truncate">
-                  <span
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="truncate">{item.label}</span>
-                </span>
-                <span className="font-mono tabular-nums text-[#261E19] font-medium shrink-0">
-                  {mask(item.value)}
-                  <span className="text-[10px] text-[#8C7D73] ml-1">({pct(item.value)}%)</span>
-                </span>
-              </div>
-              <div className="w-full h-1 bg-[#F4EFEA] rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${pct(item.value)}%`, backgroundColor: item.color }}
+        {/* Clean Hairline Rows */}
+        <div className="divide-y divide-[#EAEAEA] border-t border-[#EAEAEA]">
+          {segments.map((seg) => (
+            <div key={seg.label} className="py-2.5 flex items-center justify-between text-xs">
+              <span className="inline-flex items-center gap-2 text-[#2F3437]">
+                <span
+                  className="w-2 h-2 rounded-[2px] shrink-0"
+                  style={{ backgroundColor: seg.color }}
                 />
-              </div>
+                <span>{seg.label}</span>
+              </span>
+              <span className="font-mono tabular-nums text-[#111111]">
+                {mask(seg.value)}
+                <span className="text-[#787774] ml-1.5 text-[11px]">{pct(seg.value)}%</span>
+              </span>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* CARD 2: Monthly Cash Flow Waterfall */}
-      <div className="bg-white border border-[#E2DBD0] rounded-2xl p-4 space-y-3.5 shadow-xs">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xs font-semibold text-[#261E19] font-sans flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-[#435C4D]" />
-              <span>Monthly Cash Flow</span>
-            </h2>
-            <p className="text-[11px] text-[#8C7D73]">Post-divorce inflow vs. outflow</p>
-          </div>
+      {/* Card 2: Monthly Cash Flow & Discovery */}
+      <section className="bg-white border border-[#EAEAEA] rounded-xl p-5 space-y-5">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs font-medium text-[#111111]">Monthly Cash Flow</span>
           {hasProjection && (
             <span
-              className={`text-[11px] font-mono tabular-nums font-semibold px-2 py-0.5 rounded-full ${
+              className={`text-[10px] font-mono tabular-nums uppercase tracking-[0.04em] px-2 py-0.5 rounded-full ${
                 monthlyNet >= 0
-                  ? 'bg-[#E6ECE6] text-[#354A3E]'
-                  : 'bg-amber-50 text-amber-800 border border-amber-200'
+                  ? 'bg-[#EDF3EC] text-[#346538]'
+                  : 'bg-[#FDEBEC] text-[#9F2F2D]'
               }`}
             >
               {monthlyNet >= 0 ? '+' : ''}
-              {mask(monthlyNet)}
+              {mask(monthlyNet)}/mo
             </span>
           )}
         </div>
 
         {hasProjection ? (
-          <div className="space-y-3">
-            {/* Inflow vs Outflow Comparative Bars */}
-            <div className="space-y-2">
-              <div className="space-y-1">
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-[#5C4E43]">Projected Inflow</span>
-                  <span className="font-mono tabular-nums font-medium text-[#261E19]">
-                    {mask(monthlyInflow)}/mo
-                  </span>
-                </div>
-                <div className="w-full h-2.5 bg-[#F4EFEA] rounded-full overflow-hidden flex">
-                  <div
-                    className="h-full bg-[#435C4D] transition-all duration-500"
-                    style={{
-                      width: `${
-                        monthlyInflow > 0 ? Math.round((earnedNet / maxFlow) * 100) : 0
-                      }%`
-                    }}
-                    title="Earned Net Income"
-                  />
-                  <div
-                    className="h-full bg-[#839E8D] transition-all duration-500"
-                    style={{
-                      width: `${
-                        monthlyInflow > 0
-                          ? Math.max(0, inflowPct - Math.round((earnedNet / maxFlow) * 100))
-                          : 0
-                      }%`
-                    }}
-                    title="Estimated Support"
-                  />
-                </div>
-                <div className="flex items-center justify-between text-[10px] text-[#8C7D73]">
-                  <span>Earned: {mask(earnedNet)}</span>
-                  <span>Support: {mask(spousalMid + childMid)}</span>
-                </div>
+          <div className="space-y-3.5">
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs">
+                <span className="text-[#787774]">Inflow</span>
+                <span className="font-mono tabular-nums text-[#111111]">
+                  {mask(monthlyInflow)}
+                </span>
               </div>
-
-              <div className="space-y-1">
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-[#5C4E43]">Est. Outflow</span>
-                  <span className="font-mono tabular-nums font-medium text-[#261E19]">
-                    {mask(monthlyOutflow)}/mo
-                  </span>
-                </div>
-                <div className="w-full h-2.5 bg-[#F4EFEA] rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      monthlyOutflow > monthlyInflow ? 'bg-amber-600' : 'bg-[#A07E5F]'
-                    }`}
-                    style={{ width: `${outflowPct}%` }}
-                  />
-                </div>
+              <div className="w-full h-1.5 bg-[#F7F6F3] rounded-sm overflow-hidden">
+                <div
+                  className="h-full bg-[#346538] transition-all duration-500"
+                  style={{ width: `${inflowWidth}%` }}
+                />
               </div>
             </div>
 
-            {/* Housing-to-Income Ratio Meter */}
-            {housingRatio > 0 && (
-              <div className="pt-2.5 border-t border-[#F0EAE1] flex items-center justify-between text-[11px]">
-                <span className="text-[#5C4E43] flex items-center gap-1">
-                  {housingRatio > 40 && <AlertTriangle className="w-3 h-3 text-amber-600" />}
-                  <span>Housing Load</span>
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs">
+                <span className="text-[#787774]">Outflow</span>
+                <span className="font-mono tabular-nums text-[#111111]">
+                  {mask(monthlyOutflow)}
                 </span>
+              </div>
+              <div className="w-full h-1.5 bg-[#F7F6F3] rounded-sm overflow-hidden">
+                <div
+                  className="h-full bg-[#2F3437] transition-all duration-500"
+                  style={{ width: `${outflowWidth}%` }}
+                />
+              </div>
+            </div>
+
+            {housingRatio > 0 && (
+              <div className="pt-2 border-t border-[#EAEAEA] flex items-center justify-between text-[11px]">
+                <span className="text-[#787774]">Housing load</span>
                 <span
-                  className={`font-mono tabular-nums font-semibold ${
-                    housingRatio > 40 ? 'text-amber-700' : 'text-[#435C4D]'
+                  className={`font-mono tabular-nums ${
+                    housingRatio > 40 ? 'text-[#9F2F2D] font-medium' : 'text-[#2F3437]'
                   }`}
                 >
                   {housingRatio}% of income
@@ -369,82 +235,61 @@ export default function FinancialInfographicSidebar({
             )}
           </div>
         ) : (
-          <div className="p-3 rounded-xl bg-[#FAF7F2] border border-[#E2DBD0] space-y-2">
-            <p className="text-[11px] text-[#5C4E43] leading-relaxed">
-              Add income &amp; living estimates to unlock your post-divorce monthly cash flow meter.
+          <div className="space-y-2.5">
+            <p className="text-xs text-[#787774] leading-[1.6]">
+              Add income &amp; living estimates to preview your post-divorce monthly balance.
             </p>
             <Link
               to="/discovery#projection-engine"
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#435C4D] hover:underline"
+              className="inline-block text-xs font-medium text-[#111111] underline underline-offset-4 decoration-[#EAEAEA] hover:decoration-[#111111] transition-colors"
             >
-              <span>Complete 2-min estimate</span>
-              <ChevronRight className="w-3 h-3" />
+              Add estimates →
             </Link>
           </div>
         )}
-      </div>
 
-      {/* CARD 3: 7-Category Discovery Coverage */}
-      <div className="bg-white border border-[#E2DBD0] rounded-2xl p-4 space-y-3 shadow-xs">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold text-[#261E19] font-sans flex items-center gap-1.5">
-            <FileCheck2 className="w-3.5 h-3.5 text-[#435C4D]" />
-            <span>Discovery Coverage</span>
-          </h2>
-          <span className="text-[11px] font-mono tabular-nums font-semibold text-[#435C4D]">
-            {coveredCount}/7
-          </span>
-        </div>
+        {/* Discovery Coverage Strip */}
+        <div className="pt-4 border-t border-[#EAEAEA] space-y-2.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-[#787774]">Discovery Files</span>
+            <span className="font-mono tabular-nums text-[#111111]">
+              {coveredCount} / 7
+            </span>
+          </div>
 
-        {/* 7-Segment Infographic Bar */}
-        <div className="grid grid-cols-7 gap-1" role="img" aria-label={`${coveredCount} of 7 discovery categories covered`}>
-          {checklist.map((item) => {
-            const bg =
-              item.status === 'Reviewed'
-                ? 'bg-[#435C4D]'
-                : item.status === 'Uploaded'
-                ? 'bg-[#839E8D]'
-                : 'bg-[#E2DBD0]';
-            return (
+          <div
+            className="grid grid-cols-7 gap-1"
+            role="img"
+            aria-label={`${coveredCount} of 7 discovery categories covered`}
+          >
+            {checklist.map((item) => (
               <div
                 key={item.key}
                 title={`${item.title}: ${item.status}`}
-                className={`h-2 rounded-full ${bg} transition-colors`}
+                className={`h-1.5 rounded-[2px] transition-colors ${
+                  item.status === 'Reviewed'
+                    ? 'bg-[#346538]'
+                    : item.status === 'Uploaded'
+                    ? 'bg-[#94B097]'
+                    : 'bg-[#EAEAEA]'
+                }`}
               />
-            );
-          })}
-        </div>
+            ))}
+          </div>
 
-        <div className="flex items-center justify-between text-[10px] text-[#5C4E43]">
-          <span className="inline-flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#435C4D]" />
-            {reviewedCount} Verified
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#839E8D]" />
-            {uploadedCount} Uploaded
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#E2DBD0]" />
-            {missingCount} Missing
-          </span>
-        </div>
-
-        {flaggedLeadsCount > 0 && (
-          <Link
-            to="/discovery"
-            className="flex items-center justify-between px-3 py-2 rounded-xl bg-amber-50/80 border border-amber-200/80 text-[11px] text-amber-900 hover:bg-amber-50 transition"
-          >
-            <span className="inline-flex items-center gap-1.5 font-medium">
-              <ShieldAlert className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+          {flaggedLeadsCount > 0 && (
+            <Link
+              to="/discovery"
+              className="mt-1 flex items-center justify-between px-2.5 py-1.5 rounded-md bg-[#FBF3DB] text-[#956400] text-[11px] font-medium"
+            >
               <span>
-                {flaggedLeadsCount} unlisted lead{flaggedLeadsCount > 1 ? 's' : ''}
+                {flaggedLeadsCount} unlisted lead{flaggedLeadsCount > 1 ? 's' : ''} flagged
               </span>
-            </span>
-            <ChevronRight className="w-3.5 h-3.5 text-amber-700" />
-          </Link>
-        )}
-      </div>
+              <span>→</span>
+            </Link>
+          )}
+        </div>
+      </section>
     </aside>
   );
 }
