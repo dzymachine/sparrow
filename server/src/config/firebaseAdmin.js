@@ -50,27 +50,36 @@ try {
   const hasADC = Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 
   if (serviceAccount || hasADC) {
+    const { initializeApp, cert, getApps, applicationDefault } = require('firebase-admin/app');
+    const { getFirestore } = require('firebase-admin/firestore');
+    const { getStorage } = require('firebase-admin/storage');
     const adminSdk = require('firebase-admin');
+
     const storageBucket =
       process.env.FIREBASE_STORAGE_BUCKET ||
       (serviceAccount?.project_id ? `${serviceAccount.project_id}.firebasestorage.app` : undefined);
 
-    if (adminSdk.apps.length === 0) {
+    const apps = getApps();
+    let app = null;
+
+    if (apps.length === 0) {
       const options = serviceAccount
-        ? { credential: adminSdk.credential.cert(serviceAccount) }
-        : { credential: adminSdk.credential.applicationDefault() };
+        ? { credential: cert(serviceAccount) }
+        : { credential: applicationDefault() };
 
       if (storageBucket) {
         options.storageBucket = storageBucket;
       }
-      adminSdk.initializeApp(options);
+      app = initializeApp(options);
+    } else {
+      app = apps[0];
     }
 
     admin = adminSdk;
-    db = adminSdk.firestore();
+    db = getFirestore(app);
     if (storageBucket) {
       try {
-        bucket = adminSdk.storage().bucket(storageBucket);
+        bucket = getStorage(app).bucket(storageBucket);
       } catch (e) {
         console.warn('[Firebase Admin] Storage bucket init skipped:', e.message);
       }
