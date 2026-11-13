@@ -4,11 +4,25 @@
 
 @layer base {
   body {
-    @apply text-slate-800 bg-[#FAF9F6];
+    @apply text-[#5C4E43] bg-[#F8F6F2] font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-[#261E19] font-medium tracking-tight;
+  }
+
+  .font-mono, [data-mono="true"], .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
 /* Custom smooth transitions */
 .transition-smooth {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hairline card utility */
+.card-hairline {
+  @apply bg-white border border-[#E2DBD0] rounded-xl shadow-none;
 }
