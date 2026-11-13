@@ -2,8 +2,11 @@
 try {
   require('tsx/cjs');
   const serverModule = require('./server.ts');
-  module.exports = serverModule.default || serverModule;
+  const app = serverModule.default || serverModule;
+  if (serverModule.startServer && require.main === module) {
+    serverModule.startServer();
+  }
+  module.exports = app;
 } catch (e) {
-  console.log('[Server Entrypoint] Starting via tsx server.ts');
-  require('child_process').spawn('npx', ['tsx', require('path').join(__dirname, 'server.ts')], { stdio: 'inherit' });
+  console.log('[Server Entrypoint] Starting via tsx server.ts', e);
 }

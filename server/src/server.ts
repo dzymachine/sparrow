@@ -670,14 +670,18 @@ app.use((err: any, _req: Request, res: Response, next: NextFunction): any => {
   next(err);
 });
 
-if (require.main === module) {
-  app.listen(PORT, () => {
+export function startServer(port: number | string = PORT) {
+  return app.listen(port, () => {
     console.log(`===============================================`);
-    console.log(` Foothold Server running on port ${PORT}`);
+    console.log(` Foothold Server running on port ${port}`);
     console.log(` Gemini Discovery Engine: gemini-4-hydrogen`);
-    console.log(` Health check: http://localhost:${PORT}/api/health`);
+    console.log(` Health check: http://localhost:${port}/api/health`);
     console.log(`===============================================`);
   });
+}
+
+if (require.main === module) {
+  startServer();
 }
 
 export default app;

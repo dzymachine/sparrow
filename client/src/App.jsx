@@ -12,7 +12,7 @@ import RuthBuddyWidget from './components/RuthBuddyWidget';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import OnboardingPage from './pages/OnboardingPage';
-import DashboardPage from './pages/DashboardPage';
+import DashboardPage from './pages/DashboardPage.tsx';
 
 export default function App() {
   return (
