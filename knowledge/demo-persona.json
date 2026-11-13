@@ -1,0 +1,26 @@
+{
+  "_note": "FAKE demo persona. Use fake documents on stage. Never upload real documents in a demo.",
+  "name": "Maria",
+  "age": 44,
+  "background": "Left her career 12 years ago to raise two children.",
+  "profile": {
+    "income_self": 0,
+    "income_spouse": 15000,
+    "has_children": true,
+    "years_married": 16,
+    "has_access_to_accounts": false,
+    "owns_home": true,
+    "case_filed": false,
+    "stage": "preparing"
+  },
+  "fake_documents_to_create": [
+    "2024 joint tax return showing interest income from an account not otherwise listed",
+    "Spouse W-2 showing 401(k) contributions, with no matching retirement statement",
+    "One checking account statement",
+    "Mortgage statement"
+  ],
+  "planted_gaps_for_demo": [
+    "Interest income on the tax return suggests an account that is not in the uploaded statements",
+    "401(k) contributions on the W-2 suggest a retirement account that was not provided"
+  ]
+}

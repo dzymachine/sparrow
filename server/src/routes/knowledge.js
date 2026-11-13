@@ -24,6 +24,41 @@ router.get('/search', (req, res) => {
   });
 });
 
+// GET deterministic rules
+router.get('/rules', (req, res) => {
+  const rules = knowledgeStore.getRules();
+  return res.json({ success: true, ...rules });
+});
+
+// POST evaluate deterministic rules against user profile
+router.post('/rules/evaluate', (req, res) => {
+  const profile = req.body || {};
+  const matchedCards = knowledgeStore.evaluateRules(profile);
+  return res.json({
+    success: true,
+    count: matchedCards.length,
+    cards: matchedCards
+  });
+});
+
+// GET demo persona
+router.get('/persona', (req, res) => {
+  const persona = knowledgeStore.getDemoPersona();
+  return res.json({ success: true, persona });
+});
+
+// GET agent guidelines
+router.get('/guidelines', (req, res) => {
+  const guidelines = knowledgeStore.getAgentGuidelines();
+  return res.json({ success: true, guidelines });
+});
+
+// GET sources catalog
+router.get('/sources', (req, res) => {
+  const sources = knowledgeStore.getSources();
+  return res.json({ success: true, sources });
+});
+
 // GET specific knowledge article by slug
 router.get('/article/:slug', (req, res) => {
   const { slug } = req.params;
