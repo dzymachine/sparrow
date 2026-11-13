@@ -24,12 +24,6 @@ export default function AuthPage() {
     setIsSignUp(searchParams.get('mode') === 'signup');
   }, [searchParams]);
 
-  useEffect(() => {
-    if (currentUser && !submitted) {
-      navigate('/dashboard');
-    }
-  }, [currentUser, submitted, navigate]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

@@ -10,9 +10,7 @@ import {
   ChevronDown,
   Feather,
   AlertOctagon,
-  User,
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 import { useSmoothNavigate } from '../context/TransitionContext';
 import {
   VideoBackground,
@@ -22,11 +20,10 @@ import {
 } from '../components/LandingEffects';
 
 export default function LandingPage() {
-  const { currentUser } = useAuth();
   const smoothNavigate = useSmoothNavigate();
 
   const handleEnterPlatform = () => {
-    smoothNavigate(currentUser ? '/dashboard' : '/auth?mode=signup');
+    smoothNavigate('/auth?mode=login');
   };
 
   const handleSmoothLink = (e, to) => {
@@ -77,33 +74,20 @@ export default function LandingPage() {
               <span>Safe Exit</span>
             </button>
 
-            {currentUser ? (
-              <Link
-                to="/dashboard"
-                onClick={(e) => handleSmoothLink(e, '/dashboard')}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-lg transition"
-              >
-                <User className="w-3.5 h-3.5 text-amber-200" />
-                <span>Dashboard</span>
-              </Link>
-            ) : (
-              <>
-                <Link
-                  to="/auth?mode=login"
-                  onClick={(e) => handleSmoothLink(e, '/auth?mode=login')}
-                  className="text-xs font-medium text-stone-100 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/15 px-3 py-1.5 rounded-lg transition"
-                >
-                  Log in
-                </Link>
-                <Link
-                  to="/auth?mode=signup"
-                  onClick={(e) => handleSmoothLink(e, '/auth?mode=signup')}
-                  className="text-xs font-semibold text-[#1C1512] bg-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded-lg shadow-md transition"
-                >
-                  Sign up
-                </Link>
-              </>
-            )}
+            <Link
+              to="/auth?mode=login"
+              onClick={(e) => handleSmoothLink(e, '/auth?mode=login')}
+              className="text-xs font-medium text-stone-100 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/15 px-3 py-1.5 rounded-lg transition"
+            >
+              Log in
+            </Link>
+            <Link
+              to="/auth?mode=signup"
+              onClick={(e) => handleSmoothLink(e, '/auth?mode=signup')}
+              className="text-xs font-semibold text-[#1C1512] bg-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded-lg shadow-md transition"
+            >
+              Sign up
+            </Link>
           </div>
         </div>
       </header>
