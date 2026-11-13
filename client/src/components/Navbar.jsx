@@ -90,14 +90,6 @@ export default function Navbar() {
             >
               Consult a Pro
             </Link>
-            {currentUser && (
-              <Link
-                to="/settings"
-                className={`hover:text-[#1c1c19] transition ${location.pathname === '/settings' ? 'text-[#384631] font-semibold' : ''}`}
-              >
-                Settings
-              </Link>
-            )}
           </nav>
 
           {/* User actions & Reset Workspace */}
