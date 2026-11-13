@@ -1,0 +1,1056 @@
+<!DOCTYPE html><html lang="en"><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Daily Reflections &amp; Weather</title><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;background-color:#f8f6f0;}body{overscroll-behavior:none;font-family:'Inter',sans-serif;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}
+.font-editorial-heading {
+  font-family: "Newsreader", Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+/* 3. CINEMATIC SWIMMING BACKGROUND (TERRACOTTA WITH HINTS OF PINK) - 5 Fluid Moving Blobs */
+@keyframes swimBlob1 {
+  0%   { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+  25%  { transform: translate(90px, -60px) scale(1.18) rotate(15deg); }
+  50%  { transform: translate(40px, 80px) scale(0.92) rotate(-10deg); }
+  75%  { transform: translate(-70px, 30px) scale(1.12) rotate(20deg); }
+  100% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+}
+
+@keyframes swimBlob2 {
+  0%   { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+  30%  { transform: translate(-100px, 70px) scale(1.22) rotate(-25deg); }
+  60%  { transform: translate(80px, -50px) scale(0.85) rotate(15deg); }
+  85%  { transform: translate(-40px, -40px) scale(1.08) rotate(-10deg); }
+  100% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+}
+
+@keyframes swimBlob3 {
+  0%   { transform: translate(0px, 0px) scale(0.95) rotate(0deg); }
+  35%  { transform: translate(70px, 90px) scale(1.2) rotate(30deg); }
+  70%  { transform: translate(-80px, -50px) scale(1.05) rotate(-15deg); }
+  100% { transform: translate(0px, 0px) scale(0.95) rotate(0deg); }
+}
+
+@keyframes swimBlob4 {
+  0%   { transform: translate(0px, 0px) scale(1.05) rotate(0deg); }
+  30%  { transform: translate(-60px, -70px) scale(1.25) rotate(-20deg); }
+  70%  { transform: translate(90px, 60px) scale(0.9) rotate(25deg); }
+  100% { transform: translate(0px, 0px) scale(1.05) rotate(0deg); }
+}
+
+@keyframes swimBlob5 {
+  0%   { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+  40%  { transform: translate(80px, -60px) scale(1.15) rotate(18deg); }
+  80%  { transform: translate(-60px, 70px) scale(0.95) rotate(-12deg); }
+  100% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+}
+
+.blob-terracotta-1 {
+  animation: swimBlob1 18s ease-in-out infinite;
+  will-change: transform;
+}
+.blob-pink-2 {
+  animation: swimBlob2 22s ease-in-out infinite;
+  will-change: transform;
+}
+.blob-terracotta-3 {
+  animation: swimBlob3 20s ease-in-out infinite;
+  will-change: transform;
+}
+.blob-pink-4 {
+  animation: swimBlob4 24s ease-in-out infinite;
+  will-change: transform;
+}
+.blob-warm-5 {
+  animation: swimBlob5 19s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* 1. BEGIN WITH STEP ONE BUTTON: Unmistakable, lively, continuous breathing / expanding & shrinking animation (scale 1.0 to 1.08, 2.5s duration) with intense vibrant glowing box-shadow */
+@keyframes stepOneBreathe {
+  0%, 100% {
+    transform: scale(1.0);
+    box-shadow: 
+      0 0 25px rgba(200, 109, 81, 0.75),
+      0 0 45px rgba(107, 142, 92, 0.65),
+      0 0 65px rgba(200, 109, 81, 0.45),
+      0 6px 20px rgba(56, 70, 49, 0.35);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 
+      0 0 35px rgba(200, 109, 81, 0.95),
+      0 0 60px rgba(107, 142, 92, 0.85),
+      0 0 85px rgba(200, 109, 81, 0.65),
+      0 10px 30px rgba(56, 70, 49, 0.45);
+  }
+}
+
+.btn-step-one-breathing {
+  animation: stepOneBreathe 2.5s ease-in-out infinite !important;
+  will-change: transform, box-shadow;
+  transition: filter 0.3s ease;
+}
+.btn-step-one-breathing:hover {
+  filter: brightness(1.08) drop-shadow(0 0 20px rgba(200, 109, 81, 0.9));
+}
+
+/* 2. CHANGING WORD IN TAGLINE: Soft rhythmic pulse and glowing aura */
+@keyframes rotatingWordPulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    text-shadow: 
+      0 0 25px rgba(184, 107, 82, 0.6),
+      0 0 40px rgba(107, 142, 92, 0.5);
+  }
+  50% {
+    transform: scale(1.05);
+    text-shadow: 
+      0 0 32px rgba(184, 107, 82, 0.85),
+      0 0 52px rgba(107, 142, 92, 0.7),
+      0 0 70px rgba(200, 109, 81, 0.4);
+  }
+}
+
+.changing-word-pulse {
+  animation: rotatingWordPulseGlow 2.5s ease-in-out infinite;
+  display: inline-block;
+  will-change: transform, text-shadow;
+}
+
+/* 4. GROWING VINES ON SCROLL */
+.vine-path {
+  stroke-dasharray: 2400;
+  stroke-dashoffset: 2400;
+  transition: stroke-dashoffset 0.15s ease-out;
+}
+.vine-leaf {
+  opacity: 0.15;
+  transform-origin: center;
+  transform: scale(0.35);
+  transition: opacity 0.35s ease-out, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.vine-leaf.leaf-grown {
+  opacity: 0.92;
+  transform: scale(1);
+}
+
+/* 5. SPARROW GLIDE ANIMATION */
+@keyframes gentleGlide {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-7px) rotate(-1.5deg); }
+}
+@keyframes wingFlap {
+  0%, 100% { transform: scaleY(1) rotate(0deg); }
+  50% { transform: scaleY(0.75) rotate(-4deg); }
+}
+.sparrow-body-bob {
+  animation: gentleGlide 3.6s ease-in-out infinite;
+}
+.sparrow-wing-movement {
+  transform-origin: 32px 34px;
+  animation: wingFlap 1.8s ease-in-out infinite;
+}
+
+/* Scroll reveal animations */
+.reveal-module {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal-module.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob-terracotta-1, .blob-pink-2, .blob-terracotta-3, .blob-pink-4, .blob-warm-5,
+  .btn-step-one-breathing, .changing-word-pulse,
+  .sparrow-body-bob, .sparrow-wing-movement {
+    animation: none !important;
+  }
+  .reveal-module {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .vine-path {
+    stroke-dashoffset: 0 !important;
+  }
+  .vine-leaf {
+    opacity: 0.9 !important;
+    transform: scale(1) !important;
+  }
+}
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-primary-fixed":"#121f0d","on-surface-variant":"#444841","surface-dim":"#dcdad5","primary-container":"#4f5e47","on-tertiary-fixed":"#2b1702","on-secondary":"#ffffff","secondary-fixed-dim":"#bbccaa","surface-container-high":"#ebe8e3","primary-fixed":"#d7e8ca","tertiary-container":"#715438","on-error-container":"#93000a","on-error":"#ffffff","on-tertiary-fixed-variant":"#5c4127","on-primary-container":"#c6d6ba","primary-fixed-dim":"#bbccaf","inverse-on-surface":"#f3f0eb","on-secondary-container":"#5a694d","on-secondary-fixed-variant":"#3d4b31","primary":"#384631","error":"#ba1a1a","tertiary":"#583d23","secondary":"#546347","surface":"#f8f6f0","background":"#f8f6f0","surface-container":"#e6ece2","surface-container-low":"#eff4ec","surface-container-lowest":"#ffffff","surface-container-highest":"#dfe6da","on-surface":"#1c1c19","on-primary":"#ffffff","outline":"#757870","outline-variant":"#c5c8be"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"space-sm":"0.75rem","gutter-mobile":"1rem","margin":"3rem","space-xs":"0.375rem","gutter":"1.5rem","space-md":"1.25rem","space-xl":"3.5rem","space-lg":"2rem","margin-mobile":"1.25rem"},fontFamily:{"body-md":["Inter"],"quote-lg":["Newsreader","Georgia","serif"],"headline-lg":["Newsreader","Georgia","serif"],"label-lg":["Inter"],"headline-lg-mobile":["Newsreader","Georgia","serif"],"headline-sm":["Newsreader","Georgia","serif"],"body-sm":["Inter"],"body-lg":["Inter"],"label-sm":["Inter"],"headline-xl":["Newsreader","Georgia","serif"],"headline-md":["Newsreader","Georgia","serif"],"headline-xl-mobile":["Newsreader","Georgia","serif"],"label-md":["Inter"],"body-xl":["Inter"]},fontSize:{"body-md":["16px",{"lineHeight":"26px","fontWeight":"400"}],"quote-lg":["24px",{"lineHeight":"38px","letterSpacing":"0.01em","fontWeight":"400"}],"headline-lg":["36px",{"lineHeight":"44px","letterSpacing":"-0.015em","fontWeight":"400"}],"label-lg":["15px",{"lineHeight":"20px","letterSpacing":"0.02em","fontWeight":"600"}],"headline-lg-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.01em","fontWeight":"400"}],"headline-sm":["22px",{"lineHeight":"30px","fontWeight":"500"}],"body-sm":["14px",{"lineHeight":"22px","fontWeight":"400"}],"body-lg":["18px",{"lineHeight":"30px","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"600"}],"headline-xl":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"400"}],"headline-md":["26px",{"lineHeight":"34px","fontWeight":"400"}],"headline-xl-mobile":["34px",{"lineHeight":"42px","letterSpacing":"-0.01em","fontWeight":"400"}],"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0.03em","fontWeight":"500"}],"body-xl":["20px",{"lineHeight":"32px","fontWeight":"400"}]}}}}</script><script>function safeExit(){window.location.replace('https://weather.com');}window.addEventListener('keydown',function(e){if(e.key==='Escape'){safeExit();}});</script><style id="calm-step-one-animation">@keyframes activeStepPulse { 0% { transform: scale(0.96); box-shadow: 0 0 25px rgba(224, 112, 82, 0.8), 0 0 45px rgba(200, 109, 81, 0.6); } 50% { transform: scale(1.12); box-shadow: 0 0 45px rgba(224, 112, 82, 1), 0 0 85px rgba(200, 109, 81, 0.9), 0 0 120px rgba(236, 161, 148, 0.75); } 100% { transform: scale(1.06); box-shadow: 0 0 35px rgba(224, 112, 82, 0.9), 0 0 70px rgba(200, 109, 81, 0.75); } } .btn-step-one-breathing { animation: stepOneBreathe 2.5s ease-in-out infinite !important; transform: scale(1); box-shadow: 0 0 25px rgba(200, 109, 81, 0.75), 0 0 45px rgba(107, 142, 92, 0.65), 0 0 65px rgba(200, 109, 81, 0.45), 0 6px 20px rgba(56, 70, 49, 0.35); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, filter 0.2s ease !important; } .btn-step-one-breathing:hover { transform: scale(1.05) !important; box-shadow: 0 0 35px rgba(200, 109, 81, 0.9), 0 0 60px rgba(107, 142, 92, 0.75), 0 0 85px rgba(200, 109, 81, 0.6) !important; filter: brightness(1.06) !important; } .btn-step-one-breathing:active { animation: activeStepPulse 0.45s ease-in-out infinite alternate !important; transform: scale(1.10) !important; box-shadow: 0 0 40px rgba(224, 112, 82, 0.95), 0 0 80px rgba(200, 109, 81, 0.8), 0 0 110px rgba(236, 161, 148, 0.7) !important; filter: brightness(1.15) !important; }</style><style id="terracotta-swimming-pools">@keyframes swimPool1 { 0% { transform: translate(0px, 0px) scale(1) rotate(0deg); } 33% { transform: translate(65px, 45px) scale(1.14) rotate(12deg); } 66% { transform: translate(-45px, 75px) scale(0.92) rotate(-8deg); } 100% { transform: translate(40px, -35px) scale(1.08) rotate(15deg); } } @keyframes swimPool2 { 0% { transform: translate(0px, 0px) scale(1) rotate(0deg); } 30% { transform: translate(-70px, -45px) scale(1.18) rotate(-14deg); } 65% { transform: translate(60px, 50px) scale(0.88) rotate(10deg); } 100% { transform: translate(-40px, 30px) scale(1.1) rotate(-8deg); } } @keyframes swimPool3 { 0% { transform: translate(0px, 0px) scale(0.95) rotate(0deg); } 35% { transform: translate(-60px, 60px) scale(1.16) rotate(16deg); } 70% { transform: translate(50px, -50px) scale(0.92) rotate(-12deg); } 100% { transform: translate(-30px, -30px) scale(1.06) rotate(6deg); } } @keyframes swimPool4 { 0% { transform: translate(0px, 0px) scale(1.05) rotate(0deg); } 28% { transform: translate(55px, -60px) scale(1.2) rotate(-18deg); } 68% { transform: translate(-45px, 45px) scale(0.88) rotate(14deg); } 100% { transform: translate(40px, 65px) scale(1.12) rotate(-10deg); } } @keyframes swimPool5 { 0% { transform: translate(0px, 0px) scale(1) rotate(0deg); } 32% { transform: translate(-75px, 40px) scale(1.15) rotate(14deg); } 68% { transform: translate(45px, -55px) scale(0.9) rotate(-10deg); } 100% { transform: translate(-30px, -40px) scale(1.08) rotate(8deg); } } @keyframes swimPool6 { 0% { transform: translate(0px, 0px) scale(0.96) rotate(0deg); } 30% { transform: translate(60px, -50px) scale(1.16) rotate(-12deg); } 70% { transform: translate(-50px, 60px) scale(0.86) rotate(15deg); } 100% { transform: translate(35px, 35px) scale(1.08) rotate(-6deg); } } @keyframes swimPool7 { 0% { transform: translate(0px, 0px) scale(1.04) rotate(0deg); } 35% { transform: translate(-65px, -45px) scale(1.18) rotate(16deg); } 65% { transform: translate(55px, 50px) scale(0.9) rotate(-14deg); } 100% { transform: translate(-40px, 30px) scale(1.08) rotate(10deg); } } @keyframes swimPool8 { 0% { transform: translate(0px, 0px) scale(1) rotate(0deg); } 30% { transform: translate(50px, 55px) scale(1.22) rotate(-15deg); } 65% { transform: translate(-60px, -40px) scale(0.88) rotate(12deg); } 100% { transform: translate(35px, -50px) scale(1.1) rotate(-8deg); } } .pool-terracotta-1 { animation: swimPool1 17s ease-in-out infinite alternate; will-change: transform; } .pool-terracotta-2 { animation: swimPool2 19s ease-in-out infinite alternate; will-change: transform; } .pool-terracotta-3 { animation: swimPool3 21s ease-in-out infinite alternate; will-change: transform; } .pool-terracotta-4 { animation: swimPool4 18s ease-in-out infinite alternate; will-change: transform; } .pool-terracotta-5 { animation: swimPool5 22s ease-in-out infinite alternate; will-change: transform; } .pool-terracotta-6 { animation: swimPool6 16s ease-in-out infinite alternate; will-change: transform; } .pool-terracotta-7 { animation: swimPool7 20s ease-in-out infinite alternate; will-change: transform; } .pool-terracotta-8 { animation: swimPool8 15s ease-in-out infinite alternate; will-change: transform; } @media (prefers-reduced-motion: reduce) { .pool-terracotta-1, .pool-terracotta-2, .pool-terracotta-3, .pool-terracotta-4, .pool-terracotta-5, .pool-terracotta-6, .pool-terracotta-7, .pool-terracotta-8 { animation: none !important; } }</style></head><body class="bg-[#f8f6f0] font-body-md text-on-surface antialiased relative selection:bg-[#d9b3ac]/45 selection:text-[#1d2a18]"><div id="page-wide-terracotta-pools" class="absolute inset-0 pointer-events-none overflow-hidden z-0 w-full h-full"><div class="pool-terracotta-1 absolute top-[5%] -left-12 w-[380px] h-[380px] rounded-full blur-[75px] opacity-35" style="background: radial-gradient(circle, rgb(200, 109, 81) 0%, rgb(184, 88, 59) 50%, rgb(160, 126, 95) 70%, transparent 80%);"></div><div class="pool-terracotta-2 absolute top-[8%] right-[-5%] w-[420px] h-[380px] rounded-full blur-[80px] opacity-30" style="background: radial-gradient(circle, rgb(217, 136, 110) 0%, rgb(200, 109, 81) 55%, transparent 75%);"></div><div class="pool-terracotta-4 absolute top-[22%] left-[12%] w-[380px] h-[380px] rounded-full blur-[80px] opacity-30" style="background: radial-gradient(circle, rgb(200, 109, 81) 0%, rgb(160, 126, 95) 60%, transparent 80%);"></div><div class="pool-terracotta-3 absolute top-[28%] right-[8%] w-[400px] h-[360px] rounded-full blur-[75px] opacity-35" style="background: radial-gradient(circle, rgb(184, 88, 59) 0%, rgb(160, 126, 95) 55%, transparent 75%);"></div><div class="pool-terracotta-5 absolute top-[40%] -left-16 w-[420px] h-[380px] rounded-full blur-[80px] opacity-35" style="background: radial-gradient(circle, rgb(217, 136, 110) 0%, rgb(184, 88, 59) 55%, transparent 75%);"></div><div class="pool-terracotta-6 absolute top-[48%] right-[10%] w-[400px] h-[400px] rounded-full blur-[75px] opacity-30" style="background: radial-gradient(circle, rgb(200, 109, 81) 0%, rgb(160, 126, 95) 60%, transparent 75%);"></div><div class="pool-terracotta-7 absolute top-[58%] left-[15%] w-[420px] h-[380px] rounded-full blur-[80px] opacity-35" style="background: radial-gradient(circle, rgb(184, 88, 59) 0%, rgb(200, 109, 81) 50%, transparent 75%);"></div><div class="pool-terracotta-8 absolute top-[66%] -right-12 w-[390px] h-[390px] rounded-full blur-[75px] opacity-30" style="background: radial-gradient(circle, rgb(160, 126, 95) 0%, rgb(200, 109, 81) 55%, transparent 75%);"></div><div class="pool-terracotta-1 absolute top-[75%] left-[8%] w-[410px] h-[410px] rounded-full blur-[80px] opacity-35" style="background: radial-gradient(circle, rgb(200, 109, 81) 0%, rgb(184, 88, 59) 50%, rgb(160, 126, 95) 70%, transparent 80%);"></div><div class="pool-terracotta-2 absolute top-[84%] right-[12%] w-[400px] h-[380px] rounded-full blur-[75px] opacity-30" style="background: radial-gradient(circle, rgb(217, 136, 110) 0%, rgb(200, 109, 81) 55%, transparent 75%);"></div><div class="pool-terracotta-5 absolute top-[92%] left-[20%] w-[420px] h-[400px] rounded-full blur-[80px] opacity-35" style="background: radial-gradient(circle, rgb(200, 109, 81) 0%, rgb(160, 126, 95) 60%, transparent 80%);"></div><div class="pool-terracotta-4 absolute top-[97%] right-[5%] w-[380px] h-[380px] rounded-full blur-[75px] opacity-30" style="background: radial-gradient(circle, rgb(184, 88, 59) 0%, rgb(200, 109, 81) 50%, transparent 75%);"></div></div>
+<!-- 4. GROWING VINES ON SCROLL: Left and Right Margins with organic sage/green tones -->
+<aside aria-hidden="true" class="fixed top-0 left-0 h-full w-14 sm:w-20 pointer-events-none z-30 opacity-85 overflow-hidden">
+<svg class="h-full w-full" preserveAspectRatio="none" viewBox="0 0 80 1200">
+<defs>
+<linearGradient id="leftVineGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#546347" stop-opacity="0.95"></stop>
+<stop offset="45%" stop-color="#738760" stop-opacity="0.9"></stop>
+<stop offset="75%" stop-color="#A07E5F" stop-opacity="0.85"></stop>
+<stop offset="100%" stop-color="#384631" stop-opacity="0.95"></stop>
+</linearGradient>
+</defs>
+<path class="vine-path" d="M 14 0 Q 42 160, 18 320 T 44 640 T 16 940 T 38 1200" fill="none" id="left-vine-stem" stroke="url(#leftVineGrad)" stroke-linecap="round" stroke-width="3" style="stroke-dashoffset: 2400;"></path>
+<g class="vine-leaves" id="left-vine-leaves">
+<path class="vine-leaf" d="M 22 120 C 36 108, 50 114, 54 130 C 42 135, 29 128, 22 120 Z" data-progress="0.06" fill="#546347"></path>
+<path class="vine-leaf" d="M 28 220 C 44 210, 56 224, 50 240 C 37 238, 30 228, 28 220 Z" data-progress="0.14" fill="#6b8e5c"></path>
+<path class="vine-leaf" d="M 16 340 C 4 328, -2 342, 2 356 C 11 354, 15 346, 16 340 Z" data-progress="0.22" fill="#384631"></path>
+<path class="vine-leaf" d="M 34 460 C 50 448, 62 463, 54 478 C 39 474, 34 466, 34 460 Z" data-progress="0.32" fill="#546347"></path>
+<path class="vine-leaf" d="M 38 580 C 54 568, 64 583, 58 600 C 45 598, 39 588, 38 580 Z" data-progress="0.44" fill="#738760"></path>
+<path class="vine-leaf" d="M 24 720 C 9 708, 4 724, 13 738 C 21 735, 24 726, 24 720 Z" data-progress="0.56" fill="#384631"></path>
+<path class="vine-leaf" d="M 18 860 C 33 848, 46 859, 42 875 C 29 874, 21 866, 18 860 Z" data-progress="0.68" fill="#546347"></path>
+<path class="vine-leaf" d="M 30 1010 C 45 998, 55 1011, 48 1026 C 36 1024, 31 1016, 30 1010 Z" data-progress="0.80" fill="#6b8e5c"></path>
+<path class="vine-leaf" d="M 36 1130 C 50 1118, 60 1131, 52 1146 C 41 1144, 35 1136, 36 1130 Z" data-progress="0.92" fill="#384631"></path>
+</g>
+</svg>
+</aside>
+<aside aria-hidden="true" class="fixed top-0 right-0 h-full w-14 sm:w-20 pointer-events-none z-30 opacity-85 overflow-hidden">
+<svg class="h-full w-full" preserveAspectRatio="none" viewBox="0 0 80 1200">
+<defs>
+<linearGradient id="rightVineGrad" x1="100%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#6b8e5c" stop-opacity="0.95"></stop>
+<stop offset="40%" stop-color="#546347" stop-opacity="0.9"></stop>
+<stop offset="75%" stop-color="#c97258" stop-opacity="0.8"></stop>
+<stop offset="100%" stop-color="#384631" stop-opacity="0.95"></stop>
+</linearGradient>
+</defs>
+<path class="vine-path" d="M 66 0 Q 38 170, 62 340 T 36 650 T 64 940 T 42 1200" fill="none" id="right-vine-stem" stroke="url(#rightVineGrad)" stroke-linecap="round" stroke-width="3" style="stroke-dashoffset: 2400;"></path>
+<g class="vine-leaves" id="right-vine-leaves">
+<path class="vine-leaf" d="M 58 140 C 43 128, 31 135, 27 150 C 40 154, 52 148, 58 140 Z" data-progress="0.08" fill="#6b8e5c"></path>
+<path class="vine-leaf" d="M 52 250 C 35 238, 25 253, 31 268 C 44 266, 50 256, 52 250 Z" data-progress="0.18" fill="#546347"></path>
+<path class="vine-leaf" d="M 64 380 C 77 368, 83 383, 79 396 C 71 395, 66 386, 64 380 Z" data-progress="0.28" fill="#738760"></path>
+<path class="vine-leaf" d="M 48 510 C 31 498, 21 513, 27 528 C 42 525, 47 516, 48 510 Z" data-progress="0.40" fill="#546347"></path>
+<path class="vine-leaf" d="M 42 660 C 27 648, 17 663, 23 678 C 36 676, 41 668, 42 660 Z" data-progress="0.52" fill="#6b8e5c"></path>
+<path class="vine-leaf" d="M 58 790 C 73 778, 77 794, 69 808 C 61 805, 59 796, 58 790 Z" data-progress="0.64" fill="#384631"></path>
+<path class="vine-leaf" d="M 62 920 C 47 908, 35 921, 39 936 C 52 935, 60 926, 62 920 Z" data-progress="0.75" fill="#546347"></path>
+<path class="vine-leaf" d="M 50 1060 C 35 1048, 25 1061, 31 1076 C 44 1074, 48 1066, 50 1060 Z" data-progress="0.86" fill="#738760"></path>
+<path class="vine-leaf" d="M 46 1160 C 31 1148, 21 1161, 29 1176 C 40 1174, 46 1166, 46 1160 Z" data-progress="0.95" fill="#6b8e5c"></path>
+</g>
+</svg>
+</aside>
+<header class="fixed top-0 w-full z-50 bg-[#f8f6f0]/90 backdrop-blur-xl border-b border-[#4F5E47]/15 shadow-[0_1px_8px_rgba(79,94,71,0.05)]"><div class="h-20 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between gap-4"><div class="flex items-center gap-3 shrink-0"><img alt="Sparrow Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFCTOpdB_3AkEMaPJAOgmJtsk87xspqGlJy8vmnTS7BYEjIfEL8j5Fw2smpq_AhJXfa2TDJYsaQeXvUfbbGyt070tcRNfNQmwGBwbMs9ApIniHucmI_48yQ2hQrI1-cJuE_wIITphTp5BvcN7CkRSJKKKSPtBluzY8lNSVm0uMmfIf9-J8HnDgJUfmxuvUhbAyQTfPIpFQkfjEmi9sZrPBIbSEkt3e_MU6bnHPOkCS"><div class="flex flex-col"><span class="font-editorial-heading font-medium text-2xl text-[#2c3b26] leading-tight tracking-tight">Sparrow</span><span class="font-label-sm text-label-sm text-on-surface-variant font-normal tracking-wide">Fly free</span></div></div><nav class="hidden lg:flex items-center gap-6" data-active-classes="bg-white/80 text-on-surface font-label-md rounded-lg shadow-sm"><a aria-current="page" class="transition-colors px-3 py-1.5 bg-white/85 text-[#2c3b26] font-label-md rounded-lg shadow-sm border border-[#4F5E47]/10" data-path="overview" href="#">Overview</a><a class="text-on-surface-variant hover:text-[#2c3b26] font-label-md text-label-md transition-colors px-3 py-1.5" data-path="how-it-works" href="#core-pillars">How It Works</a><a class="text-on-surface-variant hover:text-[#2c3b26] font-label-md text-label-md transition-colors px-3 py-1.5" data-path="flight-path" href="#flight-path-preview">Flight Path</a><a class="text-on-surface-variant hover:text-[#2c3b26] font-label-md text-label-md transition-colors px-3 py-1.5" data-path="safety-&amp;-privacy" href="#safety-guide">Safety &amp; Privacy</a><a class="text-on-surface-variant hover:text-[#2c3b26] font-label-md text-label-md transition-colors px-3 py-1.5" data-path="faq" href="#faq-section">FAQ</a></nav><div class="flex items-center gap-3 shrink-0"><button class="flex items-center gap-2 bg-white/90 hover:bg-white text-[#2c3b26] px-4 py-2 rounded-full transition-all border border-[#4F5E47]/20 shadow-sm cursor-pointer" onclick="safeExit()" title="Instantly leave to Weather.com (Press ESC)"><span class="material-symbols-outlined text-[18px]">flight_takeoff</span><span class="font-label-md text-label-md whitespace-nowrap">Leave Site <span class="hidden sm:inline opacity-70 font-normal">[ESC]</span></span></button><div class="w-8 h-8 rounded-full bg-[#384631] flex items-center justify-center shrink-0 shadow-sm"><span class="material-symbols-outlined text-white text-[18px]">nature</span></div></div></div></header><main class="w-full pt-20 bg-[#f8f6f0] min-h-[calc(100vh-140px)]"><div class="flex flex-col w-full">
+<!-- Top Discreet Notification / Safety Anchor Strip -->
+<section class="w-full bg-[#eef1e9]/85 border-b border-[#4F5E47]/15 px-6 py-2.5 relative z-10">
+<div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+<div class="flex items-center gap-2.5">
+<span class="inline-flex w-2 h-2 rounded-full bg-[#546347] shadow-[0_0_8px_rgba(84,99,71,0.6)]"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Private Browsing Sanctuary: Zero tracking pixels. Neutral browser footprint.</span>
+</div>
+<div class="flex items-center gap-4">
+<a class="font-label-sm text-label-sm text-[#2c3b26] hover:underline inline-flex items-center gap-1 font-medium" href="#safety-guide">
+<span class="material-symbols-outlined text-[15px]">lock</span>
+          Is it safe to browse right now?
+        </a>
+<span class="text-outline-variant font-label-sm">|</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant opacity-80">Quick Exit active: press <kbd class="px-1.5 py-0.5 rounded bg-white/80 text-[#2c3b26] font-mono text-[10px] border border-[#4F5E47]/20">Esc</kbd></span>
+</div>
+</div>
+</section>
+<!-- 3. HERO SECTION WITH CINEMATIC SWIMMING BACKGROUND (TERRACOTTA WITH HINTS OF PINK) -->
+<section class="w-full px-6 lg:px-12 pt-20 pb-16 lg:pt-28 lg:pb-24 relative overflow-hidden bg-[#f8f6f0]">
+<!-- 5 Fluid Moving Blobs (Terracotta & Blush Pink Swimming across Viewport) -->
+<div class="absolute inset-0 pointer-events-none overflow-hidden z-0"><div class="pool-terracotta-1 absolute -top-16 -left-12 w-[340px] h-[340px] rounded-full blur-[70px] opacity-40" style="background: radial-gradient(circle, rgb(200, 109, 81) 0%, rgb(184, 88, 59) 50%, rgb(160, 126, 95) 70%, transparent 80%);"></div><div class="pool-terracotta-2 absolute top-2 left-1/3 w-[360px] h-[320px] rounded-full blur-[75px] opacity-35" style="background: radial-gradient(circle, rgb(217, 136, 110) 0%, rgb(200, 109, 81) 55%, transparent 75%);"></div><div class="pool-terracotta-3 absolute top-6 -right-16 w-[380px] h-[380px] rounded-full blur-[75px] opacity-40" style="background: radial-gradient(circle, rgb(184, 88, 59) 0%, rgb(160, 126, 95) 55%, transparent 75%);"></div><div class="pool-terracotta-4 absolute top-1/2 -left-20 w-[360px] h-[360px] rounded-full blur-[80px] opacity-35" style="background: radial-gradient(circle, rgb(200, 109, 81) 0%, rgb(160, 126, 95) 60%, transparent 80%);"></div><div class="pool-terracotta-5 absolute top-[45%] right-[15%] w-[330px] h-[330px] rounded-full blur-[75px] opacity-35" style="background: radial-gradient(circle, rgb(217, 136, 110) 0%, rgb(184, 88, 59) 55%, transparent 75%);"></div><div class="pool-terracotta-6 absolute -bottom-16 left-[18%] w-[360px] h-[340px] rounded-full blur-[70px] opacity-35" style="background: radial-gradient(circle, rgb(200, 109, 81) 0%, rgb(160, 126, 95) 60%, transparent 75%);"></div><div class="pool-terracotta-7 absolute -bottom-20 right-8 w-[380px] h-[360px] rounded-full blur-[75px] opacity-35" style="background: radial-gradient(circle, rgb(184, 88, 59) 0%, rgb(200, 109, 81) 50%, transparent 75%);"></div><div class="pool-terracotta-8 absolute top-[28%] left-[22%] w-[280px] h-[280px] rounded-full blur-[65px] opacity-30" style="background: radial-gradient(circle, rgb(160, 126, 95) 0%, rgb(200, 109, 81) 55%, transparent 75%);"></div><div class="absolute inset-0 bg-[#f8f6f0]/60 backdrop-blur-[1.5px]"></div></div>
+<div class="max-w-5xl mx-auto flex flex-col items-center text-center space-y-8 relative z-10">
+<!-- Category Pill -->
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/95 border border-[#4F5E47]/25 text-[#1f291e] shadow-sm backdrop-blur-md">
+<span class="material-symbols-outlined text-[16px] text-[#546347]">eco</span>
+<span class="font-label-sm text-label-sm tracking-wider uppercase font-semibold">Autonomous Financial Preparedness</span>
+</div>
+<!-- 2. TAGLINE HEADLINE: UNDERSTAND YOUR FINANCES. / STARTING WITH / DEDICATED DYNAMIC WORD CONTAINER -->
+<div class="space-y-2 max-w-4xl w-full flex flex-col items-center">
+<h1 class="font-editorial-heading text-4xl sm:text-5xl lg:text-6xl font-normal text-[#1f291e] tracking-tight leading-[1.12] drop-shadow-sm">
+      UNDERSTAND YOUR FINANCES.
+</h1>
+<h2 class="font-editorial-heading text-3xl sm:text-4xl lg:text-5xl font-normal text-[#2c3b26] tracking-tight leading-[1.15] opacity-95">
+      STARTING WITH
+</h2>
+<!-- Dedicated centered container with noticeable rhythmic pulse, soft glowing aura, and automated JS timer -->
+<div class="h-16 sm:h-20 lg:h-24 w-full max-w-xl flex items-center justify-center overflow-visible relative pt-1">
+<span class="font-editorial-heading text-4xl sm:text-5xl lg:text-6xl italic text-[#b86248] font-normal transition-all duration-300 ease-in-out border-b-2 border-[#c97258]/50 pb-0.5 px-4 whitespace-nowrap" id="changing-word" style="transform: translateY(0px); opacity: 1;" data-stitch-orig-opacity="1">YOUR HOME.</span>
+</div>
+</div>
+<!-- Crisp high contrast copy -->
+<p class="font-body-lg text-body-lg text-[#1f291e] max-w-2xl leading-relaxed font-normal bg-white/70 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-[#4F5E47]/15 shadow-sm">
+    A discreet, calm sanctuary designed to help you uncover assets, navigate marital property, and plan independent horizons at your own gentle pace.
+</p>
+<!-- 1. BEGIN WITH STEP ONE BUTTON: Unmistakable continuous breathing animation (scale 1.0 to 1.08, 2.5s) & vibrant multi-layer glowing box-shadow -->
+<div class="flex flex-col items-center gap-3 pt-4">
+<a class="btn-step-one-breathing relative inline-flex items-center justify-center gap-3.5 bg-[#384631] hover:bg-[#283523] text-white px-9 py-4 rounded-full font-label-lg text-label-lg transition-all cursor-pointer border border-[#c86d51]/50 text-decoration-none" data-link="onboarding" href="#onboarding" id="primary-cta-button"><span class="text-[17px] tracking-wide font-medium">Step One</span></a>
+<p class="text-[#2c3b26] font-label-sm text-label-sm tracking-wide pt-1">
+      No account required to explore • Discreet &amp; completely private • Instant safe exit always ready
+</p>
+</div>
+<!-- Natural Calm Row -->
+<div class="w-full pt-10 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left">
+<div class="p-6 rounded-2xl bg-white/95 backdrop-blur-md border border-[#4F5E47]/20 shadow-sm space-y-3">
+<div class="w-10 h-10 rounded-full bg-[#eff4ec] border border-[#4F5E47]/20 flex items-center justify-center text-[#2c3b26]">
+<span class="material-symbols-outlined text-[20px]">filter_vintage</span>
+</div>
+<h3 class="font-editorial-heading text-lg text-[#1f291e] font-normal">Grounded &amp; Gentle</h3>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+        No harsh urgency or timers. Pause anytime; nothing is logged or reported.
+      </p>
+</div>
+<div class="p-6 rounded-2xl bg-white/95 backdrop-blur-md border border-[#4F5E47]/20 shadow-sm space-y-3">
+<div class="w-10 h-10 rounded-full bg-[#eff4ec] border border-[#4F5E47]/20 flex items-center justify-center text-[#c97258]">
+<span class="material-symbols-outlined text-[20px]">water_drop</span>
+</div>
+<h3 class="font-editorial-heading text-lg text-[#1f291e] font-normal">Factual Clarity</h3>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+        Understand 1040s, pensions, debt attribution, and home equity in plain English.
+      </p>
+</div>
+<div class="p-6 rounded-2xl bg-white/95 backdrop-blur-md border border-[#4F5E47]/20 shadow-sm space-y-3">
+<div class="w-10 h-10 rounded-full bg-[#eff4ec] border border-[#4F5E47]/20 flex items-center justify-center text-[#546347]">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+</div>
+<h3 class="font-editorial-heading text-lg text-[#1f291e] font-normal">Discreet Footprint</h3>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+        Camouflaged tab name, zero cloud storage by default, and instant 1-key exit.
+      </p>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. INTERACTIVE FLIGHT PATH SECTION: Sparrow smoothly glides between perches & card exclusively shows active perch -->
+<section class="reveal-module w-full px-6 lg:px-12 py-20 bg-white/95 border-y border-[#4F5E47]/15 relative z-10 is-revealed" id="flight-path-preview">
+<div class="max-w-5xl mx-auto space-y-10">
+<!-- Section Header with Flight Status -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 text-center md:text-left">
+<div class="max-w-2xl space-y-3">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[#546347] font-semibold flex items-center justify-center md:justify-start gap-2">
+<span class="material-symbols-outlined text-[16px]">flight</span>
+The Sparrow Flight Path
+</span>
+<h2 class="font-editorial-heading text-3xl sm:text-4xl text-[#1f291e]">Four gentle perches toward complete autonomy.</h2>
+<p class="font-body-md text-body-md text-[#444841]">
+  Click or hover any perch to guide the sparrow along your path. The card below updates to show exclusively the details for where your sparrow is perched.
+</p>
+</div>
+<div class="flex items-center gap-3 px-4 py-2 rounded-full bg-[#edf2e8] border border-[#4F5E47]/20 text-on-surface-variant self-center md:self-auto shrink-0 shadow-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-[#384631] shadow-[0_0_8px_rgba(56,70,49,0.7)] animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-[#2c3b26] font-medium" id="current-flight-status">Perch 01 • Quiet Discovery</span>
+</div>
+</div>
+<!-- Interactive Flight Path Ribbon & Smoothly Gliding Sparrow Indicator -->
+<div class="relative w-full rounded-2xl bg-[#eff4ec] border border-[#4F5E47]/20 p-6 sm:p-8 overflow-hidden shadow-inner">
+<div class="absolute inset-0 pointer-events-none opacity-40">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1000 120">
+<path d="M 0 60 Q 250 20, 500 60 T 1000 60" fill="none" stroke="#BBCCAA" stroke-dasharray="4 8" stroke-width="1"></path>
+<path d="M 0 85 Q 250 110, 500 80 T 1000 75" fill="none" stroke="#D7E8CA" stroke-dasharray="6 12" stroke-width="1.2"></path>
+</svg>
+</div>
+<div class="relative z-10">
+<!-- Connecting line -->
+<div class="hidden sm:block absolute top-7 left-[8%] right-[8%] h-0.5 bg-outline-variant/40 -z-0"></div>
+<div class="hidden sm:block absolute top-7 left-[8%] h-0.5 bg-[#384631] transition-all duration-500 ease-out -z-0" id="flight-track-fill" style="width: 0%;"></div>
+<!-- Interactive Perch Waypoint Buttons -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 relative z-10" id="perch-milestone-nodes">
+<!-- Perch Node 1 -->
+<button class="flight-node-btn group flex flex-col items-center text-center p-3.5 rounded-xl transition-all cursor-pointer bg-white shadow-sm border border-[#384631]/40 ring-2 ring-[#384631]/20" id="waypoint-1" onclick="selectPerch(1)" onmouseenter="previewPerch(1)" onmouseleave="restorePerch()" type="button">
+<div class="w-10 h-10 rounded-full bg-[#384631] text-white flex items-center justify-center font-label-md text-label-md transition-transform duration-300 group-hover:scale-110 shadow-sm" id="waypoint-badge-1">
+<span class="material-symbols-outlined text-[18px]">looks_one</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[#546347] font-semibold mt-2.5">Perch 01</span>
+<span class="font-label-md text-label-md text-on-surface font-medium leading-tight">Quiet Discovery</span>
+<span class="text-[11px] text-[#444841] mt-0.5">Groundwork</span>
+</button>
+<!-- Perch Node 2 -->
+<button class="flight-node-btn group flex flex-col items-center text-center p-3.5 rounded-xl transition-all cursor-pointer hover:bg-white/80 border border-transparent" id="waypoint-2" onclick="selectPerch(2)" onmouseenter="previewPerch(2)" onmouseleave="restorePerch()" type="button">
+<div class="w-10 h-10 rounded-full bg-surface-container text-[#444841] flex items-center justify-center font-label-md text-label-md transition-transform duration-300 group-hover:scale-110" id="waypoint-badge-2">
+<span class="material-symbols-outlined text-[18px]">looks_two</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[#546347] font-semibold mt-2.5">Perch 02</span>
+<span class="font-label-md text-label-md text-on-surface font-medium leading-tight">Asset Mapping</span>
+<span class="text-[11px] text-[#444841] mt-0.5">Clarity</span>
+</button>
+<!-- Perch Node 3 -->
+<button class="flight-node-btn group flex flex-col items-center text-center p-3.5 rounded-xl transition-all cursor-pointer hover:bg-white/80 border border-transparent" id="waypoint-3" onclick="selectPerch(3)" onmouseenter="previewPerch(3)" onmouseleave="restorePerch()" type="button">
+<div class="w-10 h-10 rounded-full bg-surface-container text-[#444841] flex items-center justify-center font-label-md text-label-md transition-transform duration-300 group-hover:scale-110" id="waypoint-badge-3">
+<span class="material-symbols-outlined text-[18px]">looks_3</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[#546347] font-semibold mt-2.5">Perch 03</span>
+<span class="font-label-md text-label-md text-on-surface font-medium leading-tight">Post-Separation</span>
+<span class="text-[11px] text-[#444841] mt-0.5">5-Yr Horizon</span>
+</button>
+<!-- Perch Node 4 -->
+<button class="flight-node-btn group flex flex-col items-center text-center p-3.5 rounded-xl transition-all cursor-pointer hover:bg-white/80 border border-transparent" id="waypoint-4" onclick="selectPerch(4)" onmouseenter="previewPerch(4)" onmouseleave="restorePerch()" type="button">
+<div class="w-10 h-10 rounded-full bg-surface-container text-[#444841] flex items-center justify-center font-label-md text-label-md transition-transform duration-300 group-hover:scale-110" id="waypoint-badge-4">
+<span class="material-symbols-outlined text-[18px]">looks_4</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[#546347] font-semibold mt-2.5">Perch 04</span>
+<span class="font-label-md text-label-md text-on-surface font-medium leading-tight">Consultation</span>
+<span class="text-[11px] text-[#444841] mt-0.5">Brief Ready</span>
+</button>
+</div>
+</div>
+<!-- Gliding Sparrow Indicator -->
+<div aria-hidden="true" class="hidden sm:block absolute top-1 pointer-events-none transition-all duration-500 ease-out z-20" id="flying-sparrow-container" style="left: 12.5%; transform: translateX(-50%) rotate(0deg);">
+<div class="sparrow-body-bob relative filter drop-shadow-[0_4px_12px_rgba(56,70,49,0.3)]">
+<svg class="w-16 h-16" fill="none" viewBox="0 0 72 72">
+<defs>
+<linearGradient id="sparrowFeatherGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#4F5E47"></stop>
+<stop offset="45%" stop-color="#384631"></stop>
+<stop offset="100%" stop-color="#A07E5F"></stop>
+</linearGradient>
+<linearGradient id="sparrowWingGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#715438"></stop>
+<stop offset="60%" stop-color="#4F5E47"></stop>
+<stop offset="100%" stop-color="#BBCCAA"></stop>
+</linearGradient>
+</defs>
+<path d="M 12 48 C 17 46 22 43 27 40 L 21 49 C 17 50 14 50 12 48 Z" fill="#715438" opacity="0.9"></path>
+<path d="M 9 52 C 15 50 20 46 25 43 L 18 55 C 13 56 10 54 9 52 Z" fill="#583D23"></path>
+<path d="M 23 42 C 28 44 37 45 44 41 C 51 37 56 31 60 27 C 62 25 64 24 66 23 C 65 25 63 27 61 29 C 58 34 53 40 45 44 C 36 48 27 47 23 42 Z" fill="url(#sparrowFeatherGrad)"></path>
+<path d="M 33 42 C 38 45 45 44 50 40 C 53 37 56 33 58 30 C 56 32 53 35 48 37 C 42 39 36 39 33 42 Z" fill="#E7BF9C" opacity="0.95"></path>
+<circle cx="58" cy="27" fill="#384631" r="4.5"></circle>
+<polygon fill="#A07E5F" points="62,26.5 68,27.5 62,29"></polygon>
+<circle cx="59.2" cy="26.3" fill="#FCF9F4" r="0.9"></circle>
+<g class="sparrow-wing-movement">
+<path d="M 32 38 C 30 28 34 16 46 8 C 42 15 40 23 42 32 C 40 34 36 36 32 38 Z" fill="url(#sparrowWingGrad)" opacity="0.92"></path>
+<path d="M 37 34 C 35 24 40 14 49 7 C 46 14 45 22 47 30 C 43 32 40 33 37 34 Z" fill="#BBCCAF" opacity="0.75"></path>
+<path d="M 27 39 C 24 33 26 24 34 17 C 32 23 32 29 35 36 Z" fill="#715438" opacity="0.65"></path>
+</g>
+</svg>
+</div>
+</div>
+</div>
+<!-- Focused Single Content Card: Displays ONLY the active perch info -->
+<div class="w-full bg-[#fcfdfb] p-8 lg:p-12 rounded-3xl border border-[#4F5E47]/20 shadow-sm transition-all duration-300">
+<!-- Content Panel 1: Perch 01 -->
+<div class="space-y-6" id="perch-panel-1">
+<div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#4F5E47]/15">
+<div class="flex items-center gap-3">
+<span class="w-12 h-12 rounded-2xl bg-[#384631]/10 text-[#384631] flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">folder_special</span>
+</span>
+<div>
+<span class="font-label-sm text-label-sm text-[#546347] font-semibold uppercase tracking-wider">Active Stage • Step 1</span>
+<h3 class="font-editorial-heading text-2xl sm:text-3xl text-[#1f291e]">Perch 01: Quiet Discovery</h3>
+</div>
+</div>
+<div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#edf2e8] border border-[#4F5E47]/15 text-[#2c3b26] font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-[#546347]">vpn_key_off</span>
+<span>No Passwords Required</span>
+</div>
+</div>
+<p class="font-body-lg text-body-lg text-[#1f291e] leading-relaxed">
+      In many partnerships, one person unconsciously takes on all logins, passwords, and tax preparations. Sparrow shows you how to obtain certified public documents, tax returns, and basic account histories independently—without alerting your spouse or triggering conflict.
+</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+<div class="p-5 rounded-2xl bg-[#edf2e8]/75 border border-[#4F5E47]/15 space-y-2">
+<div class="flex items-center gap-2 text-[#2c3b26] font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[18px] text-[#546347]">verified</span>
+          IRS Form 1040 Guide
+        </div>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+          Understand Page 1 lines 8 &amp; 9 (Schedule 1) to identify undisclosed investment accounts and passive business distributions without asking for credentials.
+        </p>
+</div>
+<div class="p-5 rounded-2xl bg-[#edf2e8]/75 border border-[#4F5E47]/15 space-y-2">
+<div class="flex items-center gap-2 text-[#2c3b26] font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[18px] text-[#546347]">lock_open_right</span>
+          Direct Access Channels
+        </div>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+          Learn legal steps to request your own joint bank records directly from institutions with simple primary identification at any physical branch.
+        </p>
+</div>
+</div>
+<div class="pt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[#4F5E47]/15">
+<div class="flex items-center gap-2 text-[#444841] font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[#546347] text-[18px]">memory</span>
+<span>Local memory autosave: Nothing is stored in cloud databases.</span>
+</div>
+<button class="font-label-sm text-label-sm text-[#2c3b26] hover:underline cursor-pointer font-medium" onclick="selectPerch(2)">
+        Advance to Perch 02: Asset Mapping →
+</button>
+</div>
+</div>
+<!-- Content Panel 2: Perch 02 -->
+<div class="space-y-6 hidden" id="perch-panel-2">
+<div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#4F5E47]/15">
+<div class="flex items-center gap-3">
+<span class="w-12 h-12 rounded-2xl bg-[#384631]/10 text-[#384631] flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">account_tree</span>
+</span>
+<div>
+<span class="font-label-sm text-label-sm text-[#546347] font-semibold uppercase tracking-wider">Active Stage • Step 2</span>
+<h3 class="font-editorial-heading text-2xl sm:text-3xl text-[#1f291e]">Perch 02: Asset Mapping</h3>
+</div>
+</div>
+<div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#edf2e8] border border-[#4F5E47]/15 text-[#2c3b26] font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-[#546347]">balance</span>
+<span>Equitable Division</span>
+</div>
+</div>
+<p class="font-body-lg text-body-lg text-[#1f291e] leading-relaxed">
+      Marital property law varies across states, but the principle is universal: you are entitled to know the full scope of what was built during the partnership. We map complex assets into simple categories: retirement accounts, home equity, hidden account indicators, and debt attribution.
+</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+<div class="p-5 rounded-2xl bg-[#edf2e8]/75 border border-[#4F5E47]/15 space-y-2">
+<div class="flex items-center gap-2 text-[#2c3b26] font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[18px] text-[#546347]">account_balance_wallet</span>
+          Marital Equity vs Separate Property
+        </div>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+          Dissect inheritances, pre-marital savings, and joint contributions without paying expensive preliminary billable hours to an accountant.
+        </p>
+</div>
+<div class="p-5 rounded-2xl bg-[#edf2e8]/75 border border-[#4F5E47]/15 space-y-2">
+<div class="flex items-center gap-2 text-[#2c3b26] font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[18px] text-[#546347]">query_stats</span>
+          Pension &amp; 401(k) Retirement Splits (QDRO)
+        </div>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+          Understand how pensions and 401(k) retirement funds are partitioned via Qualified Domestic Relations Orders without penalty fees.
+        </p>
+</div>
+</div>
+<div class="pt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[#4F5E47]/15">
+<div class="flex items-center gap-2 text-[#444841] font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[#546347] text-[18px]">check_circle</span>
+<span>Detect hidden accounts and assign liabilities transparently.</span>
+</div>
+<button class="font-label-sm text-label-sm text-[#2c3b26] hover:underline cursor-pointer font-medium" onclick="selectPerch(3)">
+        Advance to Perch 03: Post-Separation Horizon →
+</button>
+</div>
+</div>
+<!-- Content Panel 3: Perch 03 -->
+<div class="space-y-6 hidden" id="perch-panel-3">
+<div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#4F5E47]/15">
+<div class="flex items-center gap-3">
+<span class="w-12 h-12 rounded-2xl bg-[#384631]/10 text-[#384631] flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">wb_twilight</span>
+</span>
+<div>
+<span class="font-label-sm text-label-sm text-[#546347] font-semibold uppercase tracking-wider">Active Stage • Step 3</span>
+<h3 class="font-editorial-heading text-2xl sm:text-3xl text-[#1f291e]">Perch 03: Post-Separation Horizon</h3>
+</div>
+</div>
+<div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#edf2e8] border border-[#4F5E47]/15 text-[#2c3b26] font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-[#546347]">visibility</span>
+<span>5-Year Forward Modeling</span>
+</div>
+</div>
+<p class="font-body-lg text-body-lg text-[#1f291e] leading-relaxed">
+      The central question keeping women awake at night is: "Will I and my children be okay?" Our scenario planner models 5-year budget feasibility, the keep-vs-sell home calculation, independent cash flow projections, and health insurance continuity.
+</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+<div class="p-5 rounded-2xl bg-[#edf2e8]/75 border border-[#4F5E47]/15 space-y-2">
+<div class="flex items-center gap-2 text-[#2c3b26] font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[18px] text-[#546347]">home</span>
+          Keep vs Sell Home Modeling
+        </div>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+          Run mortgage refinancing math, property taxes, maintenance reserves, and utility realities on a single income stream with zero guesswork.
+        </p>
+</div>
+<div class="p-5 rounded-2xl bg-[#edf2e8]/75 border border-[#4F5E47]/15 space-y-2">
+<div class="flex items-center gap-2 text-[#2c3b26] font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[18px] text-[#546347]">health_and_safety</span>
+          Cash Flow &amp; Healthcare Transition
+        </div>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+          Simulate COBRA vs private marketplace health coverage costs alongside child support timing and rebound earning curves.
+        </p>
+</div>
+</div>
+<div class="pt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[#4F5E47]/15">
+<div class="flex items-center gap-2 text-[#444841] font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[#546347] text-[18px]">check_circle</span>
+<span>Plan realistically for future stability without fear.</span>
+</div>
+<button class="font-label-sm text-label-sm text-[#2c3b26] hover:underline cursor-pointer font-medium" onclick="selectPerch(4)">
+        Advance to Perch 04: Consultation Readiness →
+</button>
+</div>
+</div>
+<!-- Content Panel 4: Perch 04 -->
+<div class="space-y-6 hidden" id="perch-panel-4">
+<div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#4F5E47]/15">
+<div class="flex items-center gap-3">
+<span class="w-12 h-12 rounded-2xl bg-[#384631]/10 text-[#384631] flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">assignment_turned_in</span>
+</span>
+<div>
+<span class="font-label-sm text-label-sm text-[#546347] font-semibold uppercase tracking-wider">Active Stage • Step 4</span>
+<h3 class="font-editorial-heading text-2xl sm:text-3xl text-[#1f291e]">Perch 04: Consultation Readiness</h3>
+</div>
+</div>
+<div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#edf2e8] border border-[#4F5E47]/15 text-[#2c3b26] font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-[#546347]">file_download</span>
+<span>Brief Ready</span>
+</div>
+</div>
+<p class="font-body-lg text-body-lg text-[#1f291e] leading-relaxed">
+      Attorneys bill $350 to $700 per hour just to sort through disorganized shoe boxes of receipts. Sparrow compiles your verified asset matrix into a 1-click private brief, complete with a structured question checklist and fee transparency guide.
+</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+<div class="p-5 rounded-2xl bg-[#edf2e8]/75 border border-[#4F5E47]/15 space-y-2">
+<div class="flex items-center gap-2 text-[#2c3b26] font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[18px] text-[#546347]">summarize</span>
+          1-Click Private Case Dossier
+        </div>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+          Walk into your initial consultation with a structured, professional financial summary ready for attorneys or mediators.
+        </p>
+</div>
+<div class="p-5 rounded-2xl bg-[#edf2e8]/75 border border-[#4F5E47]/15 space-y-2">
+<div class="flex items-center gap-2 text-[#2c3b26] font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[18px] text-[#546347]">checklist</span>
+          Attorney Checklist &amp; Fee Transparency
+        </div>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+          Know exactly what questions to ask during intake consultations to avoid retainer waste and evaluate advocate fit.
+        </p>
+</div>
+</div>
+<div class="pt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[#4F5E47]/15">
+<div class="flex items-center gap-2 text-[#444841] font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[#546347] text-[18px]">savings</span>
+<span>Save up to 40% on preliminary legal retainer hours.</span>
+</div>
+<button class="font-label-sm text-label-sm text-[#2c3b26] hover:underline cursor-pointer font-medium" onclick="selectPerch(1)">
+        ↺ Return to Perch 01
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Core Feature Pillars (Bento Grid) -->
+<section class="reveal-module w-full px-6 lg:px-12 py-20 relative z-10 is-revealed bg-[#edf2e8]/75" id="core-pillars">
+<div class="max-w-7xl mx-auto space-y-12">
+<div class="max-w-3xl space-y-3">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[#546347] font-semibold">Purpose-Built Architecture</span>
+<h2 class="font-editorial-heading text-3xl sm:text-4xl text-[#1f291e]">Designed for calm discovery, never shame or intimidation.</h2>
+<p class="font-body-lg text-body-lg text-[#444841]">
+  Every tool in Sparrow is calibrated for emotional quietness and factual certainty.
+</p>
+</div>
+<!-- Bento Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+<!-- Bento Card 1: Broad Accent Card (8 cols) -->
+<div class="lg:col-span-8 p-8 lg:p-10 rounded-3xl bg-white/95 border border-[#4F5E47]/15 flex flex-col justify-between space-y-6 shadow-sm">
+<div class="space-y-4">
+<div class="w-12 h-12 rounded-xl bg-[#edf2e8] text-[#2c3b26] flex items-center justify-center border border-[#4F5E47]/15">
+<span class="material-symbols-outlined text-[24px]">favorite</span>
+</div>
+<span class="font-label-sm text-label-sm text-[#546347] font-semibold uppercase">No Judgement Sanctuary</span>
+<h3 class="font-editorial-heading text-2xl sm:text-3xl text-[#1f291e]">It is completely normal to say "I don't know."</h3>
+<p class="font-body-md text-body-md text-[#444841] leading-relaxed max-w-2xl">
+  Millions of intelligent women let their spouse manage investments, taxes, and debt. You did nothing wrong. Sparrow begins with gentle questions, not intimidating accounting jargon. We build your understanding brick by brick.
+</p>
+</div>
+<div class="p-4 rounded-xl bg-[#edf2e8]/80 border border-[#4F5E47]/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+<div class="space-y-0.5">
+<p class="font-label-md text-label-md text-[#2c3b26] font-semibold">Guided Self-Paced Checklist</p>
+<p class="font-body-sm text-body-sm text-[#444841]">32 plain-language prompts to identify household wealth sources.</p>
+</div>
+<span class="px-3.5 py-1.5 rounded-full bg-white text-[#2c3b26] font-label-sm text-label-sm font-semibold shrink-0 border border-[#4F5E47]/20 shadow-sm">Included Free</span>
+</div>
+</div>
+<!-- Bento Card 2: 1040 Plain Decoder (4 cols) -->
+<div class="lg:col-span-4 p-8 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#4F5E47]/15 flex flex-col justify-between space-y-6 shadow-sm">
+<div class="space-y-4">
+<div class="w-12 h-12 rounded-xl bg-[#edf2e8] text-[#2c3b26] flex items-center justify-center border border-[#4F5E47]/15">
+<span class="material-symbols-outlined text-[24px]">translate</span>
+</div>
+<h3 class="font-editorial-heading text-xl sm:text-2xl text-[#1f291e]">Plain-English Document Decoder</h3>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+  We translate line 2b, Schedule C, and Form 8889 into understandable terms: what they mean for alimony, child support, and actual take-home income.
+</p>
+</div>
+<div class="bg-[#eff4ec] p-4 rounded-xl space-y-2 border border-[#4F5E47]/15">
+<span class="font-label-sm text-label-sm text-[#546347] font-semibold">Sample Explanation</span>
+<p class="font-body-sm text-body-sm text-on-surface italic">"Line 8 shows passive partnerships. This means income exists outside ordinary pay stubs."</p>
+</div>
+</div>
+<!-- Bento Card 3: Estimated Outcome Ranges (4 cols) -->
+<div class="lg:col-span-4 p-8 rounded-3xl bg-white/90 backdrop-blur-sm border border-[#4F5E47]/15 flex flex-col justify-between space-y-6 shadow-sm">
+<div class="space-y-4">
+<div class="w-12 h-12 rounded-xl bg-[#edf2e8] text-[#2c3b26] flex items-center justify-center border border-[#4F5E47]/15">
+<span class="material-symbols-outlined text-[24px]">ssid_chart</span>
+</div>
+<h3 class="font-editorial-heading text-xl sm:text-2xl text-[#1f291e]">Honest Outcome Ranges</h3>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+  False precision creates heartache. We model conservative, realistic, and optimistic asset division scenarios based on state-specific statutory precedent.
+</p>
+</div>
+<div class="bg-[#eff4ec] p-4 rounded-xl flex items-center justify-between border border-[#4F5E47]/15">
+<span class="font-label-sm text-label-sm text-[#444841]">State Guidelines</span>
+<span class="font-label-md text-label-md text-[#2c3b26] font-semibold">50-State Statutory Database</span>
+</div>
+</div>
+<!-- Bento Card 4: Legal Statutes cited (8 cols) -->
+<div class="lg:col-span-8 p-8 lg:p-10 rounded-3xl bg-white/95 border border-[#4F5E47]/15 flex flex-col justify-between space-y-6 shadow-sm">
+<div class="space-y-4">
+<div class="w-12 h-12 rounded-xl bg-[#edf2e8] text-[#2c3b26] flex items-center justify-center border border-[#4F5E47]/15">
+<span class="material-symbols-outlined text-[24px]">menu_book</span>
+</div>
+<span class="font-label-sm text-label-sm text-[#546347] font-semibold uppercase">Transparent Authority</span>
+<h3 class="font-editorial-heading text-2xl sm:text-3xl text-[#1f291e]">Legal statutes cited alongside every explanation.</h3>
+<p class="font-body-md text-body-md text-[#444841] leading-relaxed max-w-2xl">
+  No black-box algorithms or unverified internet forums. Every explanation of marital waste, dissipation of assets, and rehabilitative maintenance includes direct links to relevant state civil codes and family law jurisprudence.
+</p>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<div class="p-3 rounded-lg bg-[#eff4ec] text-center border border-[#4F5E47]/15">
+<p class="font-label-md text-label-md text-[#2c3b26] font-bold">50 States</p>
+<p class="font-label-sm text-label-sm text-[#444841]">Statutory Coverage</p>
+</div>
+<div class="p-3 rounded-lg bg-[#eff4ec] text-center border border-[#4F5E47]/15">
+<p class="font-label-md text-label-md text-[#2c3b26] font-bold">100% Private</p>
+<p class="font-label-sm text-label-sm text-[#444841]">Zero Account Logs</p>
+</div>
+<div class="p-3 rounded-lg bg-[#eff4ec] text-center border border-[#4F5E47]/15">
+<p class="font-label-md text-label-md text-[#2c3b26] font-bold">PDF Ready</p>
+<p class="font-label-sm text-label-sm text-[#444841]">Structured Reports</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Discreet Safety & Privacy Guarantee Section -->
+<section class="reveal-module w-full px-6 lg:px-12 py-20 bg-white/70 border-t border-[#4F5E47]/15 relative z-10 is-revealed" id="safety-guide">
+<div class="max-w-7xl mx-auto space-y-12">
+<div class="max-w-3xl space-y-3">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[#546347] font-semibold">Discretion &amp; Sanctuary</span>
+<h2 class="font-editorial-heading text-3xl sm:text-4xl text-[#1f291e]">Your safety is our foundational architecture.</h2>
+<p class="font-body-lg text-body-lg text-[#444841]">
+  We engineered Sparrow so that you can research freely without leaving a footprint for curious or monitoring partners.
+</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Safety Pillar 1 -->
+<div class="p-8 rounded-3xl bg-white border border-[#4F5E47]/15 space-y-4 shadow-sm">
+<div class="w-10 h-10 rounded-full bg-[#dfe8da] text-[#2c3b26] flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+</div>
+<h3 class="font-editorial-heading text-xl text-[#1f291e]">Instant Safe Exit [ESC]</h3>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+  Clicking the Leave Site button or pressing Escape immediately redirects your browser tab to a neutral weather radar forecast page.
+</p>
+</div>
+<!-- Safety Pillar 2 -->
+<div class="p-8 rounded-3xl bg-white border border-[#4F5E47]/15 space-y-4 shadow-sm">
+<div class="w-10 h-10 rounded-full bg-[#dfe8da] text-[#2c3b26] flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">tab</span>
+</div>
+<h3 class="font-editorial-heading text-xl text-[#1f291e]">Camouflaged Tab Title</h3>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+  Your browser tab appears neutrally as "Daily Reflections &amp; Weather" with an innocuous feather icon, blending into typical lifestyle tabs.
+</p>
+</div>
+<!-- Safety Pillar 3 -->
+<div class="p-8 rounded-3xl bg-white border border-[#4F5E47]/15 space-y-4 shadow-sm">
+<div class="w-10 h-10 rounded-full bg-[#dfe8da] text-[#2c3b26] flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">phonelink_erase</span>
+</div>
+<h3 class="font-editorial-heading text-xl text-[#1f291e]">Zero Data Persistence</h3>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+  Sparrow uses no tracking cookies, analytics pixels, or database entries during exploratory research. Nothing is tied to your email.
+</p>
+</div>
+</div>
+<!-- Step-by-Step Incognito Guide Box -->
+<div class="bg-white/95 p-6 lg:p-8 rounded-3xl border border-[#4F5E47]/15 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm">
+<div class="space-y-2 max-w-2xl">
+<div class="flex items-center gap-2 text-[#2c3b26] font-label-lg text-label-lg font-semibold">
+<span class="material-symbols-outlined text-[20px] text-[#546347]">security</span>
+  Recommended Sanctuary Practice
+</div>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">
+  For maximum privacy, open Sparrow inside an <strong>Incognito or Private Browsing</strong> window, and consider researching from a workplace device, local library terminal, or trusted friend's phone if shared devices are monitored.
+</p>
+</div>
+<button class="inline-flex items-center gap-2 bg-[#384631] hover:bg-[#283523] text-white px-6 py-3 rounded-full font-label-md text-label-md shrink-0 transition-colors shadow-sm cursor-pointer" onclick="safeExit()">
+<span class="material-symbols-outlined text-[18px]">flight_takeoff</span>
+  Leave Now &amp; Clear Cache
+</button>
+</div>
+</div>
+</section>
+<!-- Frequently Asked Questions (Accordion) -->
+<section class="reveal-module w-full px-6 lg:px-12 py-20 relative z-10 is-revealed bg-[#edf2e8]/75" id="faq-section">
+<div class="max-w-4xl mx-auto space-y-10">
+<div class="text-center space-y-3">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-[#546347] font-semibold">Clarity &amp; Answers</span>
+<h2 class="font-editorial-heading text-3xl sm:text-4xl text-[#1f291e]">Frequently Asked Questions</h2>
+<p class="font-body-lg text-body-lg text-[#444841]">
+  Direct, compassionate answers to the questions you might hesitate to ask out loud.
+</p>
+</div>
+<!-- FAQ Items List -->
+<div class="space-y-4">
+<!-- FAQ 1 -->
+<details class="group bg-white p-6 rounded-2xl border border-[#4F5E47]/15 transition-all open:bg-[#f6f9f4] shadow-sm" open="">
+<summary class="flex items-center justify-between cursor-pointer list-none">
+<h3 class="font-editorial-heading text-lg sm:text-xl text-[#1f291e] pr-4">Is this formal legal advice?</h3>
+<span class="material-symbols-outlined text-[#384631] group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="pt-4 font-body-md text-body-md text-[#444841] leading-relaxed">
+  No. Sparrow provides financial modeling, document decoding, and educational legal information derived from publicly accessible state statutes. We do not represent you in court or provide formal attorney counseling. Our purpose is to make you financially informed so your actual legal consultations are targeted, efficient, and cost-effective.
+</div>
+</details>
+<!-- FAQ 2 -->
+<details class="group bg-white p-6 rounded-2xl border border-[#4F5E47]/15 transition-all open:bg-[#f6f9f4] shadow-sm">
+<summary class="flex items-center justify-between cursor-pointer list-none">
+<h3 class="font-editorial-heading text-lg sm:text-xl text-[#1f291e] pr-4">What if my partner manages all passwords and accounts?</h3>
+<span class="material-symbols-outlined text-[#384631] group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="pt-4 font-body-md text-body-md text-[#444841] leading-relaxed">
+  This is extremely common. You do not need online logins to build a comprehensive asset picture. Sparrow provides step-by-step guidance on how to request copies of joint tax transcripts directly from the IRS (using Form 4506-T) and how to request joint bank statements in person at local bank branches using your personal photo ID.
+</div>
+</details>
+<!-- FAQ 3 -->
+<details class="group bg-white p-6 rounded-2xl border border-[#4F5E47]/15 transition-all open:bg-[#f6f9f4] shadow-sm">
+<summary class="flex items-center justify-between cursor-pointer list-none">
+<h3 class="font-editorial-heading text-lg sm:text-xl text-[#1f291e] pr-4">Can anyone see that I used this app?</h3>
+<span class="material-symbols-outlined text-[#384631] group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="pt-4 font-body-md text-body-md text-[#444841] leading-relaxed">
+  We store zero personal identifiable information on our servers while you explore. If someone physically inspects your device browser history, they could see page visits unless you use Private Browsing or click our Clear History guide. The app header tab is titled "Daily Reflections &amp; Weather" to safeguard your screen from casual passersby.
+</div>
+</details>
+<!-- FAQ 4 -->
+<details class="group bg-white p-6 rounded-2xl border border-[#4F5E47]/15 transition-all open:bg-[#f6f9f4] shadow-sm">
+<summary class="flex items-center justify-between cursor-pointer list-none">
+<h3 class="font-editorial-heading text-lg sm:text-xl text-[#1f291e] pr-4">Do I need to link my bank account or provide my SSN?</h3>
+<span class="material-symbols-outlined text-[#384631] group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="pt-4 font-body-md text-body-md text-[#444841] leading-relaxed">
+  Never. Sparrow will never ask for your Social Security Number, bank account passwords, or financial institution login credentials. You enter rounded numbers manually, or compare your papers to our illustrated templates.
+</div>
+</details>
+<!-- FAQ 5 -->
+<details class="group bg-white p-6 rounded-2xl border border-[#4F5E47]/15 transition-all open:bg-[#f6f9f4] shadow-sm">
+<summary class="flex items-center justify-between cursor-pointer list-none">
+<h3 class="font-editorial-heading text-lg sm:text-xl text-[#1f291e] pr-4">Is it free to start?</h3>
+<span class="material-symbols-outlined text-[#384631] group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="pt-4 font-body-md text-body-md text-[#444841] leading-relaxed">
+  Yes. The entire educational library, asset discovery guides, IRS form walkthroughs, and basic 5-year budget models are completely free without requiring an email address or credit card.
+</div>
+</details>
+</div>
+</div>
+</section>
+<!-- Emergency & Crisis Support Banner -->
+<section class="reveal-module w-full px-6 lg:px-12 py-12 bg-white/70 border-t border-[#4F5E47]/15 relative z-10 is-revealed">
+<div class="max-w-5xl mx-auto rounded-3xl bg-white border border-[#4F5E47]/15 p-8 lg:p-10 shadow-sm">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-full bg-[#dfe8da] text-[#2c3b26] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">support_agent</span>
+</div>
+<div class="space-y-1">
+<h4 class="font-editorial-heading text-xl text-[#1f291e]">Need immediate personal safety support?</h4>
+<p class="font-body-sm text-body-sm text-[#444841] leading-relaxed max-w-xl">
+  Financial independence begins with physical safety. Free, confidential support is available 24/7. Reach out to caring advocates anytime:
+</p>
+<div class="pt-2 flex flex-wrap items-center gap-4 text-[#2c3b26] font-label-md text-label-md">
+<span class="inline-flex items-center gap-1.5 font-bold">
+<span class="material-symbols-outlined text-[16px] text-[#546347]">call</span>
+  National Hotline: 1-800-799-7233
+</span>
+<span class="inline-flex items-center gap-1.5 font-bold">
+<span class="material-symbols-outlined text-[16px] text-[#546347]">sms</span>
+  Text "START" to 88788
+</span>
+</div>
+</div>
+</div>
+<button class="px-5 py-2.5 rounded-full bg-[#edf2e8] hover:bg-[#dfe8da] text-[#2c3b26] font-label-sm text-label-sm shrink-0 transition-colors border border-[#4F5E47]/20 shadow-sm cursor-pointer" onclick="safeExit()">
+  Exit Page (ESC)
+</button>
+</div>
+</div>
+</section>
+<!-- Pre-Footer Encouraging Horizon Section -->
+<section class="reveal-module w-full px-6 lg:px-12 py-20 bg-[#edf2e8]/80 border-t border-[#4F5E47]/15 text-center relative overflow-hidden z-10 is-revealed">
+<div class="max-w-3xl mx-auto space-y-6 relative">
+<div class="flex justify-center">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#2c3b26] shadow-sm border border-[#4F5E47]/15">
+<svg class="w-6 h-6 fill-none stroke-current" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+<line x1="16" x2="2" y1="8" y2="22"></line>
+<line x1="17.5" x2="9" y1="15" y2="15"></line>
+</svg>
+</div>
+</div>
+<h2 class="font-editorial-heading text-3xl sm:text-4xl text-[#1f291e]">
+  Take the first step toward clear skies and financial autonomy.
+</h2>
+<p class="font-body-lg text-body-lg text-[#444841] max-w-xl mx-auto leading-relaxed">
+  You do not have to figure out everything today. Today, you only need to know what questions to ask.
+</p>
+<div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#384631] hover:bg-[#283523] text-white px-8 py-4 rounded-full font-label-lg text-label-lg transition-all shadow-md cursor-pointer" data-link="onboarding" href="#onboarding">
+<span>Start Your Flight Path</span>
+<span class="material-symbols-outlined text-[18px]">east</span>
+</a>
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-[#f6f9f4] text-[#2c3b26] px-8 py-4 rounded-full font-label-lg text-label-lg transition-all border border-[#4F5E47]/20 shadow-sm cursor-pointer" onclick="selectPerch(1); document.getElementById('flight-path-preview').scrollIntoView({behavior: 'smooth'});" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+<span>Explore Interactive Demo</span>
+</button>
+</div>
+<p class="text-[#444841] font-label-sm text-label-sm pt-2">
+  Completely free • No email signup • Anonymous &amp; secure
+</p>
+</div>
+</section>
+</div>
+<script>
+  // 2. Automated JS rotation timer (every 2.5s) for changing word in tagline
+  const rotatingWords = [
+    "PEACE OF MIND.",
+    "YOUR HOME.",
+    "DOCUMENTS.",
+    "NEXT CHAPTER.",
+    "RETIREMENT."
+  ];
+  let rotatingIndex = 0;
+  const rotatingWordEl = document.getElementById('changing-word');
+
+  if (rotatingWordEl) {
+    setInterval(() => {
+      rotatingWordEl.style.opacity = '0';
+      rotatingWordEl.style.transform = 'translateY(8px)';
+      
+      setTimeout(() => {
+        rotatingIndex = (rotatingIndex + 1) % rotatingWords.length;
+        rotatingWordEl.textContent = rotatingWords[rotatingIndex];
+        rotatingWordEl.style.opacity = '1';
+        rotatingWordEl.style.transform = 'translateY(0)';
+      }, 300);
+    }, 2500);
+  }
+
+  // 4. Botanical Vine Growing on Scroll Controller
+  const leftStem = document.getElementById('left-vine-stem');
+  const rightStem = document.getElementById('right-vine-stem');
+  const vineLeaves = document.querySelectorAll('.vine-leaf');
+  const vinePathLength = 2400;
+
+  function updateVineGrowth() {
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = Math.min(Math.max(scrollY / (scrollHeight || 1), 0), 1);
+
+    const offset = vinePathLength * (1 - progress * 1.12);
+    const clampedOffset = Math.max(0, offset);
+
+    if (leftStem) leftStem.style.strokeDashoffset = clampedOffset;
+    if (rightStem) rightStem.style.strokeDashoffset = clampedOffset;
+
+    vineLeaves.forEach(leaf => {
+      const threshold = parseFloat(leaf.getAttribute('data-progress') || 0);
+      if (progress >= threshold - 0.04) {
+        leaf.classList.add('leaf-grown');
+      } else {
+        leaf.classList.remove('leaf-grown');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateVineGrowth, { passive: true });
+  window.addEventListener('resize', updateVineGrowth);
+  updateVineGrowth(); // initial trigger
+
+  // Scroll reveal IntersectionObserver
+  const revealElements = document.querySelectorAll('.reveal-module');
+  if ('IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.12,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    revealElements.forEach(el => revealObserver.observe(el));
+  } else {
+    revealElements.forEach(el => el.classList.add('is-revealed'));
+  }
+
+  // 5. Sparrow Flight Path Interactivity (smooth glide on hover and click)
+  let activePerchStep = 1;
+  const perchInfo = [
+    { title: "Perch 01 • Quiet Discovery", left: "12.5%", fill: "0%", tilt: "0deg" },
+    { title: "Perch 02 • Asset Mapping", left: "37.5%", fill: "33.3%", tilt: "4deg" },
+    { title: "Perch 03 • Post-Separation Horizon", left: "62.5%", fill: "66.6%", tilt: "-2deg" },
+    { title: "Perch 04 • Consultation Readiness", left: "87.5%", fill: "100%", tilt: "5deg" }
+  ];
+
+  function moveSparrow(stepNumber) {
+    const config = perchInfo[stepNumber - 1];
+    const sparrow = document.getElementById('flying-sparrow-container');
+    const trackFill = document.getElementById('flight-track-fill');
+    const statusText = document.getElementById('current-flight-status');
+
+    if (sparrow && config) {
+      sparrow.style.left = config.left;
+      sparrow.style.transform = `translateX(-50%) rotate(${config.tilt})`;
+    }
+    if (trackFill && config) {
+      trackFill.style.width = config.fill;
+    }
+    if (statusText && config) {
+      statusText.textContent = config.title;
+    }
+  }
+
+  function previewPerch(stepNumber) {
+    moveSparrow(stepNumber);
+  }
+
+  function restorePerch() {
+    moveSparrow(activePerchStep);
+  }
+
+  function selectPerch(stepNumber) {
+    activePerchStep = stepNumber;
+    moveSparrow(stepNumber);
+
+    for (let i = 1; i <= 4; i++) {
+      const panel = document.getElementById('perch-panel-' + i);
+      const waypoint = document.getElementById('waypoint-' + i);
+      const waypointBadge = document.getElementById('waypoint-badge-' + i);
+      
+      if (i === stepNumber) {
+        if (panel) panel.classList.remove('hidden');
+        if (waypoint) {
+          waypoint.classList.add('bg-white', 'shadow-sm', 'border-[#384631]/40', 'ring-2', 'ring-[#384631]/20');
+          waypoint.classList.remove('border-transparent');
+        }
+        if (waypointBadge) {
+          waypointBadge.classList.add('bg-[#384631]', 'text-white', 'shadow-sm');
+          waypointBadge.classList.remove('bg-surface-container', 'text-[#444841]');
+        }
+      } else {
+        if (panel) panel.classList.add('hidden');
+        if (waypoint) {
+          waypoint.classList.remove('bg-white', 'shadow-sm', 'border-[#384631]/40', 'ring-2', 'ring-[#384631]/20');
+          waypoint.classList.add('border-transparent');
+        }
+        if (waypointBadge) {
+          waypointBadge.classList.remove('bg-[#384631]', 'text-white', 'shadow-sm');
+          waypointBadge.classList.add('bg-surface-container', 'text-[#444841]');
+        }
+      }
+    }
+  }
+</script></main><footer class="w-full bg-[#f8f6f0]/95 border-t border-[#4F5E47]/15 py-space-xl relative z-10"><div class="max-w-7xl mx-auto px-6 lg:px-12 space-y-space-lg"><div class="bg-white border border-[#4F5E47]/15 rounded-3xl p-space-md lg:p-space-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md shadow-sm"><div class="flex items-start gap-4"><div class="w-10 h-10 rounded-full bg-[#edf2e8] flex items-center justify-center shrink-0 mt-0.5 border border-[#4F5E47]/15"><span class="material-symbols-outlined text-[#2c3b26] text-[20px]">verified_user</span></div><div class="space-y-1"><p class="font-label-lg text-label-lg text-[#2c3b26] font-semibold">Confidentiality &amp; Safe Sanctuary</p><p class="font-body-sm text-body-sm text-[#444841] leading-relaxed">Your safety and privacy come first. For immediate danger, call 911. Free, confidential support 24/7: Call 1-800-799-7233 or text START to 88788.</p></div></div><div class="flex items-center gap-4 shrink-0 w-full md:w-auto"><a class="font-label-sm text-label-sm text-[#2c3b26] hover:underline transition-colors font-medium" data-path="clear-history-guide" href="#">How to clear your browser history</a></div></div><div class="pt-4 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left"><p class="font-body-sm text-body-sm text-[#444841] max-w-3xl leading-relaxed">Sparrow provides financial modeling and educational legal information, not formal legal advice. Use of this sanctuary does not establish an attorney-client relationship.</p><div class="font-label-sm text-label-sm text-[#444841] shrink-0">© 2024 Sparrow Platform. Autonomous &amp; Serene.</div></div></div></footer>
+
+</body></html>
