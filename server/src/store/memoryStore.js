@@ -7,6 +7,8 @@
 const userProfiles = new Map();
 const agentMemories = new Map();
 const chatHistories = new Map();
+const checklistProgress = new Map();
+const documentDrafts = new Map();
 
 // Seed default demo user for instant testing
 const DEMO_USER_ID = 'demo-user-123';
@@ -15,11 +17,19 @@ userProfiles.set(DEMO_USER_ID, {
   userId: DEMO_USER_ID,
   email: 'demo.user@ruthai.org',
   displayName: 'Sarah',
+  goal: 'pursuing_divorce',
   stateJurisdiction: 'California',
   marriageLengthYears: 18,
   hasChildren: true,
   childrenCount: 2,
+  divorcePathway: 'contested_or_uncooperative',
+  hasPrenup: 'no',
+  ownsHome: true,
+  hasRetirementAccounts: true,
+  needsFeeWaiver: false,
+  needsProtectiveOrder: false,
   financialRole: 'spouse_managed_all',
+  fearOfHiddenAssets: true,
   primaryConcerns: [
     'keeping_marital_home',
     'discovering_hidden_accounts',
@@ -27,6 +37,13 @@ userProfiles.set(DEMO_USER_ID, {
     'protecting_retirement_share'
   ],
   estimatedHouseholdIncome: '$180,000+',
+  userGrossMonthlyIncome: 3200,
+  spouseGrossMonthlyIncome: 13500,
+  custodySharePercent: 65,
+  monthlyLivingExpenses: 2400,
+  monthlyDebtPayments: 350,
+  totalDebts: 12000,
+  healthInsuranceMonthlyCost: 480,
   employmentStatus: 'part_time_caregiver',
   safetyDiscreetMode: true,
   createdAt: new Date().toISOString(),
@@ -118,8 +135,49 @@ module.exports = {
     chatHistories.set(userId, history);
     return history;
   },
+  getChecklistProgress: (userId) => checklistProgress.get(userId) || {},
+  updateChecklistItem: (userId, docId, updates) => {
+    const existing = checklistProgress.get(userId) || {};
+    const prevItem = existing[docId] || {};
+    const next = {
+      ...existing,
+      [docId]: {
+        ...prevItem,
+        ...(updates.status !== undefined ? { status: updates.status } : {}),
+        ...(updates.notes !== undefined ? { notes: updates.notes } : {}),
+        ...(updates.openedAt !== undefined ? { openedAt: updates.openedAt } : {}),
+        ...(updates.completedExternally !== undefined ? { completedExternally: updates.completedExternally } : {}),
+        ...(updates.filledRequiredCount !== undefined ? { filledRequiredCount: updates.filledRequiredCount } : {}),
+        ...(updates.totalRequiredCount !== undefined ? { totalRequiredCount: updates.totalRequiredCount } : {}),
+        ...(updates.fieldCompletionPercent !== undefined ? { fieldCompletionPercent: updates.fieldCompletionPercent } : {}),
+        ...(updates.uploadedFile !== undefined ? { uploadedFile: updates.uploadedFile } : {}),
+        updatedAt: new Date().toISOString()
+      }
+    };
+    checklistProgress.set(userId, next);
+    return next;
+  },
+  resetChecklistProgress: (userId) => {
+    checklistProgress.delete(userId);
+  },
+  getDocumentDraft: (userId, docId) => {
+    const userDrafts = documentDrafts.get(userId);
+    return userDrafts ? userDrafts[docId] || null : null;
+  },
+  saveDocumentDraft: (userId, docId, values) => {
+    const userDrafts = documentDrafts.get(userId) || {};
+    const record = {
+      values: { ...(values || {}) },
+      updatedAt: new Date().toISOString()
+    };
+    userDrafts[docId] = record;
+    documentDrafts.set(userId, userDrafts);
+    return record;
+  },
   purgeUserMemory: (userId) => {
     agentMemories.delete(userId);
     chatHistories.delete(userId);
+    checklistProgress.delete(userId);
+    documentDrafts.delete(userId);
   }
 };

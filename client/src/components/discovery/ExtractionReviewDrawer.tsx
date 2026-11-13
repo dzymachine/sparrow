@@ -337,7 +337,7 @@ export default function ExtractionReviewDrawer() {
           {activeTab === 'expenses' && (
             <div className="space-y-4">
               <div className="text-xs text-[#5C4E43]">
-                Recurring expenses automatically mapped into Foothold's two simple buckets: <strong>Bucket A (Must-Pays)</strong> and <strong>Bucket B (Life & Kids)</strong>.
+                Recurring expenses automatically mapped into Sparrow's two simple buckets: <strong>Bucket A (Must-Pays)</strong> and <strong>Bucket B (Life & Kids)</strong>.
               </div>
 
               {extractedData?.bankOrCredit?.recurringExpenses && (

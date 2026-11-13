@@ -30,7 +30,7 @@ export default function Footer() {
               <div className="w-6 h-6 rounded-md bg-[#435C4D] flex items-center justify-center text-white font-medium text-xs">
                 F
               </div>
-              <span className="text-white font-medium text-base tracking-tight">Foothold</span>
+              <span className="text-white font-medium text-base tracking-tight">Sparrow</span>
               <span className="text-[#8C7D73]">·</span>
               <span className="text-[#DFCABC]">Know What's Yours</span>
             </div>
@@ -64,14 +64,14 @@ export default function Footer() {
           <div>
             <h4 className="text-xs font-medium text-white tracking-wider uppercase mb-3">Statutory Guardrails</h4>
             <p className="text-[11px] text-[#A98F7C] leading-relaxed">
-              Foothold provides educational financial discovery and legal disclosure modeling, not legal advice. 
+              Sparrow provides educational financial discovery and legal disclosure modeling, not legal advice. 
               Always review your Discovery Packet with a qualified California family law attorney or court mediator.
             </p>
           </div>
         </div>
 
         <div className="border-t border-[#3D2F27] pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#8C725F]">
-          <p>© {new Date().getFullYear()} Foothold · Built for financial clarity and independence.</p>
+          <p>© {new Date().getFullYear()} Sparrow · Built for financial clarity and independence.</p>
           <p>California Family Law Discovery Compliant · AES-256 Storage</p>
         </div>
       </div>

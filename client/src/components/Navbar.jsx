@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, Sparkles, LogOut, User, LogIn, AlertOctagon, Eye, EyeOff, RotateCcw } from 'lucide-react';
+import { Shield, Sparkles, LogOut, User, LogIn, AlertOctagon, Eye, EyeOff, RotateCcw, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDiscovery } from '../context/DiscoveryContext';
 
@@ -59,7 +59,7 @@ export default function Navbar() {
             </div>
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="font-medium text-base text-[#261E19] tracking-tight">Foothold</span>
+                <span className="font-medium text-base text-[#261E19] tracking-tight">Sparrow</span>
                 <span className="text-xs text-[#8C7D73]">·</span>
                 <span className="text-xs text-[#5C4E43]">Know What's Yours</span>
               </div>
@@ -81,11 +81,25 @@ export default function Navbar() {
               Intake Profile
             </Link>
             <Link 
+              to="/consult" 
+              className={`hover:text-[#261E19] transition ${location.pathname === '/consult' ? 'text-[#261E19] font-semibold' : ''}`}
+            >
+              Consult a Pro
+            </Link>
+            <Link 
               to="/" 
               className={`hover:text-[#261E19] transition ${location.pathname === '/' ? 'text-[#261E19] font-semibold' : ''}`}
             >
               Overview
             </Link>
+            {currentUser && (
+              <Link
+                to="/settings"
+                className={`hover:text-[#261E19] transition ${location.pathname === '/settings' ? 'text-[#261E19] font-semibold' : ''}`}
+              >
+                Settings
+              </Link>
+            )}
           </nav>
 
           {/* User actions & Reset Workspace */}
@@ -107,6 +121,18 @@ export default function Navbar() {
                 >
                   <User className="w-3.5 h-3.5 text-[#435C4D]" />
                   <span className="max-w-[110px] truncate">{currentUser.displayName || currentUser.email}</span>
+                </Link>
+                <Link
+                  to="/settings"
+                  className={`p-1.5 rounded-lg transition ${
+                    location.pathname === '/settings'
+                      ? 'text-[#261E19] bg-[#F4EFEB]'
+                      : 'text-[#8C7D73] hover:text-[#261E19] hover:bg-[#F4EFEB]'
+                  }`}
+                  title="Settings"
+                  aria-label="Settings"
+                >
+                  <Settings className="w-4 h-4" />
                 </Link>
                 <button
                   onClick={handleLogout}

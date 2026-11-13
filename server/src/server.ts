@@ -10,7 +10,10 @@ dotenv.config();
 // Existing legacy routes
 const userRoutes = require('./routes/user');
 const agentRoutes = require('./routes/agent');
+const { syncDiscoveredDocumentToProfile } = require('./services/discoveryWikiSync');
 require('./config/firebaseAdmin');
+
+const GEMINI_DISCOVERY_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -307,22 +310,34 @@ Task:
    - Pay Stubs & Insurance Policies (Gross vs net, deductions, health premiums, beneficiaries)
 2. Provide a 2-sentence plain-English summary explaining what this document means for her rights, safety, or marital property entitlement.
 3. Flag any unlisted, undisclosed, or sole-name accounts found (especially from Schedule B interest/dividend lines or recurring external transfers).
-4. Extract all line items strictly conforming to the requested JSON responseSchema.
+4. Extract all line items strictly conforming to the requested JSON responseSchema. Be exact with all dollar amounts, balances, and arithmetic sums (never drop digits or trailing zeros; e.g., $4,600.00 + $4,600.00 = 9200).
 `;
 
+    const isTextLike =
+      mimeType.includes('csv') ||
+      mimeType.includes('text/plain') ||
+      fileName.toLowerCase().endsWith('.csv') ||
+      fileName.toLowerCase().endsWith('.txt');
+
+    const contentPart = isTextLike
+      ? {
+          text: `Document Filename: ${fileName}\nCategory Hint: ${categoryHint || 'auto-detect'}\n\nDocument Content:\n${fileBuffer.toString('utf-8')}`
+        }
+      : {
+          inlineData: {
+            data: base64Data,
+            mimeType: mimeType || 'application/pdf'
+          }
+        };
+
     const response = await ai.models.generateContent({
-      model: 'gemini-4-hydrogen',
+      model: GEMINI_DISCOVERY_MODEL,
       contents: [
         {
           role: 'user',
           parts: [
-            { text: promptText },
-            {
-              inlineData: {
-                data: base64Data,
-                mimeType: mimeType || 'application/pdf'
-              }
-            }
+            { text: promptText + (categoryHint ? `\nUser indicated category hint: ${categoryHint}.` : '') },
+            contentPart
           ]
         }
       ],
@@ -334,12 +349,16 @@ Task:
 
     const rawText = response.text || '';
     const parsed = JSON.parse(rawText);
+    if (parsed?.extractedData?.bankOrCredit?.totalMonthlyInflows !== undefined) {
+      parsed.extractedData.bankOrCredit.totalMonthlyInflows =
+        Math.round(Number(parsed.extractedData.bankOrCredit.totalMonthlyInflows) * 100) / 100;
+    }
     return {
       ...parsed,
-      sourceEngine: 'gemini-4-hydrogen'
+      sourceEngine: GEMINI_DISCOVERY_MODEL
     };
   } catch (error: any) {
-    console.warn('[Discovery Engine] gemini-4-hydrogen call skipped or encountered an error:', error?.message);
+    console.warn(`[Discovery Engine] ${GEMINI_DISCOVERY_MODEL} call skipped or encountered an error:`, error?.message);
     return fallbackAnalysis(fileBuffer, mimeType, fileName, categoryHint);
   }
 }
@@ -528,21 +547,186 @@ app.get('/api/discovery/samples', (_req: Request, res: Response) => {
   });
 });
 
+const TRIAGE_RESPONSE_SCHEMA = {
+  type: 'object',
+  properties: {
+    categoryKey: {
+      type: 'string',
+      enum: ['tax_returns', 'retirement', 'bank_statements', 'mortgage_lease', 'pay_stubs', 'marital_agreements', 'insurance_policies']
+    },
+    documentLabel: {
+      type: 'string',
+      description: 'Plain-English name of the document type, e.g., "Tax Document (Form 1040)", "401(k) Retirement Statement", "Bank Statement", "Mortgage Statement", "Pay Stub", "Marital Agreement", or "Insurance Policy".'
+    },
+    confidence: {
+      type: 'string',
+      enum: ['high', 'medium', 'low']
+    },
+    triageSummary: {
+      type: 'string',
+      description: 'One clear, reassuring sentence explaining what you see in the document so the user can confirm.'
+    }
+  },
+  required: ['categoryKey', 'documentLabel', 'confidence', 'triageSummary']
+};
+
+function fallbackTriage(fileName: string, textPreview: string = '') {
+  const lower = `${fileName} ${textPreview}`.toLowerCase();
+  if (lower.includes('1040') || lower.includes('tax') || lower.includes('w-2') || lower.includes('w2') || lower.includes('schedule b')) {
+    return {
+      categoryKey: 'tax_returns',
+      documentLabel: 'Tax Document (Form 1040 / W-2)',
+      confidence: 'high',
+      triageSummary: 'This appears to be a federal or state tax filing containing income and tax reporting details.'
+    };
+  }
+  if (lower.includes('401k') || lower.includes('401(k)') || lower.includes('ira') || lower.includes('retirement') || lower.includes('fidelity') || lower.includes('vanguard') || lower.includes('pension')) {
+    return {
+      categoryKey: 'retirement',
+      documentLabel: 'Retirement Account Statement (401k / IRA)',
+      confidence: 'high',
+      triageSummary: 'This appears to be a retirement or pension statement showing vested balances and holdings.'
+    };
+  }
+  if (lower.includes('mortgage') || lower.includes('escrow') || lower.includes('lease') || lower.includes('deed') || lower.includes('property')) {
+    return {
+      categoryKey: 'mortgage_lease',
+      documentLabel: 'Mortgage or Housing Document',
+      confidence: 'high',
+      triageSummary: 'This appears to be a mortgage, property, or lease document detailing housing payments or loan balance.'
+    };
+  }
+  if (lower.includes('paystub') || lower.includes('pay stub') || lower.includes('payroll') || lower.includes('earnings') || lower.includes('adp') || lower.includes('gusto')) {
+    return {
+      categoryKey: 'pay_stubs',
+      documentLabel: 'Pay Stub / Income Statement',
+      confidence: 'high',
+      triageSummary: 'This appears to be a payroll or earnings statement showing gross pay and deductions.'
+    };
+  }
+  if (lower.includes('prenup') || lower.includes('postnup') || lower.includes('stipulation') || lower.includes('agreement') || lower.includes('court')) {
+    return {
+      categoryKey: 'marital_agreements',
+      documentLabel: 'Marital or Support Agreement',
+      confidence: 'medium',
+      triageSummary: 'This appears to be a legal, marital, or support agreement.'
+    };
+  }
+  if (lower.includes('insurance') || lower.includes('policy') || lower.includes('beneficiary') || lower.includes('coverage')) {
+    return {
+      categoryKey: 'insurance_policies',
+      documentLabel: 'Insurance Policy or Benefits Summary',
+      confidence: 'medium',
+      triageSummary: 'This appears to be an insurance policy or beneficiary coverage document.'
+    };
+  }
+  return {
+    categoryKey: 'bank_statements',
+    documentLabel: 'Bank or Credit Card Statement',
+    confidence: 'medium',
+    triageSummary: 'This appears to be a bank or financial account statement with balances or transactions.'
+  };
+}
+
+async function triageDocumentWithGemini(
+  fileBuffer: Buffer,
+  mimeType: string,
+  fileName: string
+) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  const isTextLike = mimeType === 'text/csv' || mimeType === 'text/plain' || mimeType === 'application/vnd.ms-excel' || fileName.toLowerCase().endsWith('.csv') || fileName.toLowerCase().endsWith('.txt');
+  const textPreview = isTextLike ? fileBuffer.toString('utf8').slice(0, 4000) : '';
+
+  if (!apiKey) {
+    return { ...fallbackTriage(fileName, textPreview), sourceEngine: 'heuristic-fallback' };
+  }
+
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+    const parts: any[] = [
+      {
+        text: `You are an empathetic AI document triage assistant for Foothold, a divorce financial discovery app.
+Review this uploaded file ("${fileName}") and quickly classify what kind of financial or legal document it is so we can ask the user to confirm before ingesting it into their knowledge base.
+Return JSON matching the schema.`
+      }
+    ];
+
+    if (isTextLike) {
+      parts.push({ text: `File content preview:\n${textPreview}` });
+    } else {
+      parts.push({
+        inlineData: {
+          mimeType: mimeType || 'application/pdf',
+          data: fileBuffer.toString('base64')
+        }
+      });
+    }
+
+    const response = await ai.models.generateContent({
+      model: GEMINI_DISCOVERY_MODEL,
+      contents: [{ role: 'user', parts }],
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: TRIAGE_RESPONSE_SCHEMA
+      }
+    });
+
+    const rawText = response.text || '{}';
+    const parsed = JSON.parse(rawText);
+    return {
+      categoryKey: parsed.categoryKey || 'bank_statements',
+      documentLabel: parsed.documentLabel || 'Financial Document',
+      confidence: parsed.confidence || 'high',
+      triageSummary: parsed.triageSummary || 'Document reviewed and classified.',
+      sourceEngine: GEMINI_DISCOVERY_MODEL
+    };
+  } catch (err) {
+    console.warn('[Discovery Triage] Falling back to heuristic triage:', (err as Error).message);
+    return { ...fallbackTriage(fileName, textPreview), sourceEngine: 'heuristic-fallback' };
+  }
+}
+
+// POST triage document endpoint (Step 1 before user confirms upload & KB ingestion)
+app.post('/api/discovery/triage', upload.single('file'), async (req: Request, res: Response): Promise<any> => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file provided for triage' });
+    }
+    const file = req.file;
+    const fileName = file.originalname || 'uploaded_document.pdf';
+    const triage = await triageDocumentWithGemini(file.buffer, file.mimetype, fileName);
+    return res.json({
+      success: true,
+      fileName,
+      fileSize: file.size,
+      fileType: file.mimetype,
+      triage
+    });
+  } catch (error: any) {
+    console.error('[Discovery Triage Error]:', error);
+    return res.status(500).json({ error: error.message || 'Failed to triage document' });
+  }
+});
+
 // POST analyze document endpoint
 app.post('/api/discovery/analyze', upload.single('file'), async (req: Request, res: Response): Promise<any> => {
   try {
-    const { sampleDocId, categoryHint, fileName: bodyFileName } = req.body || {};
+    const { sampleDocId, categoryHint, fileName: bodyFileName, userId, skipWikiSync } = req.body || {};
+    const shouldSyncWiki = Boolean(userId) && skipWikiSync !== true && skipWikiSync !== 'true';
 
     // A. One-click sample test document request
     if (sampleDocId && SAMPLE_DOCUMENTS[sampleDocId]) {
       const sample = SAMPLE_DOCUMENTS[sampleDocId];
+      const responseDoc: ExtractedDiscoveryDocument = {
+        ...sample,
+        id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        uploadedAt: new Date().toISOString()
+      };
+      const wikiSync = shouldSyncWiki ? await syncDiscoveredDocumentToProfile(userId, responseDoc) : null;
       return res.json({
         success: true,
-        document: {
-          ...sample,
-          id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-          uploadedAt: new Date().toISOString()
-        }
+        document: responseDoc,
+        wikiSync
       });
     }
 
@@ -567,7 +751,7 @@ app.post('/api/discovery/analyze', upload.single('file'), async (req: Request, r
         confidenceScore: extracted.confidenceScore || 0.95,
         status: 'Uploaded',
         uploadedAt: new Date().toISOString(),
-        sourceEngine: extracted.sourceEngine || 'gemini-4-hydrogen',
+        sourceEngine: extracted.sourceEngine || GEMINI_DISCOVERY_MODEL,
         plainEnglishSummary: extracted.plainEnglishSummary || 'Document extracted successfully. Review the findings below before syncing into your workspace.',
         documentClassification: extracted.documentClassification || {
           category: 'financial_statement',
@@ -581,9 +765,11 @@ app.post('/api/discovery/analyze', upload.single('file'), async (req: Request, r
         unlistedAccounts: extracted.unlistedAccounts || []
       };
 
+      const wikiSync = shouldSyncWiki ? await syncDiscoveredDocumentToProfile(userId, responseDoc) : null;
       return res.json({
         success: true,
-        document: responseDoc
+        document: responseDoc,
+        wikiSync
       });
     }
 
@@ -608,7 +794,7 @@ app.post('/api/discovery/analyze', upload.single('file'), async (req: Request, r
         confidenceScore: extracted.confidenceScore || 0.95,
         status: 'Uploaded',
         uploadedAt: new Date().toISOString(),
-        sourceEngine: extracted.sourceEngine || 'gemini-4-hydrogen',
+        sourceEngine: extracted.sourceEngine || GEMINI_DISCOVERY_MODEL,
         plainEnglishSummary: extracted.plainEnglishSummary || 'Statement analyzed successfully.',
         documentClassification: extracted.documentClassification || {
           category: 'bank_statement',
@@ -622,9 +808,11 @@ app.post('/api/discovery/analyze', upload.single('file'), async (req: Request, r
         unlistedAccounts: extracted.unlistedAccounts || []
       };
 
+      const wikiSync = shouldSyncWiki ? await syncDiscoveredDocumentToProfile(userId, responseDoc) : null;
       return res.json({
         success: true,
-        document: responseDoc
+        document: responseDoc,
+        wikiSync
       });
     }
 
@@ -641,13 +829,37 @@ app.post('/api/discovery/analyze', upload.single('file'), async (req: Request, r
   }
 });
 
+// POST commit/sync reviewed discovery document to user's Personal LLM Wiki & Memory
+app.post('/api/discovery/commit', async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { userId, document } = req.body || {};
+    if (!userId || !document) {
+      return res.status(400).json({
+        error: 'MISSING_PARAMETERS',
+        message: 'userId and document are required to commit discovery findings.'
+      });
+    }
+    const syncResult = await syncDiscoveredDocumentToProfile(userId, document);
+    return res.json({
+      success: true,
+      ...syncResult
+    });
+  } catch (err: any) {
+    console.error('[Discovery Engine] Commit sync error:', err);
+    return res.status(500).json({
+      error: 'COMMIT_FAILED',
+      message: err?.message || 'Unable to sync document findings to your Personal LLM Wiki.'
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (_req: Request, res: Response) => {
   res.json({
     status: 'healthy',
     name: 'Foothold Financial Discovery Service',
     description: "Know What's Yours - Document Intelligence Engine",
-    geminiModel: 'gemini-4-hydrogen',
+    geminiModel: GEMINI_DISCOVERY_MODEL,
     geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
     time: new Date().toISOString()
   });

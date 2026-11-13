@@ -11,6 +11,9 @@ export function AgentMemoryProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [agentMemory, setAgentMemory] = useState(null);
   const [wikiData, setWikiData] = useState(null);
+  const [divorceChecklist, setDivorceChecklist] = useState(null);
+  const [lifeProjection, setLifeProjection] = useState(null);
+  const [isCalculatingProjection, setIsCalculatingProjection] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isUpdatingWiki, setIsUpdatingWiki] = useState(false);
@@ -20,6 +23,19 @@ export function AgentMemoryProvider({ children }) {
   const toggleBuddyDrawer = useCallback(() => setIsBuddyOpen((prev) => !prev), []);
   const openBuddyDrawer = useCallback(() => setIsBuddyOpen(true), []);
   const closeBuddyDrawer = useCallback(() => setIsBuddyOpen(false), []);
+
+  const refreshChecklist = useCallback(async (uid = activeUserId) => {
+    try {
+      const res = await api.getDivorceChecklist(uid);
+      if (res?.checklist) {
+        setDivorceChecklist(res.checklist);
+      }
+      return res?.checklist || null;
+    } catch (e) {
+      console.log('Unable to fetch divorce document checklist yet.');
+      return null;
+    }
+  }, [activeUserId]);
 
   const refreshWiki = useCallback(async (uid = activeUserId) => {
     try {
@@ -33,6 +49,56 @@ export function AgentMemoryProvider({ children }) {
       return null;
     }
   }, [activeUserId]);
+
+  const refreshLifeProjection = useCallback(async (uid = activeUserId) => {
+    setIsCalculatingProjection(true);
+    try {
+      const res = await api.getLifeProjection(uid);
+      if (res?.projection) {
+        setLifeProjection(res.projection);
+      }
+      return res?.projection || null;
+    } catch (e) {
+      console.log('Unable to calculate post-divorce projection yet.');
+      return null;
+    } finally {
+      setIsCalculatingProjection(false);
+    }
+  }, [activeUserId]);
+
+  const refreshAllMemory = useCallback(async (uid = activeUserId) => {
+    const tasks = [refreshWiki(uid), refreshLifeProjection(uid)];
+    if (currentUser?.uid) {
+      tasks.push(
+        api.getAgentMemory(uid).then((r) => {
+          if (r?.memory) setAgentMemory(r.memory);
+        }).catch(() => {})
+      );
+      tasks.push(
+        api.getUserProfile(uid).then((r) => {
+          if (r?.profile) setProfile(r.profile);
+        }).catch(() => {})
+      );
+    }
+    await Promise.all(tasks);
+  }, [activeUserId, currentUser?.uid, refreshWiki, refreshLifeProjection]);
+
+  const saveLifeProjectionInputs = useCallback(async (inputs, uid = activeUserId) => {
+    setIsCalculatingProjection(true);
+    try {
+      const res = await api.saveLifeProjectionInputs(uid, inputs);
+      if (res?.profile) {
+        setProfile(res.profile);
+      }
+      if (res?.projection) {
+        setLifeProjection(res.projection);
+      }
+      await refreshWiki(uid);
+      return res?.projection || null;
+    } finally {
+      setIsCalculatingProjection(false);
+    }
+  }, [activeUserId, refreshWiki]);
 
   // Sync user profile, agent memory, wiki, and chat history whenever activeUserId changes
   useEffect(() => {
@@ -76,6 +142,16 @@ export function AgentMemoryProvider({ children }) {
           console.log('No existing personal wiki found.');
         }
 
+        // Load tailored Divorce Document Checklist
+        try {
+          const checklistRes = await api.getDivorceChecklist(activeUserId);
+          if (isMounted && checklistRes?.checklist) {
+            setDivorceChecklist(checklistRes.checklist);
+          }
+        } catch (e) {
+          console.log('Unable to load divorce checklist yet.');
+        }
+
         // Fetch Chat History
         try {
           const chatRes = await api.getChatHistory(activeUserId);
@@ -86,7 +162,7 @@ export function AgentMemoryProvider({ children }) {
             setChatMessages([
               {
                 sender: 'agent',
-                text: `Hello ${greetingName}. I am Ruth, your private financial discovery companion. Whatever your situation is, you do not have to figure this out alone. Share anything you've discovered or ask a question—I'll organize key details into your Personal Wiki so you never have to repeat yourself.`,
+                text: `Hey ${greetingName}! I'm Finch, your financial buddy here. Share any accounts, questions, or details—I'll keep track of them so you never have to repeat yourself.`,
                 timestamp: new Date().toISOString()
               }
             ]);
@@ -96,7 +172,7 @@ export function AgentMemoryProvider({ children }) {
             setChatMessages([
               {
                 sender: 'agent',
-                text: `Hello ${currentUser?.displayName || 'there'}. I am Ruth, your private financial discovery companion. How can I support you today?`,
+                text: `Hey ${currentUser?.displayName || 'there'}! I'm Finch, your financial buddy. What's on your mind today?`,
                 timestamp: new Date().toISOString()
               }
             ]);
@@ -124,6 +200,11 @@ export function AgentMemoryProvider({ children }) {
         ...data
       });
       setProfile(res.profile);
+      if (res.checklist) {
+        setDivorceChecklist(res.checklist);
+      } else {
+        await refreshChecklist(currentUser.uid);
+      }
 
       const memRes = await api.getAgentMemory(currentUser.uid);
       if (memRes.memory) {
@@ -134,6 +215,41 @@ export function AgentMemoryProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
+  };
+
+  // Update a document item's status or notes in the Divorce Document Checklist
+  const updateDocumentChecklistItem = async (docId, updates) => {
+    try {
+      const res = await api.updateChecklistItem(activeUserId, docId, updates);
+      if (res?.checklist) {
+        setDivorceChecklist(res.checklist);
+      }
+      return res?.checklist || null;
+    } catch (err) {
+      console.error('Failed to update document checklist item:', err);
+      return null;
+    }
+  };
+
+  // Upload an already-completed document for a checklist item
+  const uploadCompletedChecklistDoc = async (docId, file) => {
+    const dataBase64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const res = await api.uploadChecklistDocument(activeUserId, docId, {
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: file.type || 'application/pdf',
+      dataBase64
+    });
+    if (res?.checklist) {
+      setDivorceChecklist(res.checklist);
+    }
+    return res;
   };
 
   // Add discovered asset to memory + wiki
@@ -184,7 +300,7 @@ export function AgentMemoryProvider({ children }) {
       setChatMessages([
         {
           sender: 'agent',
-          text: 'All of your Personal Wiki entries and conversation history have been permanently purged. We are starting with a clean slate whenever you are ready.',
+          text: 'All cleared! Everything we talked about is wiped—fresh start whenever you\'re ready.',
           timestamp: new Date().toISOString()
         }
       ]);
@@ -233,6 +349,9 @@ export function AgentMemoryProvider({ children }) {
     profile,
     agentMemory,
     wikiData,
+    divorceChecklist,
+    lifeProjection,
+    isCalculatingProjection,
     chatMessages,
     isSyncing,
     isUpdatingWiki,
@@ -246,6 +365,12 @@ export function AgentMemoryProvider({ children }) {
     updateWikiSection,
     purgeMemory,
     refreshWiki,
+    refreshChecklist,
+    refreshLifeProjection,
+    refreshAllMemory,
+    saveLifeProjectionInputs,
+    updateDocumentChecklistItem,
+    uploadCompletedChecklistDoc,
     sendMessage
   };
 

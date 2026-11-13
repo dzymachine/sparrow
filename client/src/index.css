@@ -26,3 +26,58 @@
 .card-hairline {
   @apply bg-white border border-[#E2DBD0] rounded-xl shadow-none;
 }
+
+/* Finch bird animations */
+@keyframes finch-bob {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-2.5px) rotate(-1.5deg);
+  }
+}
+
+@keyframes finch-wing {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+  75% {
+    transform: rotate(-6deg);
+  }
+}
+
+@keyframes finch-blink {
+  0%, 92%, 100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+
+.animate-finch-bob {
+  animation: finch-bob 2.8s ease-in-out infinite;
+}
+
+.animate-finch-wing {
+  transform-box: fill-box;
+  transform-origin: 30% 35%;
+  animation: finch-wing 2.8s ease-in-out infinite;
+}
+
+.group:hover .animate-finch-wing,
+.finch-active .animate-finch-wing {
+  animation: finch-wing 0.55s ease-in-out infinite;
+}
+
+.animate-finch-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: finch-blink 4.5s ease-in-out infinite;
+}

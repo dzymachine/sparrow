@@ -72,7 +72,7 @@ export default function AuthPage() {
             <Shield className="w-6 h-6" />
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-            {isSignUp ? 'Create your private account' : 'Welcome back to RuthAI'}
+            {isSignUp ? 'Create your private account' : 'Welcome back to Sparrow'}
           </h2>
           <p className="text-xs sm:text-sm text-slate-500">
             {isSignUp

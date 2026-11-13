@@ -7,6 +7,7 @@ import {
   VaultAccount,
   RecurringExpenseItem
 } from '../types/discovery';
+import { useAgentMemory } from './AgentMemoryContext';
 
 const STORAGE_KEY = 'foothold_discovery_state_v1';
 
@@ -234,18 +235,46 @@ const DEFAULT_WORKSPACE_STATE: DiscoveryWorkspaceState = {
   privacyMode: false
 };
 
+interface WikiSyncSummary {
+  addedCount: number;
+  fileName: string;
+  syncedAt: string;
+}
+
+export interface PendingTriage {
+  file: File;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  previewUrl: string;
+  triage: {
+    categoryKey: DiscoveryCategoryKey;
+    documentLabel: string;
+    confidence: string;
+    triageSummary: string;
+    sourceEngine?: string;
+  };
+}
+
 interface DiscoveryContextType {
   workspace: DiscoveryWorkspaceState;
   checklist: CategoryChecklistItem[];
   activeReviewDoc: ExtractedDocument | null;
   isAnalyzing: boolean;
+  isTriaging: boolean;
+  pendingTriage: PendingTriage | null;
+  isSyncingToWiki: boolean;
+  lastWikiSync: WikiSyncSummary | null;
   analyzingFileName: string;
   analysisError: string | null;
   openReviewDrawer: (docId: string) => void;
   closeReviewDrawer: () => void;
+  triageFileForUpload: (file: File, categoryHint?: DiscoveryCategoryKey) => Promise<PendingTriage | null>;
+  confirmTriageAndUpload: (confirmedCategoryKey?: DiscoveryCategoryKey) => Promise<ExtractedDocument | null>;
+  cancelTriage: () => void;
   uploadFileAndAnalyze: (file: File, categoryHint?: DiscoveryCategoryKey) => Promise<ExtractedDocument | null>;
   loadSampleDocument: (sampleDocId: string) => Promise<ExtractedDocument | null>;
-  approveAndSyncDocument: (docId: string, updatedDoc?: ExtractedDocument) => void;
+  approveAndSyncDocument: (docId: string, updatedDoc?: ExtractedDocument) => Promise<void>;
   updateExtractedDocument: (docId: string, updatedDoc: ExtractedDocument) => void;
   deleteDocument: (docId: string) => void;
   togglePrivacyMode: () => void;
@@ -257,6 +286,10 @@ interface DiscoveryContextType {
 const DiscoveryContext = createContext<DiscoveryContextType | null>(null);
 
 export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
+  const agentMemoryCtx = useAgentMemory() as any;
+  const activeUserId: string = agentMemoryCtx?.activeUserId || 'guest-session';
+  const refreshAllMemory: ((uid?: string) => Promise<void>) | undefined = agentMemoryCtx?.refreshAllMemory;
+
   const [workspace, setWorkspace] = useState<DiscoveryWorkspaceState>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -271,6 +304,10 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
 
   const [activeReviewDocId, setActiveReviewDocId] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isTriaging, setIsTriaging] = useState(false);
+  const [pendingTriage, setPendingTriage] = useState<PendingTriage | null>(null);
+  const [isSyncingToWiki, setIsSyncingToWiki] = useState(false);
+  const [lastWikiSync, setLastWikiSync] = useState<WikiSyncSummary | null>(null);
   const [analyzingFileName, setAnalyzingFileName] = useState('');
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
@@ -344,7 +381,7 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch('/api/discovery/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sampleDocId })
+        body: JSON.stringify({ sampleDocId, userId: activeUserId })
       });
 
       if (!res.ok) {
@@ -370,6 +407,17 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
         };
       });
 
+      if (data.wikiSync?.synced) {
+        setLastWikiSync({
+          addedCount: data.wikiSync.addedCount || 0,
+          fileName: newDoc.fileName,
+          syncedAt: new Date().toISOString()
+        });
+        if (refreshAllMemory) {
+          await refreshAllMemory(activeUserId);
+        }
+      }
+
       setActiveReviewDocId(newDoc.id);
       setIsAnalyzing(false);
       return newDoc;
@@ -379,7 +427,7 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
       setIsAnalyzing(false);
       return null;
     }
-  }, []);
+  }, [activeUserId, refreshAllMemory]);
 
   // File Upload and Gemini Analysis
   const uploadFileAndAnalyze = useCallback(
@@ -391,6 +439,7 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
       try {
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('userId', activeUserId);
         if (categoryHint) {
           formData.append('categoryHint', categoryHint);
         }
@@ -410,12 +459,27 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
           throw new Error(data.message || 'Unable to extract structured data.');
         }
 
-        const newDoc: ExtractedDocument = data.document;
+        const previewUrl = URL.createObjectURL(file);
+        const newDoc: ExtractedDocument & { previewUrl?: string } = {
+          ...data.document,
+          previewUrl
+        };
 
         setWorkspace((prev) => ({
           ...prev,
           documents: [newDoc, ...prev.documents]
         }));
+
+        if (data.wikiSync?.synced) {
+          setLastWikiSync({
+            addedCount: data.wikiSync.addedCount || 0,
+            fileName: newDoc.fileName,
+            syncedAt: new Date().toISOString()
+          });
+          if (refreshAllMemory) {
+            await refreshAllMemory(activeUserId);
+          }
+        }
 
         setActiveReviewDocId(newDoc.id);
         setIsAnalyzing(false);
@@ -427,8 +491,74 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
     },
+    [activeUserId, refreshAllMemory]
+  );
+
+  // Step 1: AI Triage before uploading & adding to Knowledge Base
+  const triageFileForUpload = useCallback(
+    async (file: File, categoryHint?: DiscoveryCategoryKey) => {
+      setIsTriaging(true);
+      setAnalysisError(null);
+      setAnalyzingFileName(file.name);
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/discovery/triage', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Document triage failed');
+        }
+
+        const data = await res.json();
+        const previewUrl = URL.createObjectURL(file);
+        const triageResult: PendingTriage = {
+          file,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          previewUrl,
+          triage: {
+            ...data.triage,
+            categoryKey: categoryHint || data.triage?.categoryKey || 'bank_statements'
+          }
+        };
+
+        setPendingTriage(triageResult);
+        setIsTriaging(false);
+        return triageResult;
+      } catch (err: any) {
+        console.error('File triage error:', err);
+        setAnalysisError(err.message || 'Unable to review file before upload.');
+        setIsTriaging(false);
+        return null;
+      }
+    },
     []
   );
+
+  // Step 2: User confirms document type -> upload, parse, and add to LLM Wiki KB
+  const confirmTriageAndUpload = useCallback(
+    async (confirmedCategoryKey?: DiscoveryCategoryKey) => {
+      if (!pendingTriage) return null;
+      const targetFile = pendingTriage.file;
+      const categoryToUse = confirmedCategoryKey || pendingTriage.triage.categoryKey;
+      setPendingTriage(null);
+      return uploadFileAndAnalyze(targetFile, categoryToUse);
+    },
+    [pendingTriage, uploadFileAndAnalyze]
+  );
+
+  const cancelTriage = useCallback(() => {
+    if (pendingTriage?.previewUrl) {
+      URL.revokeObjectURL(pendingTriage.previewUrl);
+    }
+    setPendingTriage(null);
+  }, [pendingTriage]);
 
   // Update extracted document before or after sync
   const updateExtractedDocument = useCallback((docId: string, updatedDoc: ExtractedDocument) => {
@@ -451,13 +581,22 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
 
   // Explicit "Approve & Sync to Workspace"
   const approveAndSyncDocument = useCallback(
-    (docId: string, updatedDoc?: ExtractedDocument) => {
+    async (docId: string, updatedDoc?: ExtractedDocument) => {
+      const targetDoc = updatedDoc || workspace.documents.find((d) => d.id === docId);
+      const approvedDocForServer: ExtractedDocument | null = targetDoc
+        ? {
+            ...targetDoc,
+            status: 'Reviewed',
+            approvedAt: new Date().toISOString()
+          }
+        : null;
+
       setWorkspace((prev) => {
-        const targetDoc = updatedDoc || prev.documents.find((d) => d.id === docId);
-        if (!targetDoc) return prev;
+        const docToSync = updatedDoc || prev.documents.find((d) => d.id === docId);
+        if (!docToSync) return prev;
 
         const approvedDoc: ExtractedDocument = {
-          ...targetDoc,
+          ...docToSync,
           status: 'Reviewed',
           approvedAt: new Date().toISOString()
         };
@@ -672,8 +811,37 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
       });
 
       setActiveReviewDocId(null);
+
+      if (approvedDocForServer) {
+        setIsSyncingToWiki(true);
+        try {
+          const res = await fetch('/api/discovery/commit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: activeUserId,
+              document: approvedDocForServer
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setLastWikiSync({
+              addedCount: data.addedCount || 0,
+              fileName: approvedDocForServer.fileName,
+              syncedAt: new Date().toISOString()
+            });
+            if (refreshAllMemory) {
+              await refreshAllMemory(activeUserId);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to commit discovery document to LLM Wiki:', err);
+        } finally {
+          setIsSyncingToWiki(false);
+        }
+      }
     },
-    []
+    [activeUserId, refreshAllMemory, workspace.documents]
   );
 
   // Reset workspace to clean defaults
@@ -746,7 +914,7 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Foothold_Discovery_Packet_${new Date().toISOString().slice(0, 10)}.csv`;
+        link.download = `Sparrow_Discovery_Packet_${new Date().toISOString().slice(0, 10)}.csv`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -761,7 +929,7 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Foothold Discovery Packet · Confidential Legal Brief</title>
+  <title>Sparrow Discovery Packet · Confidential Legal Brief</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #261E19; background: #FFF; padding: 40px; margin: 0 auto; max-width: 850px; font-size: 13px; line-height: 1.5; }
     h1 { font-size: 22px; margin-bottom: 4px; color: #261E19; }
@@ -901,7 +1069,7 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
   </table>
 
   <div class="footer">
-    Foothold Document Intelligence Brief · Grounded in verified user-uploaded statements · Strictly for attorney / mediator preparation · Not legal advice.
+    Sparrow Document Intelligence Brief · Grounded in verified user-uploaded statements · Strictly for attorney / mediator preparation · Not legal advice.
   </div>
 </body>
 </html>
@@ -924,10 +1092,17 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
         checklist,
         activeReviewDoc,
         isAnalyzing,
+        isTriaging,
+        pendingTriage,
+        isSyncingToWiki,
+        lastWikiSync,
         analyzingFileName,
         analysisError,
         openReviewDrawer,
         closeReviewDrawer,
+        triageFileForUpload,
+        confirmTriageAndUpload,
+        cancelTriage,
         uploadFileAndAnalyze,
         loadSampleDocument,
         approveAndSyncDocument,

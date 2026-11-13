@@ -264,7 +264,7 @@ export default function LandingPage() {
                 She spent hours counting furniture for attorneys, while missing out on significant settlement entitlements simply because nobody showed her where to look.
               </p>
               <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-brand-800">
-                <span>RuthAI was built so no woman has to face that uncertainty alone.</span>
+                <span>Sparrow was built so no woman has to face that uncertainty alone.</span>
               </div>
             </div>
           </div>
@@ -279,13 +279,20 @@ export default function LandingPage() {
         <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto">
           Start your confidential evaluation today. It takes less than 3 minutes to complete the initial assessment.
         </p>
-        <div className="pt-2">
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             to="/onboarding"
             className="inline-flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold px-8 py-3.5 rounded-xl shadow-md hover:shadow-lg transition text-base"
           >
             <span>Begin Guided Onboarding</span>
             <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link
+            to="/consult"
+            className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-800 font-semibold px-6 py-3.5 rounded-xl border border-slate-300 shadow-sm transition text-base"
+          >
+            <span>Consult a Professional</span>
+            <ArrowRight className="w-4 h-4 text-brand-700" />
           </Link>
         </div>
       </section>

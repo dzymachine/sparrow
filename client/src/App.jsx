@@ -13,6 +13,10 @@ import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import OnboardingPage from './pages/OnboardingPage';
 import DashboardPage from './pages/DashboardPage.tsx';
+import FinancialDiscoveryPage from './pages/FinancialDiscoveryPage.tsx';
+import DivorceChecklistPage from './pages/DivorceChecklistPage.tsx';
+import SettingsPage from './pages/SettingsPage.tsx';
+import ConsultProfessionalPage from './pages/ConsultProfessionalPage.tsx';
 
 export default function App() {
   return (
@@ -49,6 +53,39 @@ export default function App() {
                       </ProtectedRoute>
                     }
                   />
+
+                  {/* 5. Financial Discovery Engine Page */}
+                  <Route
+                    path="/discovery"
+                    element={
+                      <ProtectedRoute>
+                        <FinancialDiscoveryPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* 6. Divorce Document Checklist Page */}
+                  <Route
+                    path="/checklist"
+                    element={
+                      <ProtectedRoute>
+                        <DivorceChecklistPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* 7. Account & Security Settings Page */}
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <SettingsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* 8. Consult a Family Law Professional (Google Maps Finder) */}
+                  <Route path="/consult" element={<ConsultProfessionalPage />} />
 
                   {/* Fallback */}
                   <Route path="*" element={<Navigate to="/" replace />} />

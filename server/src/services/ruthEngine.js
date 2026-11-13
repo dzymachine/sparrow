@@ -241,7 +241,7 @@ async function callGeminiIfConfigured(promptText) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { temperature: 0.4, maxOutputTokens: 600 }
+        generationConfig: { temperature: 0.5, maxOutputTokens: 250 }
       })
     });
     if (!response.ok) return null;
@@ -293,9 +293,13 @@ async function generateRuthResponse({ userId, message, profile, newlyAddedFacts 
 
   // Try Gemini if API key is configured
   if (process.env.GEMINI_API_KEY) {
-    const systemPrompt = `You are Ruth, a warm, empathetic, trauma-informed AI financial discovery companion for women navigating divorce.
-You are strictly educational (include a brief reminder that this is financial education, not legal advice).
-Proactively reference relevant facts from the user's Personal LLM Wiki below when answering so they feel heard and remembered.
+    const systemPrompt = `You are Finch, a warm, casual, down-to-earth AI buddy helping women sort out their money during a divorce.
+Style rules (strict):
+- Be VERY short and concise (2-3 short sentences max, or 3 tiny bullets if listing things).
+- Sound conversational, casual, and friendly—like a supportive, smart friend texting, not a textbook or lawyer.
+- Explain complex money or legal stuff in plain, everyday words. NO complex jargon (if you must mention a term like QDRO or Schedule B, explain it in 3-5 simple words).
+- Reference relevant facts from the user's Personal Wiki below so they feel heard.
+- End with a super brief reminder that this is just helpful info, not legal advice.
 
 USER PERSONAL LLM WIKI:
 ${compiledContext}
@@ -303,7 +307,7 @@ ${compiledContext}
 USER MESSAGE:
 ${message}
 
-Respond concisely (3-5 sentences), empathetically, and grounded in their state's rules (${jurisdiction}).`;
+Keep it short, casual, easy to read, and grounded in ${jurisdiction} rules.`;
 
     const geminiText = await callGeminiIfConfigured(systemPrompt);
     if (geminiText) {
@@ -322,8 +326,7 @@ Respond concisely (3-5 sentences), empathetically, and grounded in their state's
   // Acknowledge newly saved facts if any
   const nonLogAdded = newlyAddedFacts.filter((f) => f.section !== 'interaction_log');
   if (nonLogAdded.length > 0) {
-    const savedLabels = [...new Set(nonLogAdded.map((f) => f.category))].join(', ');
-    parts.push(`I've noted that in your Personal Wiki (${savedLabels}) so you don't have to repeat yourself.`);
+    parts.push(`Got it—saved that so you don't have to repeat yourself.`);
   }
 
   // Check for specific account/institution references in wiki
@@ -337,21 +340,21 @@ Respond concisely (3-5 sentences), empathetically, and grounded in their state's
 
   if (lower.includes('remember') || lower.includes('know about me') || lower.includes('wiki') || lower.includes('summary')) {
     if (wiki.stats.totalFacts === 0) {
-      parts.push(`Right now your Personal Wiki is completely clear. Whenever you share details about your state, marriage length, accounts, or goals, I'll organize them here so we can build your financial picture together.`);
+      parts.push(`Nothing saved yet! Share your state, accounts, or goals anytime and I'll keep track of it here.`);
     } else {
       const highlights = [];
-      if (jurisdiction) highlights.push(`you're navigating this in **${jurisdiction}** (${isCommunityProp ? 'Community Property' : 'Equitable Distribution'})`);
-      if (marriageYears) highlights.push(`a **${marriageYears}-year marriage**`);
-      if (mentionedAccounts.length > 0) highlights.push(`tracked financial leads including **${mentionedAccounts.slice(0, 3).join('; ')}**`);
-      if (realEstateFacts.length > 0) highlights.push(`property details (**${realEstateFacts[0]}**)`);
-      parts.push(`Here is what I currently remember in your Personal Wiki: ${highlights.join(', ')}. You can inspect, edit, or purge any of these details anytime in the **Memory Inspector** tab.`);
+      if (jurisdiction) highlights.push(`you're in **${jurisdiction}** (${isCommunityProp ? '50/50 split state' : 'fair-split state'})`);
+      if (marriageYears) highlights.push(`married **${marriageYears} years**`);
+      if (mentionedAccounts.length > 0) highlights.push(`accounts we're tracking: **${mentionedAccounts.slice(0, 3).join('; ')}**`);
+      if (realEstateFacts.length > 0) highlights.push(`home info (**${realEstateFacts[0]}**)`);
+      parts.push(`Here's what I've got so far: ${highlights.join(', ')}. You can edit or delete any of this anytime in **Memory Inspector**.`);
     }
   } else if (lower.includes('house') || lower.includes('home') || lower.includes('mortgage') || lower.includes('refinance')) {
     const homeContext = realEstateFacts.length > 0
-      ? `Looking at what we have recorded (**${realEstateFacts[0]}**), `
+      ? `Based on your notes (**${realEstateFacts[0]}**), `
       : '';
     parts.push(
-      `I understand how important stability and keeping your home can feel right now. ${homeContext}in ${jurisdiction}, keeping the marital home means evaluating both equity buyout rules and whether refinancing at current rates is sustainable on post-divorce income. Let's run the numbers in your 5-Year Life Projection so you can make a clear-eyed decision without becoming house-rich and cash-poor.`
+      `Wanting to keep the house makes total sense. ${homeContext}In ${jurisdiction}, keeping it usually means buying out your spouse's share and refinancing on your own income. Check your **5-Year Life Projection** to see if the monthly payments still feel comfortable.`
     );
   } else if (
     lower.includes('account') || lower.includes('hidden') || lower.includes('vanguard') ||
@@ -359,41 +362,41 @@ Respond concisely (3-5 sentences), empathetically, and grounded in their state's
     lower.includes('find') || lower.includes('asset') || lower.includes('401k') || lower.includes('401(k)')
   ) {
     const acctRef = mentionedAccounts.length > 0
-      ? `Based on your Personal Wiki, we already have these accounts flagged: **${mentionedAccounts.slice(0, 3).join(' | ')}**. `
+      ? `We already have these flagged: **${mentionedAccounts.slice(0, 3).join(' | ')}**. `
       : '';
     parts.push(
-      `${acctRef}When one spouse managed the accounts, tax returns are your strongest investigative tool—Form 1040 **Schedule B** reveals interest and dividend payers (like brokerage or savings accounts), and **Schedule D** shows stock sales. Under ${jurisdiction} ${isCommunityProp ? 'Community Property' : 'Equitable Distribution'} rules, marital contributions to these accounts are subject to formal disclosure and division.`
+      `${acctRef}Tax returns are the easiest place to spot hidden accounts—check **Schedule B** (shows bank and investment interest) and **Schedule D** (shows stock sales). In ${jurisdiction}, money saved during marriage usually has to be shared and split.`
     );
   } else if (lower.includes('lawyer') || lower.includes('attorney') || lower.includes('ask') || lower.includes('prep') || lower.includes('legal')) {
     const acctRef = mentionedAccounts.length > 0
-      ? `Make sure to bring up the specific accounts in your Wiki (**${mentionedAccounts.slice(0, 2).join('; ')}**) and request formal discovery/statements for each. `
+      ? `Bring up the accounts we saved (**${mentionedAccounts.slice(0, 2).join('; ')}**) and ask how to get official statements. `
       : '';
     const lawyerRef = lawyerFacts.length > 0
-      ? `You also have ${lawyerFacts.length} open item(s) saved in your Lawyer Readiness wiki. `
+      ? `You also have ${lawyerFacts.length} note(s) saved for your lawyer. `
       : '';
     parts.push(
-      `Family law attorneys often charge $350–$650/hour, so walking in organized saves thousands. ${acctRef}${lawyerRef}Ask specifically about: (1) formal Schedule B/account disclosure requests, (2) QDRO requirements for any retirement accounts, and (3) temporary support orders while discovery is pending.`
+      `Lawyers charge by the hour, so going in organized saves real money. ${acctRef}${lawyerRef}Ask them: (1) how to get full account statements, (2) how to split retirement accounts without tax penalties, and (3) if you can get temporary support while things are sorted out.`
     );
   } else if (lower.includes('alimony') || lower.includes('support') || lower.includes('maintenance')) {
     const yrNote = marriageYears
-      ? `With your **${marriageYears}-year marriage** in **${jurisdiction}**, `
+      ? `Since you've been married **${marriageYears} years** in **${jurisdiction}**, `
       : `In **${jurisdiction}**, `;
     const caRule = (jurisdiction === 'California' && marriageYears && marriageYears >= 10)
-      ? `you cross the 10-year threshold under CA Family Code § 4336 for a "marriage of long duration," meaning the court retains ongoing jurisdiction over spousal support rather than setting an automatic short-term cutoff. `
-      : `spousal support duration and amount depend on marriage length, income disparity, and caregiving history. `;
+      ? `California treats 10+ years as a long marriage—meaning spousal support doesn't have an automatic cutoff date. `
+      : `spousal support depends on how long you were married, what each of you earns, and who handled caregiving. `;
     parts.push(
-      `${yrNote}${caRule}Documenting your household's historical standard of living and your caregiving/employment role will be essential for your attorney.`
+      `${yrNote}${caRule}Jot down your usual living costs and work history so your lawyer has the full picture.`
     );
   } else {
     const contextHint = mentionedAccounts.length > 0
-      ? ` We currently have **${mentionedAccounts.length} financial lead(s)** (including ${mentionedAccounts[0]}) saved in your Personal Wiki.`
+      ? ` We've already got **${mentionedAccounts.length} account(s)** saved (like ${mentionedAccounts[0]}).`
       : '';
     parts.push(
-      `I hear you, and you don't have to carry this alone. Taking financial discovery one step at a time is the most protective thing you can do right now.${contextHint} Would you like to review your tracked accounts, test housing affordability, or prepare questions for an attorney?`
+      `I've got your back—let's take this one small step at a time.${contextHint} Want to look over your accounts, check if the house fits your budget, or prep questions for a lawyer?`
     );
   }
 
-  parts.push(`*Educational guidance only—not legal advice. Please confirm strategy with a licensed ${jurisdiction} family law attorney.*`);
+  parts.push(`*Just helpful info, not legal advice—double-check with a ${jurisdiction} lawyer.*`);
 
   return {
     reply: parts.join(' '),

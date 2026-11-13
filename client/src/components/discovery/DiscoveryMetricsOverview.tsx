@@ -13,10 +13,15 @@ import {
   EyeOff
 } from 'lucide-react';
 import { useDiscovery } from '../../context/DiscoveryContext';
+import { useAgentMemory } from '../../context/AgentMemoryContext';
 
 export default function DiscoveryMetricsOverview() {
-  const { workspace, checklist, exportDiscoveryPacket, togglePrivacyMode } = useDiscovery();
+  const { workspace, checklist, exportDiscoveryPacket, togglePrivacyMode, isSyncingToWiki, lastWikiSync } = useDiscovery();
+  const { wikiData } = useAgentMemory() as any;
   const [showMissingList, setShowMissingList] = useState(false);
+
+  const wikiTotalFacts = wikiData?.stats?.totalFacts || 0;
+  const wikiFootprintCount = wikiData?.sections?.financial_footprint?.facts?.length || 0;
 
   const { accountVault, baseline, housingSandbox, ledgerProtection, privacyMode } = workspace;
 
@@ -57,8 +62,18 @@ export default function DiscoveryMetricsOverview() {
           <h2 className="text-xl font-medium text-[#261E19] tracking-tight">
             Live Discovery & Document Intelligence
           </h2>
-          <p className="text-xs text-[#5C4E43] mt-0.5">
-            California Family Code §§ 760, 2104, 2550 · Grounded in user-verified financial files
+          <p className="text-xs text-[#5C4E43] mt-0.5 flex flex-wrap items-center gap-2">
+            <span>Based on your verified financial documents</span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E6ECE6] text-[#435C4D] font-mono text-[10px]">
+              {isSyncingToWiki
+                ? 'Saving to Private Profile...'
+                : `Private Profile: ${wikiTotalFacts} details saved`}
+            </span>
+            {lastWikiSync && !isSyncingToWiki && (
+              <span className="text-[10px] text-[#435C4D] font-medium">
+                +{lastWikiSync.addedCount} saved from {lastWikiSync.fileName}
+              </span>
+            )}
           </p>
         </div>
 
@@ -163,7 +178,7 @@ export default function DiscoveryMetricsOverview() {
           </div>
 
           <div className="pt-3 border-t border-[#F0EAE1] mt-3 flex items-center justify-between text-xs">
-            <span className="text-[#5C4E43]">Breathing Room:</span>
+            <span className="text-[#5C4E43]">Monthly Cushion:</span>
             <span className={`font-mono tabular-nums font-medium ${breathingRoom >= 0 ? 'text-[#435C4D]' : 'text-rose-700'}`}>
               {breathingRoom >= 0 ? '+' : ''}{maskValue(breathingRoom)} / mo
             </span>
@@ -183,8 +198,8 @@ export default function DiscoveryMetricsOverview() {
               <span className="text-xs text-[#8C7D73]">of steady income</span>
             </div>
             <div className="text-xs text-[#5C4E43] mt-2 space-y-0.5">
-              <div>Retirement subject to QDRO: <span className="font-mono tabular-nums font-medium text-[#261E19]">{maskValue(retirementAssetsSubjectToQDRO)}</span></div>
-              <div>Pending Beneficiary Deadlines: <span className="font-mono tabular-nums text-[#8C7D73]">{pendingBeneficiaryCount} item{pendingBeneficiaryCount === 1 ? '' : 's'}</span></div>
+              <div>Retirement to split (QDRO court order): <span className="font-mono tabular-nums font-medium text-[#261E19]">{maskValue(retirementAssetsSubjectToQDRO)}</span></div>
+              <div>Beneficiary items to protect: <span className="font-mono tabular-nums text-[#8C7D73]">{pendingBeneficiaryCount} item{pendingBeneficiaryCount === 1 ? '' : 's'}</span></div>
             </div>
           </div>
 

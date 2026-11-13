@@ -4,6 +4,8 @@ const http = require('node:http');
 const path = require('node:path');
 
 const app = require('../src/index');
+const wikiStore = require('../src/store/wikiStore');
+const memoryStore = require('../src/store/memoryStore');
 
 let server;
 let baseUrl;
@@ -174,5 +176,73 @@ describe('Foothold Financial Discovery & Document Intelligence Engine', () => {
     const res = await request('POST', '/api/discovery/analyze', {});
     assert.equal(res.status, 400);
     assert.equal(res.body.error, 'NO_FILE_PROVIDED');
+  });
+
+  it('POST /api/discovery/analyze with userId persists extracted financial facts to LLM Wiki and memoryStore', async () => {
+    const testUserId = `discovery-wiki-user-${Date.now()}`;
+    await wikiStore.purgeWikiAsync(testUserId);
+    memoryStore.purgeUserMemory(testUserId);
+
+    const res = await request('POST', '/api/discovery/analyze', {
+      sampleDocId: 'tax_1040_2024',
+      userId: testUserId
+    });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.success, true);
+    assert.ok(res.body.wikiSync);
+    assert.equal(res.body.wikiSync.synced, true);
+    assert.ok(res.body.wikiSync.addedCount >= 4);
+
+    const wiki = await wikiStore.getWikiAsync(testUserId);
+    const footprintFacts = wiki.sections.financial_footprint.facts;
+    const lawyerFacts = wiki.sections.lawyer_readiness.facts;
+    const logFacts = wiki.sections.interaction_log.facts;
+
+    assert.ok(footprintFacts.some((f) => f.text.includes('$198,400')));
+    assert.ok(footprintFacts.some((f) => f.text.includes('Vanguard')));
+    assert.ok(lawyerFacts.some((f) => f.text.includes('FL-140')));
+    assert.ok(logFacts.length >= 1);
+
+    const profile = memoryStore.getUserProfile(testUserId);
+    assert.equal(profile.userGrossMonthlyIncome, 4000);
+    assert.equal(profile.spouseGrossMonthlyIncome, 11833);
+
+    await wikiStore.purgeWikiAsync(testUserId);
+    memoryStore.purgeUserMemory(testUserId);
+  });
+
+  it('POST /api/discovery/commit persists confirmed document assets and legal deadlines to LLM Wiki', async () => {
+    const testUserId = `discovery-commit-user-${Date.now()}`;
+    await wikiStore.purgeWikiAsync(testUserId);
+    memoryStore.purgeUserMemory(testUserId);
+
+    const analyzeRes = await request('POST', '/api/discovery/analyze', {
+      sampleDocId: 'retirement_401k'
+    });
+    assert.equal(analyzeRes.status, 200);
+
+    const commitRes = await request('POST', '/api/discovery/commit', {
+      userId: testUserId,
+      document: analyzeRes.body.document
+    });
+
+    assert.equal(commitRes.status, 200);
+    assert.equal(commitRes.body.success, true);
+    assert.equal(commitRes.body.synced, true);
+    assert.ok(commitRes.body.addedCount >= 3);
+
+    const wiki = await wikiStore.getWikiAsync(testUserId);
+    const footprintFacts = wiki.sections.financial_footprint.facts;
+    const lawyerFacts = wiki.sections.lawyer_readiness.facts;
+
+    assert.ok(footprintFacts.some((f) => f.text.includes('$428,500')));
+    assert.ok(lawyerFacts.some((f) => f.text.includes('QDRO')));
+
+    const agentMemory = memoryStore.getAgentMemory(testUserId);
+    assert.ok(agentMemory.discoveredAssets.some((a) => a.estimatedValue === 428500));
+
+    await wikiStore.purgeWikiAsync(testUserId);
+    memoryStore.purgeUserMemory(testUserId);
   });
 });

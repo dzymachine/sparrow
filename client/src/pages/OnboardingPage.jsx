@@ -32,10 +32,17 @@ export default function OnboardingPage() {
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
+    goal: 'pursuing_divorce',
     stateJurisdiction: 'California',
     marriageLengthYears: 15,
     hasChildren: true,
     childrenCount: 2,
+    divorcePathway: 'unsure',
+    hasPrenup: 'no',
+    ownsHome: true,
+    hasRetirementAccounts: true,
+    needsFeeWaiver: false,
+    needsProtectiveOrder: false,
     financialRole: 'spouse_handled_all',
     accountVisibility: 'partial_visibility',
     fearOfHiddenAssets: true,
@@ -119,6 +126,45 @@ export default function OnboardingPage() {
             </div>
 
             <div className="space-y-4 pt-2">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-2">
+                  What is your current goal?
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    {
+                      id: 'pursuing_divorce',
+                      title: 'Pursuing a Divorce',
+                      desc: 'Generate my full tailored divorce document checklist'
+                    },
+                    {
+                      id: 'legal_separation',
+                      title: 'Legal Separation',
+                      desc: 'Explore separation filings & financial disclosures'
+                    },
+                    {
+                      id: 'exploring_options',
+                      title: 'Just Exploring',
+                      desc: 'Learn my rights & organize finances quietly'
+                    }
+                  ].map((g) => (
+                    <button
+                      type="button"
+                      key={g.id}
+                      onClick={() => setFormData({ ...formData, goal: g.id })}
+                      className={`text-left p-3.5 rounded-xl border transition ${
+                        formData.goal === g.id
+                          ? 'border-brand-600 bg-brand-50/60 text-slate-900 ring-1 ring-brand-500'
+                          : 'border-slate-200 hover:border-slate-300 text-slate-700'
+                      }`}
+                    >
+                      <div className="text-sm font-semibold">{g.title}</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">{g.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-2">
                   Select State Jurisdiction
@@ -229,7 +275,87 @@ export default function OnboardingPage() {
                 </div>
               ))}
 
-              <div className="pt-4">
+              <div className="pt-4 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">
+                    Which best describes your divorce situation?
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {[
+                      { id: 'amicable_uncontested', title: 'Amicable / Uncontested', desc: 'We expect to agree on terms' },
+                      { id: 'contested_or_uncooperative', title: 'Contested / Uncooperative', desc: 'Spouse may withhold info or contest' },
+                      { id: 'unsure', title: 'Unsure / Early Stage', desc: 'Not sure how spouse will react yet' }
+                    ].map((opt) => (
+                      <button
+                        type="button"
+                        key={opt.id}
+                        onClick={() => setFormData({ ...formData, divorcePathway: opt.id })}
+                        className={`text-left p-3 rounded-xl border transition ${
+                          formData.divorcePathway === opt.id
+                            ? 'border-brand-600 bg-brand-50/60 ring-1 ring-brand-500'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="font-semibold text-xs text-slate-900">{opt.title}</div>
+                        <div className="text-[11px] text-slate-500 mt-0.5">{opt.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">
+                    Do you have a Prenuptial or Postnuptial Agreement?
+                  </label>
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {[
+                      { id: 'no', label: 'No Prenup' },
+                      { id: 'yes', label: 'Yes, Signed' },
+                      { id: 'unsure', label: 'Unsure' }
+                    ].map((p) => (
+                      <button
+                        type="button"
+                        key={p.id}
+                        onClick={() => setFormData({ ...formData, hasPrenup: p.id })}
+                        className={`py-2 px-3 rounded-xl border text-xs font-semibold transition ${
+                          formData.hasPrenup === p.id
+                            ? 'border-brand-600 bg-brand-50/60 text-brand-900 ring-1 ring-brand-500'
+                            : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">
+                    Select any factors that apply (tailors your document checklist):
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {[
+                      { key: 'ownsHome', label: 'We own a home or real estate together' },
+                      { key: 'hasRetirementAccounts', label: 'There are 401(k), IRA, or pension accounts' },
+                      { key: 'needsFeeWaiver', label: 'I may need a court filing fee waiver' },
+                      { key: 'needsProtectiveOrder', label: 'I need protective / restraining order forms' }
+                    ].map((item) => (
+                      <label
+                        key={item.key}
+                        className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 hover:border-slate-300 cursor-pointer text-xs text-slate-700"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={Boolean(formData[item.key])}
+                          onChange={(e) => setFormData({ ...formData, [item.key]: e.target.checked })}
+                          className="h-4 w-4 text-brand-600 focus:ring-brand-500 rounded border-slate-300"
+                        />
+                        <span>{item.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 <label className="flex items-start gap-3 p-3.5 rounded-xl border border-amber-200 bg-amber-50/60 cursor-pointer">
                   <input
                     type="checkbox"
@@ -263,7 +389,7 @@ export default function OnboardingPage() {
                 What are your biggest financial priorities and questions?
               </h2>
               <p className="text-sm text-slate-500">
-                Select all that apply. Ruth AI will customize your dashboard and lawyer prep questions accordingly.
+                Select all that apply. Finch will customize your dashboard and lawyer prep questions accordingly.
               </p>
             </div>
 
@@ -330,8 +456,10 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-2xl border border-slate-200 space-y-3">
                 <div className="font-semibold text-slate-900 text-sm">Summary of your setup:</div>
                 <ul className="text-xs text-slate-600 space-y-1.5">
+                  <li>• <strong>Goal:</strong> {formData.goal.replace(/_/g, ' ')}</li>
                   <li>• <strong>Jurisdiction:</strong> {formData.stateJurisdiction}</li>
                   <li>• <strong>Duration:</strong> {formData.marriageLengthYears} years ({formData.hasChildren ? `${formData.childrenCount} children` : 'No dependents'})</li>
+                  <li>• <strong>Divorce Pathway:</strong> {formData.divorcePathway.replace(/_/g, ' ')} ({formData.hasPrenup === 'yes' ? 'Has Prenup' : formData.hasPrenup === 'unsure' ? 'Prenup Unsure' : 'No Prenup'})</li>
                   <li>• <strong>Financial Dynamic:</strong> {formData.financialRole.replace(/_/g, ' ')}</li>
                   <li>• <strong>Active Priorities:</strong> {formData.primaryConcerns.length} selected</li>
                 </ul>
@@ -339,7 +467,7 @@ export default function OnboardingPage() {
 
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-xs flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-brand-600 flex-shrink-0" />
-                <span>Your Ruth AI agent memory will now be seeded with this context.</span>
+                <span>Your Finch agent memory will now be seeded with this context.</span>
               </div>
             </div>
           </div>

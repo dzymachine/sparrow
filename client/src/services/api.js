@@ -18,6 +18,80 @@ export const api = {
     return res.json();
   },
 
+  // Divorce Document Checklist
+  async getDivorceChecklist(userId) {
+    const res = await fetch(`${API_BASE}/user/checklist/${encodeURIComponent(userId)}`);
+    if (!res.ok) throw new Error('Failed to fetch divorce document checklist');
+    return res.json();
+  },
+
+  async updateChecklistItem(userId, docId, updates) {
+    const res = await fetch(`${API_BASE}/user/checklist/${encodeURIComponent(userId)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ docId, ...updates }),
+    });
+    if (!res.ok) throw new Error('Failed to update checklist item');
+    return res.json();
+  },
+
+  async getDocumentForm(userId, docId) {
+    const res = await fetch(`${API_BASE}/user/checklist/${encodeURIComponent(userId)}/form/${encodeURIComponent(docId)}`);
+    if (!res.ok) throw new Error('Failed to load guided document form');
+    return res.json();
+  },
+
+  async saveDocumentForm(userId, docId, values, status) {
+    const res = await fetch(`${API_BASE}/user/checklist/${encodeURIComponent(userId)}/form/${encodeURIComponent(docId)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values, status }),
+    });
+    if (!res.ok) throw new Error('Failed to save document draft');
+    return res.json();
+  },
+
+  async downloadFilledPdf(userId, docId, values) {
+    const res = await fetch(`${API_BASE}/user/checklist/${encodeURIComponent(userId)}/form/${encodeURIComponent(docId)}/pdf`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values }),
+    });
+    if (!res.ok) throw new Error('Failed to generate filled PDF');
+    return res.blob();
+  },
+
+  async uploadChecklistDocument(userId, docId, payload) {
+    const res = await fetch(`${API_BASE}/user/checklist/${encodeURIComponent(userId)}/upload/${encodeURIComponent(docId)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('Failed to upload completed document');
+    return res.json();
+  },
+
+  getUploadedDocumentUrl(userId, docId) {
+    return `${API_BASE}/user/checklist/${encodeURIComponent(userId)}/upload/${encodeURIComponent(docId)}`;
+  },
+
+  // Post-Divorce Life Finance Projection
+  async getLifeProjection(userId) {
+    const res = await fetch(`${API_BASE}/user/projection/${encodeURIComponent(userId)}`);
+    if (!res.ok) throw new Error('Failed to calculate post-divorce projection');
+    return res.json();
+  },
+
+  async saveLifeProjectionInputs(userId, inputs) {
+    const res = await fetch(`${API_BASE}/user/projection/${encodeURIComponent(userId)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(inputs),
+    });
+    if (!res.ok) throw new Error('Failed to update projection inputs');
+    return res.json();
+  },
+
   // Agent Memory
   async getAgentMemory(userId) {
     const res = await fetch(`${API_BASE}/agent/memory/${encodeURIComponent(userId)}`);

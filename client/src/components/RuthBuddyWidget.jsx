@@ -27,6 +27,49 @@ const QUICK_CHIPS = [
   'What do you remember about me?'
 ];
 
+const FINCH_AMBIENT_THOUGHTS = [
+  {
+    type: 'Did you know?',
+    topic: 'Splitting a 401(k)',
+    text: 'Splitting a 401(k)? You\'ll need a special court form (called a QDRO) so you don\'t get hit with tax penalties.'
+  },
+  {
+    type: 'Tip',
+    topic: 'Save statements early',
+    text: 'Grab 12 months of bank and card statements now—online logins can change fast.'
+  },
+  {
+    type: 'Thinking out loud',
+    topic: 'One step at a time',
+    text: 'Just hanging out here. One small step is plenty for today.'
+  },
+  {
+    type: 'Did you know?',
+    topic: 'What stays yours',
+    text: 'Things you owned before marriage or inherited usually stay yours if you keep the paper trail.'
+  },
+  {
+    type: 'Tip',
+    topic: 'Quick safe exit',
+    text: 'Need to leave fast? Hit Esc twice to jump straight to Weather.com.'
+  },
+  {
+    type: 'Thinking out loud',
+    topic: 'Spot hidden accounts',
+    text: 'A free credit report can uncover old accounts you didn\'t know existed.'
+  },
+  {
+    type: 'Did you know?',
+    topic: 'Listing everything',
+    text: 'In California, both spouses have to list every account and debt—even ones in just one name.'
+  },
+  {
+    type: 'Tip',
+    topic: 'Your own checking',
+    text: 'Opening your own checking account at a new bank gives you a safe, fresh spot for your money.'
+  }
+];
+
 const SECTION_ORDER = [
   'profile',
   'financial_footprint',
@@ -34,6 +77,62 @@ const SECTION_ORDER = [
   'lawyer_readiness',
   'interaction_log'
 ];
+
+function FinchBird({ className = 'w-9 h-9', isThinking = false }) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`${className} animate-finch-bob ${isThinking ? 'finch-active' : ''}`}
+      aria-hidden="true"
+    >
+      <g transform="translate(64, 0) scale(-1, 1)">
+        {/* Tail feathers */}
+        <path
+          d="M14 39L5 33L9 43L15 43Z"
+          fill="#5C4E43"
+        />
+        {/* Plump finch body */}
+        <ellipse cx="31" cy="37" rx="17" ry="14" fill="#6D5A4F" />
+        {/* Warm terracotta/ochre finch breast */}
+        <path
+          d="M27 28C36 28 45 33 45 41C45 46 39 50 32 50C25 50 22 45 22 39C22 33 24 28 27 28Z"
+          fill="#D97757"
+        />
+        {/* Head */}
+        <circle cx="38" cy="24" r="11" fill="#5C4E43" />
+        {/* Soft cheek patch */}
+        <circle cx="40" cy="26" r="4.5" fill="#F2E6DC" opacity="0.85" />
+        {/* Animated wing */}
+        <path
+          d="M20 33C26 30 33 33 34 40C30 43 21 42 18 37C17 35 18 34 20 33Z"
+          fill="#4A3D35"
+          className="animate-finch-wing"
+        />
+        {/* Beak */}
+        <path d="M48 22L57 25L48 28Z" fill="#F59E0B" />
+        {/* Animated blinking eye */}
+        <circle
+          cx="42"
+          cy="22"
+          r="2.1"
+          fill="#1E1815"
+          className="animate-finch-blink"
+        />
+        <circle cx="42.7" cy="21.3" r="0.7" fill="#FFFFFF" />
+        {/* Little perch feet */}
+        <path
+          d="M28 50V55M28 55L25 57M28 55L31 57M35 50V55M35 55L32 57M35 55L38 57"
+          stroke="#B45309"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+    </svg>
+  );
+}
 
 export default function RuthBuddyWidget() {
   const {
@@ -59,9 +158,22 @@ export default function RuthBuddyWidget() {
   const [newFactText, setNewFactText] = useState('');
   const [confirmPurge, setConfirmPurge] = useState(false);
 
+  // Ambient thought bubble state
+  const [thoughtIndex, setThoughtIndex] = useState(0);
+  const [isBubbleDismissed, setIsBubbleDismissed] = useState(false);
+
   const messagesEndRef = useRef(null);
 
   const totalFacts = wikiData?.stats?.totalFacts || 0;
+  const activeThought = FINCH_AMBIENT_THOUGHTS[thoughtIndex];
+
+  useEffect(() => {
+    if (isBuddyOpen || isDiscreetHidden || isBubbleDismissed) return;
+    const interval = setInterval(() => {
+      setThoughtIndex((prev) => (prev + 1) % FINCH_AMBIENT_THOUGHTS.length);
+    }, 14000);
+    return () => clearInterval(interval);
+  }, [isBuddyOpen, isDiscreetHidden, isBubbleDismissed]);
 
   useEffect(() => {
     if (isBuddyOpen && activeTab === 'chat') {
@@ -120,14 +232,22 @@ export default function RuthBuddyWidget() {
     setConfirmPurge(false);
   };
 
+  const handleTalkAboutThought = async () => {
+    setActiveTab('chat');
+    if (!isBuddyOpen) {
+      toggleBuddyDrawer();
+    }
+    await sendMessage(`Tell me more about this: "${activeThought.text}"`);
+  };
+
   // Ultra-discreet hidden mode (tiny neutral restore button)
   if (isDiscreetHidden) {
     return (
       <div className="fixed bottom-4 right-4 z-50">
         <button
           onClick={() => setIsDiscreetHidden(false)}
-          title="Restore assistant"
-          aria-label="Restore assistant"
+          title="Restore Finch"
+          aria-label="Restore Finch"
           className="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 text-slate-500 flex items-center justify-center shadow-sm border border-slate-300/60 transition"
         >
           <Eye className="w-3.5 h-3.5" />
@@ -136,48 +256,82 @@ export default function RuthBuddyWidget() {
     );
   }
 
-  // Minimized Pill State
+  // Minimized State (Bottom-Right Corner: Finch bird + ambient thought bubble)
   if (!isBuddyOpen) {
     return (
-      <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2">
-        <button
-          onClick={() => setIsDiscreetHidden(true)}
-          title="Discreetly hide Ruth"
-          aria-label="Discreetly hide Ruth"
-          className="p-2 rounded-full bg-white/90 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-brand-200/80 shadow-md transition"
-        >
-          <EyeOff className="w-3.5 h-3.5" />
-        </button>
-
-        <button
-          onClick={toggleBuddyDrawer}
-          data-testid="ruth-buddy-pill"
-          className="group flex items-center gap-3 bg-white hover:bg-brand-50/90 border border-brand-200 shadow-xl shadow-brand-900/10 rounded-full pl-2.5 pr-4 py-2 transition-all duration-200 hover:-translate-y-0.5"
-        >
-          <div className="relative flex-shrink-0">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-700 to-brand-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-              R
-            </div>
-            <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white" />
-            </span>
-          </div>
-
-          <div className="text-left">
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-slate-900">Ruth</span>
-              <span className="text-[11px] font-medium text-brand-700 bg-brand-100/80 px-2 py-0.5 rounded-full">
-                {isUpdatingWiki
-                  ? 'Updating Wiki...'
-                  : `${totalFacts} ${totalFacts === 1 ? 'memory' : 'memories'} saved`}
+      <div className="fixed bottom-4 right-5 z-50 flex flex-col items-end gap-2">
+        {/* Ambient Speech / Thought Bubble */}
+        {!isBubbleDismissed && (
+          <div className="relative max-w-[270px] sm:max-w-[295px] bg-white/95 backdrop-blur-sm border border-[#E2DBD0] rounded-2xl shadow-lg shadow-[#261E19]/10 p-3.5 text-left transition-all duration-300">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <span
+                className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                  activeThought.type === 'Did you know?'
+                    ? 'bg-amber-50 text-amber-800 border border-amber-200/80'
+                    : activeThought.type === 'Tip'
+                    ? 'bg-[#EDF3EF] text-[#354A3E] border border-[#C7D7CD]'
+                    : 'bg-[#F4EFEB] text-[#5C4E43] border border-[#E2DBD0]'
+                }`}
+              >
+                {activeThought.type}
               </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsBubbleDismissed(true);
+                }}
+                title="Dismiss thought"
+                aria-label="Dismiss thought"
+                className="p-0.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+              >
+                <X className="w-3 h-3" />
+              </button>
             </div>
-            <p className="text-[11px] text-slate-500 leading-tight">
-              Your private financial companion
-            </p>
+
+            <button
+              onClick={handleTalkAboutThought}
+              className="text-left group/bubble w-full focus:outline-none"
+            >
+              <p className="text-xs text-[#261E19] leading-relaxed">
+                {activeThought.text}
+              </p>
+              <span className="inline-block mt-1.5 text-[11px] font-medium text-[#435C4D] group-hover/bubble:underline">
+                Ask Finch about this →
+              </span>
+            </button>
+
+            {/* Speech bubble tail pointing down to Finch */}
+            <div className="absolute -bottom-1.5 right-12 w-3 h-3 bg-white border-r border-b border-[#E2DBD0] rotate-45" />
           </div>
-        </button>
+        )}
+
+        {/* Bird & hover discreet-hide control */}
+        <div className="group/finch flex items-end gap-1.5">
+          <button
+            onClick={() => setIsDiscreetHidden(true)}
+            title="Discreetly hide Finch"
+            aria-label="Discreetly hide Finch"
+            className="mb-3 p-1.5 rounded-full bg-white/90 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-brand-200/80 shadow-sm opacity-0 group-hover/finch:opacity-100 transition-opacity duration-200"
+          >
+            <EyeOff className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('chat');
+              toggleBuddyDrawer();
+            }}
+            data-testid="ruth-buddy-pill"
+            title="Chat with Finch"
+            aria-label="Chat with Finch"
+            className="group relative p-1 transition-transform duration-200 hover:scale-105 active:scale-95 focus:outline-none"
+          >
+            <FinchBird
+              className="w-28 h-28 sm:w-32 sm:h-32 drop-shadow-[0_8px_16px_rgba(38,30,25,0.2)]"
+              isThinking={isUpdatingWiki}
+            />
+          </button>
+        </div>
       </div>
     );
   }
@@ -192,14 +346,14 @@ export default function RuthBuddyWidget() {
       <div className="bg-gradient-to-r from-brand-800 via-brand-700 to-brand-600 text-white px-4 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="relative">
-            <div className="w-9 h-9 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 flex items-center justify-center font-bold text-sm">
-              R
+            <div className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm border border-white/40 flex items-center justify-center shadow-sm">
+              <FinchBird className="w-8 h-8" isThinking={isUpdatingWiki} />
             </div>
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-brand-800" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-sm tracking-tight">Ruth</h3>
+              <h3 className="font-bold text-sm tracking-tight text-white">Finch</h3>
               {isUpdatingWiki ? (
                 <span className="inline-flex items-center gap-1 text-[10px] bg-amber-400/20 text-amber-100 border border-amber-300/30 px-2 py-0.5 rounded-full">
                   <Loader2 className="w-2.5 h-2.5 animate-spin" />
@@ -239,7 +393,7 @@ export default function RuthBuddyWidget() {
           <button
             onClick={closeBuddyDrawer}
             title="Minimize"
-            aria-label="Minimize Ruth"
+            aria-label="Minimize Finch"
             className="p-1.5 rounded-lg text-brand-100 hover:text-white hover:bg-white/10 transition"
           >
             <Minus className="w-4 h-4" />
@@ -258,7 +412,7 @@ export default function RuthBuddyWidget() {
           }`}
         >
           <MessageCircleHeart className="w-3.5 h-3.5" />
-          Chat with Ruth
+          Chat with Finch
         </button>
         <button
           onClick={() => setActiveTab('memory')}
@@ -270,7 +424,7 @@ export default function RuthBuddyWidget() {
           }`}
         >
           <Brain className="w-3.5 h-3.5" />
-          What Ruth Remembers
+          What Finch Remembers
           <span className="text-[10px] bg-white/80 px-1.5 py-0.2 rounded-full border border-slate-200">
             {totalFacts}
           </span>
@@ -317,7 +471,7 @@ export default function RuthBuddyWidget() {
             {isUpdatingWiki && (
               <div className="flex items-center gap-2 text-xs text-brand-700 bg-brand-50 border border-brand-200 rounded-xl px-3 py-2">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Ruth is thinking &amp; updating your Personal Wiki...</span>
+                <span>Finch is thinking &amp; updating your Personal Wiki...</span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -325,6 +479,14 @@ export default function RuthBuddyWidget() {
 
           {/* Quick Suggestion Chips */}
           <div className="px-3 py-2 bg-white/80 border-t border-brand-100 flex gap-1.5 overflow-x-auto no-scrollbar">
+            <button
+              onClick={() => handleChipClick(`Tell me more about: "${activeThought.text}"`)}
+              disabled={isUpdatingWiki}
+              className="flex-shrink-0 text-[11px] bg-[#EDF3EF] hover:bg-[#DFECE4] text-[#354A3E] border border-[#C7D7CD] rounded-full px-2.5 py-1 transition truncate max-w-[230px] font-medium"
+              title={activeThought.text}
+            >
+              Ask about: {activeThought.topic}
+            </button>
             {QUICK_CHIPS.map((chip, idx) => (
               <button
                 key={idx}
@@ -347,7 +509,7 @@ export default function RuthBuddyWidget() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Share a detail or ask Ruth anything..."
+              placeholder="Share a detail or ask Finch anything..."
               className="flex-1 text-xs sm:text-sm bg-[#FAF9F6] border border-brand-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500"
             />
             <button
