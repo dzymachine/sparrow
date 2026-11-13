@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FileSearch,
@@ -6,6 +6,9 @@ import {
   TrendingUp,
   Printer,
   ArrowRight,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
   AlertTriangle,
   Eye,
   EyeOff,
@@ -50,6 +53,7 @@ export default function DashboardPage() {
     refreshLifeProjection
   } = useAgentMemory() as any;
   const { workspace, checklist, exportDiscoveryPacket, togglePrivacyMode } = useDiscovery();
+  const [showAllAlerts, setShowAllAlerts] = useState(false);
 
   useEffect(() => {
     refreshLifeProjection();
@@ -258,80 +262,80 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* 2. "What's Actually Yours" — 4 Headline Reality Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Estimated Asset Share */}
-        <div className="bg-white border border-[#E2DBD0] rounded-xl p-5 flex flex-col justify-between">
+      {/* 2. "What's Actually Yours" — Apple Inset Grouped Reality Strip */}
+      <section className="bg-white border border-[#E2DBD0] rounded-2xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#F0EAE1] overflow-hidden">
+        {/* Metric 1: Estimated Asset Share */}
+        <div className="p-5 flex flex-col justify-between space-y-3">
           <div>
-            <div className="flex items-center justify-between text-xs font-medium text-[#8C7D73]">
+            <div className="flex items-center justify-between text-xs font-medium text-[#5C4E43]">
               <span>Your Est. Asset Share</span>
-              <Scale className="w-3.5 h-3.5 text-[#435C4D]" />
+              <Scale className="w-4 h-4 text-[#435C4D]" />
             </div>
-            <div className="text-2xl font-mono font-semibold text-[#261E19] mt-2">
+            <div className="text-2xl font-mono tabular-nums font-semibold text-[#261E19] mt-2">
               {maskValue(userAssetShare)}
             </div>
           </div>
-          <div className="text-[11px] text-[#5C4E43] mt-2 pt-2 border-t border-[#F0EAE1] space-y-0.5">
+          <div className="text-xs text-[#5C4E43] pt-2.5 border-t border-[#F0EAE1] space-y-1">
             {lifeProjection?.canCalculate ? (
               <>
                 <div className="flex justify-between">
                   <span>Liquid / Cash</span>
-                  <span className="font-mono">{maskValue(liquidShare)}</span>
+                  <span className="font-mono tabular-nums text-[#261E19]">{maskValue(liquidShare)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Home Equity</span>
-                  <span className="font-mono">{maskValue(homeEquityShare)}</span>
+                  <span className="font-mono tabular-nums text-[#261E19]">{maskValue(homeEquityShare)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Retirement (QDRO)</span>
-                  <span className="font-mono">{maskValue(retirementShare)}</span>
+                  <span className="font-mono tabular-nums text-[#261E19]">{maskValue(retirementShare)}</span>
                 </div>
               </>
             ) : (
-              <span>50% baseline of {accountVault.length} discovered accounts</span>
+              <span>50% baseline of {accountVault.length} accounts</span>
             )}
           </div>
         </div>
 
-        {/* Card 2: Flagged / Undisclosed Leads */}
+        {/* Metric 2: Flagged / Undisclosed Leads */}
         <Link
           to="/discovery"
-          className="bg-white border border-[#E2DBD0] hover:border-amber-400 rounded-xl p-5 flex flex-col justify-between transition group"
+          className="p-5 flex flex-col justify-between space-y-3 hover:bg-[#FAF9F6] transition group"
         >
           <div>
-            <div className="flex items-center justify-between text-xs font-medium text-[#8C7D73]">
+            <div className="flex items-center justify-between text-xs font-medium text-[#5C4E43]">
               <span>Flagged / Unlisted Leads</span>
               <AlertTriangle
-                className={`w-3.5 h-3.5 ${
+                className={`w-4 h-4 ${
                   flaggedLeadsCount > 0 ? 'text-amber-600' : 'text-[#8C7D73]'
                 }`}
               />
             </div>
-            <div className="text-2xl font-mono font-semibold text-[#261E19] mt-2">
+            <div className="text-2xl font-mono tabular-nums font-semibold text-[#261E19] mt-2">
               {flaggedLeadsCount > 0 ? `+${maskValue(potentialUndisclosedShare)}` : '$0'}
             </div>
           </div>
-          <div className="text-[11px] text-[#5C4E43] mt-2 pt-2 border-t border-[#F0EAE1] flex items-center justify-between">
+          <div className="text-xs text-[#5C4E43] pt-2.5 border-t border-[#F0EAE1] flex items-center justify-between">
             <span>
               {flaggedLeadsCount > 0
                 ? `${flaggedLeadsCount} account${flaggedLeadsCount > 1 ? 's' : ''} to verify`
-                : 'No hidden leads flagged yet'}
+                : 'No hidden leads flagged'}
             </span>
-            <ArrowRight className="w-3 h-3 text-[#8C7D73] group-hover:translate-x-0.5 transition" />
+            <ChevronRight className="w-4 h-4 text-[#8C7D73] group-hover:translate-x-0.5 transition" />
           </div>
         </Link>
 
-        {/* Card 3: If You Divorced Today (Monthly Take-Home) */}
+        {/* Metric 3: If You Divorced Today (Monthly Take-Home) */}
         <Link
           to="/discovery#projection-engine"
-          className="bg-white border border-[#E2DBD0] hover:border-[#435C4D] rounded-xl p-5 flex flex-col justify-between transition group"
+          className="p-5 flex flex-col justify-between space-y-3 hover:bg-[#FAF9F6] transition group"
         >
           <div>
-            <div className="flex items-center justify-between text-xs font-medium text-[#8C7D73]">
+            <div className="flex items-center justify-between text-xs font-medium text-[#5C4E43]">
               <span>If You Divorced Today</span>
-              <TrendingUp className="w-3.5 h-3.5 text-[#435C4D]" />
+              <TrendingUp className="w-4 h-4 text-[#435C4D]" />
             </div>
-            <div className="text-2xl font-mono font-semibold text-[#435C4D] mt-2">
+            <div className="text-2xl font-mono tabular-nums font-semibold text-[#435C4D] mt-2">
               {isCalculatingProjection && !lifeProjection
                 ? '...'
                 : lifeProjection?.canCalculate
@@ -339,42 +343,48 @@ export default function DashboardPage() {
                 : 'Needs Info'}
             </div>
           </div>
-          <div className="text-[11px] text-[#5C4E43] mt-2 pt-2 border-t border-[#F0EAE1] flex items-center justify-between">
+          <div className="text-xs text-[#5C4E43] pt-2.5 border-t border-[#F0EAE1] flex items-center justify-between">
             <span>
               {lifeProjection?.canCalculate
                 ? `Includes ${maskValue(
                     (lifeProjection.monthlyTakeHome?.spousalSupport?.monthlyMid || 0) +
                       (lifeProjection.monthlyTakeHome?.childSupport?.monthlyMid || 0)
                   )} est. support`
-                : `${lifeProjection?.missingFields?.length || 2}+ details needed to estimate`}
+                : `${lifeProjection?.missingFields?.length || 2}+ details needed`}
             </span>
-            <ArrowRight className="w-3 h-3 text-[#8C7D73] group-hover:translate-x-0.5 transition" />
+            <ChevronRight className="w-4 h-4 text-[#8C7D73] group-hover:translate-x-0.5 transition" />
           </div>
         </Link>
 
-        {/* Card 4: Readiness Snapshot */}
-        <div className="bg-white border border-[#E2DBD0] rounded-xl p-5 flex flex-col justify-between">
+        {/* Metric 4: Readiness Snapshot */}
+        <Link
+          to="/checklist"
+          className="p-5 flex flex-col justify-between space-y-3 hover:bg-[#FAF9F6] transition group"
+        >
           <div>
-            <div className="flex items-center justify-between text-xs font-medium text-[#8C7D73]">
+            <div className="flex items-center justify-between text-xs font-medium text-[#5C4E43]">
               <span>Readiness Progress</span>
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#435C4D]" />
+              <CheckCircle2 className="w-4 h-4 text-[#435C4D]" />
             </div>
-            <div className="text-2xl font-mono font-semibold text-[#261E19] mt-2">
+            <div className="text-2xl font-mono tabular-nums font-semibold text-[#261E19] mt-2">
               {collectedCategoriesCount}
               <span className="text-sm font-normal text-[#8C7D73]"> / 7 files</span>
             </div>
           </div>
-          <div className="text-[11px] text-[#5C4E43] mt-2 pt-2 border-t border-[#F0EAE1]">
-            {divorceChecklist?.isPursuingDivorce && checklistSummary
-              ? `Court checklist: ${checklistSummary.completedCount}/${checklistSummary.totalCount} (${checklistSummary.percentComplete}%)`
-              : 'Court checklist paused (Exploration)'}
+          <div className="text-xs text-[#5C4E43] pt-2.5 border-t border-[#F0EAE1] flex items-center justify-between">
+            <span>
+              {divorceChecklist?.isPursuingDivorce && checklistSummary
+                ? `Checklist: ${checklistSummary.completedCount}/${checklistSummary.totalCount} (${checklistSummary.percentComplete}%)`
+                : 'Checklist paused'}
+            </span>
+            <ChevronRight className="w-4 h-4 text-[#8C7D73] group-hover:translate-x-0.5 transition" />
           </div>
-        </div>
+        </Link>
       </section>
 
-      {/* 3. "Where You May Be Exposed" — Red Flags & Women-Specific Alerts */}
-      <section className="bg-white border border-[#E2DBD0] rounded-xl p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      {/* 3. "Where You May Be Exposed" — Apple Inset Grouped List */}
+      <section className="bg-white border border-[#E2DBD0] rounded-2xl overflow-hidden">
+        <div className="px-6 py-4 bg-[#FAF9F6] border-b border-[#E2DBD0] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h2 className="text-base font-medium text-[#261E19] flex items-center gap-2">
               <Shield className="w-4 h-4 text-[#435C4D]" />
@@ -386,57 +396,75 @@ export default function DashboardPage() {
           </div>
           <Link
             to="/discovery"
-            className="text-xs font-medium text-[#435C4D] hover:underline inline-flex items-center gap-1"
+            className="text-xs font-medium text-[#435C4D] hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
           >
-            <span>Open Discovery Engine</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <span>Open Discovery</span>
+            <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
         {exposureAlerts.length === 0 ? (
-          <div className="bg-[#FAF9F6] border border-[#E2DBD0] rounded-lg p-4 text-xs text-[#5C4E43]">
+          <div className="p-6 text-xs text-[#5C4E43]">
             No urgent exposure flags right now. Upload tax returns, bank statements, or retirement letters in Financial Discovery to scan for hidden leads.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {exposureAlerts.map((alert) => (
-              <div
-                key={alert.id}
-                className={`rounded-xl p-4 border flex flex-col justify-between gap-3 ${
-                  alert.severity === 'high'
-                    ? 'bg-amber-50/70 border-amber-200'
-                    : 'bg-[#FAF9F6] border-[#E2DBD0]'
-                }`}
-              >
-                <div className="space-y-1">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle
-                      className={`w-4 h-4 shrink-0 mt-0.5 ${
-                        alert.severity === 'high' ? 'text-amber-700' : 'text-[#435C4D]'
+          <>
+            <div className="divide-y divide-[#F0EAE1]">
+              {(showAllAlerts ? exposureAlerts : exposureAlerts.slice(0, 2)).map((alert) => (
+                <Link
+                  key={alert.id}
+                  to={alert.to}
+                  className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#FAF9F6] transition group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
+                        alert.severity === 'high'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-[#E6ECE6] text-[#435C4D]'
                       }`}
-                    />
-                    <h3 className="text-xs font-semibold text-[#261E19]">{alert.title}</h3>
+                    >
+                      <AlertTriangle className="w-4 h-4" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <h3 className="text-xs font-semibold text-[#261E19]">{alert.title}</h3>
+                      <p className="text-xs text-[#5C4E43] leading-relaxed">{alert.detail}</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-[#5C4E43] leading-relaxed pl-6">{alert.detail}</p>
-                </div>
-                <div className="pl-6">
-                  <Link
-                    to={alert.to}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-[#435C4D] hover:text-[#261E19]"
-                  >
+                  <div className="inline-flex items-center gap-1 text-xs font-medium text-[#435C4D] shrink-0 pl-11 sm:pl-0">
                     <span>{alert.cta}</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+                    <ChevronRight className="w-4 h-4 text-[#8C7D73] group-hover:translate-x-0.5 transition" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {exposureAlerts.length > 2 && (
+              <button
+                type="button"
+                onClick={() => setShowAllAlerts((prev) => !prev)}
+                className="w-full px-6 py-3 bg-[#FAF9F6] border-t border-[#F0EAE1] text-xs font-medium text-[#435C4D] hover:text-[#261E19] flex items-center justify-center gap-1.5 transition"
+              >
+                {showAllAlerts ? (
+                  <>
+                    <span>Show fewer alerts</span>
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  </>
+                ) : (
+                  <>
+                    <span>Show all {exposureAlerts.length} alerts</span>
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            )}
+          </>
         )}
       </section>
 
-      {/* 4. "Your Next Best Step" (Anti-Overwhelm Guided Actions) */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white border border-[#E2DBD0] rounded-xl p-5 flex flex-col justify-between gap-4">
+      {/* 4. "Your Next Best Step" (Apple Inset Grouped Action Pair) */}
+      <section className="bg-white border border-[#E2DBD0] rounded-2xl grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#F0EAE1] overflow-hidden">
+        <div className="p-6 flex flex-col justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-xs font-medium text-[#435C4D]">
               <FileSearch className="w-4 h-4" />
@@ -462,7 +490,7 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="bg-white border border-[#E2DBD0] rounded-xl p-5 flex flex-col justify-between gap-4">
+        <div className="p-6 flex flex-col justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs font-medium text-[#435C4D]">
@@ -506,9 +534,9 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* 5. "Questions for Your Lawyer" Preview & Support */}
-      <section className="bg-white border border-[#E2DBD0] rounded-xl p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      {/* 5. "Questions for Your Lawyer" — Apple Inset Grouped List */}
+      <section className="bg-white border border-[#E2DBD0] rounded-2xl overflow-hidden">
+        <div className="px-6 py-4 bg-[#FAF9F6] border-b border-[#E2DBD0] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h2 className="text-base font-medium text-[#261E19] flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#435C4D]" />
@@ -528,31 +556,31 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <ul className="space-y-2">
+        <ul className="divide-y divide-[#F0EAE1]">
           {lawyerQuestions.map((q, idx) => (
             <li
               key={idx}
-              className="flex items-start gap-2.5 p-3 rounded-lg bg-[#FAF9F6] border border-[#E2DBD0] text-xs text-[#261E19]"
+              className="px-6 py-3.5 flex items-start gap-3 text-xs text-[#261E19]"
             >
               <HelpCircle className="w-4 h-4 text-[#435C4D] shrink-0 mt-0.5" />
-              <span>{q}</span>
+              <span className="leading-relaxed">{q}</span>
             </li>
           ))}
         </ul>
 
-        <div className="pt-2 border-t border-[#F0EAE1] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-[#5C4E43]">
+        <div className="px-6 py-3 bg-[#FAF9F6] border-t border-[#E2DBD0] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#5C4E43]">
           <span>
             Educational financial discovery &amp; planning tool only—not legal or tax advice.
           </span>
           <span className="inline-flex items-center gap-1.5 text-[#261E19] font-medium">
             <PhoneCall className="w-3.5 h-3.5 text-[#435C4D]" />
-            <span>Need confidential support? National DV Hotline: 1-800-799-SAFE (7233)</span>
+            <span>Confidential support: 1-800-799-SAFE (7233)</span>
           </span>
         </div>
       </section>
 
-      {/* 6. Consult a Professional (Family Law Lawyers & Offices Near You) */}
-      <section className="bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-5">
+      {/* 6. Consult a Professional */}
+      <section className="bg-white border border-[#E2DBD0] rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="space-y-1.5 max-w-2xl">
           <div className="inline-flex items-center gap-1.5 text-xs font-medium text-[#435C4D]">
             <MapPin className="w-4 h-4" />
