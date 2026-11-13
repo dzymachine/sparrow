@@ -540,7 +540,7 @@ export default function FinancialDiscoveryView() {
           </div>
 
           {/* Compact Action / Upload Area for Selected Category */}
-          <div className="p-4 space-y-3">
+          <div key={activeTabCategory?.key || 'none'} className="p-4 space-y-3 animate-fade-in">
             {activeTabCategory && (activeTabCategory.status === 'Uploaded' || activeTabCategory.status === 'Reviewed') ? (
               <div className="p-4 rounded-xl bg-[#F4F7F4] border border-[#DCE5DC] space-y-2.5 text-center">
                 <CheckCircle2 className="w-7 h-7 text-[#435C4D] mx-auto" />

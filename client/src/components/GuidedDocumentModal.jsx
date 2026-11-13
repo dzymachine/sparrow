@@ -118,8 +118,8 @@ export default function GuidedDocumentModal({ docItem, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
-      <div className="bg-[#FAF9F6] rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-brand-200 overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 animate-fade-in">
+      <div className="bg-[#FAF9F6] rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-brand-200 overflow-hidden animate-fade-in">
         {/* Top DocuSign-style Action Bar */}
         <div className="bg-white border-b border-slate-200 px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-0.5 min-w-0">

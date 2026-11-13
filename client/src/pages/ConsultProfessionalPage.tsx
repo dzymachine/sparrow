@@ -289,15 +289,15 @@ export default function ConsultProfessionalPage() {
             `${practice.name}, ${practice.address}`
           )}`;
           infoWindowRef.current.setContent(`
-            <div style="font-family: 'DM Sans', sans-serif; max-width: 240px; padding: 4px;">
-              <div style="font-weight: 600; font-size: 13px; color: #261E19; margin-bottom: 4px;">${practice.name}</div>
-              <div style="font-size: 11px; color: #5C4E43; margin-bottom: 6px;">${practice.address}</div>
+            <div style="font-family: 'Inter', sans-serif; max-width: 240px; padding: 4px;">
+              <div style="font-weight: 600; font-size: 13px; color: #1c1c19; margin-bottom: 4px;">${practice.name}</div>
+              <div style="font-size: 11px; color: #5F635E; margin-bottom: 6px;">${practice.address}</div>
               ${
                 practice.rating
-                  ? `<div style="font-size: 11px; color: #435C4D; font-weight: 500; margin-bottom: 6px;">★ ${practice.rating} (${practice.userRatingsTotal || 0} reviews)</div>`
+                  ? `<div style="font-size: 11px; color: #4F5E47; font-weight: 500; margin-bottom: 6px;">★ ${practice.rating} (${practice.userRatingsTotal || 0} reviews)</div>`
                   : ''
               }
-              <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; color: #435C4D; font-weight: 600; text-decoration: underline;">Get Directions →</a>
+              <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; color: #4F5E47; font-weight: 600; text-decoration: underline;">Get Directions →</a>
             </div>
           `);
           infoWindowRef.current.open(mapInstanceRef.current, marker);
@@ -336,7 +336,7 @@ export default function ConsultProfessionalPage() {
 
       try {
         const { Map, InfoWindow } = (await importLibrary('maps')) as google.maps.MapsLibrary;
-        const { PlacesService } = (await importLibrary('places')) as google.maps.PlacesLibrary;
+        const { Place, PlacesService } = (await importLibrary('places')) as google.maps.PlacesLibrary;
 
         if (!mapInstanceRef.current) {
           mapInstanceRef.current = new Map(mapContainerRef.current, {
@@ -369,13 +369,100 @@ export default function ConsultProfessionalPage() {
           icon: {
             path: google.maps.SymbolPath.CIRCLE,
             scale: 8,
-            fillColor: '#435C4D',
+            fillColor: '#4F5E47',
             fillOpacity: 1,
-            strokeColor: '#FFFFFF',
+            strokeColor: '#FAF7F2',
             strokeWeight: 2.5
           }
         });
 
+        const plotPractices = (mapped: LawPractice[]) => {
+          setPractices(mapped);
+          setSelectedPracticeId(mapped[0]?.id || null);
+
+          const bounds = new google.maps.LatLngBounds();
+          bounds.extend(center);
+
+          mapped.forEach((practice) => {
+            const pos = { lat: practice.lat, lng: practice.lng };
+            bounds.extend(pos);
+
+            const marker = new google.maps.Marker({
+              position: pos,
+              map: mapInstanceRef.current!,
+              title: practice.name
+            });
+
+            marker.addListener('click', () => {
+              selectPractice(practice, true);
+            });
+
+            markersRef.current.push(marker);
+          });
+
+          if (mapped.length > 1 && mapInstanceRef.current) {
+            mapInstanceRef.current.fitBounds(bounds, 48);
+          }
+        };
+
+        // Prefer Places API (New): Place.searchByText
+        if (Place && typeof Place.searchByText === 'function') {
+          try {
+            const { places } = await Place.searchByText({
+              textQuery: `${selectedCategoryObj.query} near ${areaLabel}`,
+              fields: [
+                'id',
+                'displayName',
+                'formattedAddress',
+                'location',
+                'rating',
+                'userRatingCount',
+                'nationalPhoneNumber',
+                'websiteURI',
+                'googleMapsURI'
+              ],
+              locationBias: {
+                center,
+                radius: selectedRadiusObj.meters
+              },
+              maxResultCount: 15
+            });
+
+            setIsSearching(false);
+
+            if (places && places.length > 0) {
+              const mapped: LawPractice[] = places
+                .filter((p) => p.location && p.id)
+                .map((p) => {
+                  const lat = p.location!.lat();
+                  const lng = p.location!.lng();
+                  return {
+                    id: p.id,
+                    name: p.displayName || 'Family Law Office',
+                    address: p.formattedAddress || 'Address available on Google Maps',
+                    lat,
+                    lng,
+                    rating: p.rating ?? undefined,
+                    userRatingsTotal: p.userRatingCount ?? undefined,
+                    phone: p.nationalPhoneNumber ?? undefined,
+                    website: p.websiteURI ?? undefined,
+                    googleMapsUrl:
+                      p.googleMapsURI || `https://www.google.com/maps/place/?q=place_id:${p.id}`,
+                    categoryLabel: selectedCategoryObj.label,
+                    distanceMiles: Number(haversineMiles(center.lat, center.lng, lat, lng).toFixed(1))
+                  };
+                })
+                .sort((a, b) => (a.distanceMiles ?? 99) - (b.distanceMiles ?? 99));
+
+              plotPractices(mapped);
+              return;
+            }
+          } catch (newPlacesErr) {
+            console.warn('Places API (New) failed, falling back to legacy PlacesService:', newPlacesErr);
+          }
+        }
+
+        // Legacy PlacesService fallback
         const request: google.maps.places.TextSearchRequest = {
           query: selectedCategoryObj.query,
           location: center,
@@ -408,32 +495,7 @@ export default function ConsultProfessionalPage() {
               })
               .sort((a, b) => (a.distanceMiles ?? 99) - (b.distanceMiles ?? 99));
 
-            setPractices(mapped);
-            setSelectedPracticeId(mapped[0]?.id || null);
-
-            const bounds = new google.maps.LatLngBounds();
-            bounds.extend(center);
-
-            mapped.forEach((practice) => {
-              const pos = { lat: practice.lat, lng: practice.lng };
-              bounds.extend(pos);
-
-              const marker = new google.maps.Marker({
-                position: pos,
-                map: mapInstanceRef.current!,
-                title: practice.name
-              });
-
-              marker.addListener('click', () => {
-                selectPractice(practice, true);
-              });
-
-              markersRef.current.push(marker);
-            });
-
-            if (mapped.length > 1 && mapInstanceRef.current) {
-              mapInstanceRef.current.fitBounds(bounds, 48);
-            }
+            plotPractices(mapped);
           } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
             setPractices([]);
             setSelectedPracticeId(null);
@@ -621,22 +683,22 @@ export default function ConsultProfessionalPage() {
   }, [searchCenter, radiusMiles]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-page-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2DBD0] pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2DAD0] pb-6">
         <div className="space-y-1.5">
           <Link
             to={currentUser ? '/dashboard' : '/'}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#5C4E43] hover:text-[#261E19] transition"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#5F635E] hover:text-[#4F5E47] transition-smooth"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>{currentUser ? 'Back to Dashboard' : 'Back to Home'}</span>
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-[#261E19] tracking-tight flex items-center gap-2.5">
-            <Scale className="w-6 h-6 text-[#435C4D]" />
+          <h1 className="font-serif text-3xl sm:text-4xl font-normal text-[#1c1c19] tracking-tight flex items-center gap-3">
+            <Scale className="w-6 h-6 text-[#4F5E47] shrink-0" />
             <span>Consult a Family Law Professional</span>
           </h1>
-          <p className="text-sm text-[#5C4E43] max-w-2xl">
+          <p className="text-sm sm:text-base text-[#5F635E] max-w-2xl leading-relaxed">
             Find family law attorneys, divorce mediators, and legal aid offices near you. Bring your Sparrow Discovery Brief to your first consultation so you don&apos;t waste billable hours.
           </p>
         </div>
@@ -645,7 +707,7 @@ export default function ConsultProfessionalPage() {
           <button
             type="button"
             onClick={() => exportDiscoveryPacket('print')}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-[#435C4D] bg-[#E6ECE6] hover:bg-[#d7e2d7] rounded-lg transition self-start md:self-auto"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-[#4F5E47] bg-transparent border border-[#8A9A7B] hover:bg-[#F4EFEA] rounded-full transition-smooth self-start md:self-auto"
           >
             <Printer className="w-3.5 h-3.5" />
             <span>Print / Save Lawyer Brief</span>
@@ -655,16 +717,16 @@ export default function ConsultProfessionalPage() {
 
       {/* Location Permission Prompt Banner (shown before first search) */}
       {!searchCenter && !locationPromptDismissed && (
-        <div className="bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-[#F4EFEA] border border-[#E2DAD0] rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#E6ECE6] text-[#435C4D] flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-[#EDE6DD] text-[#4F5E47] flex items-center justify-center shrink-0">
               <Compass className="w-5 h-5" />
             </div>
             <div className="space-y-1">
-              <h2 className="text-sm font-semibold text-[#261E19]">
+              <h2 className="font-serif text-lg font-normal text-[#1c1c19]">
                 Use your location or enter a ZIP code to find nearby family law offices
               </h2>
-              <p className="text-xs text-[#5C4E43]">
+              <p className="text-xs text-[#5F635E] leading-relaxed">
                 Your location is only used in your browser to query nearby law practices and is never stored on our servers.
               </p>
             </div>
@@ -674,7 +736,7 @@ export default function ConsultProfessionalPage() {
               type="button"
               onClick={handleUseMyLocation}
               disabled={isLocating}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-[#435C4D] hover:bg-[#354A3E] rounded-lg transition disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium text-[#FAF7F2] bg-[#4F5E47] hover:bg-[#384631] rounded-xl transition-smooth disabled:opacity-60"
             >
               {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5" />}
               <span>{isLocating ? 'Locating...' : 'Allow Location Access'}</span>
@@ -682,7 +744,7 @@ export default function ConsultProfessionalPage() {
             <button
               type="button"
               onClick={() => setLocationPromptDismissed(true)}
-              className="px-3 py-2 text-xs font-medium text-[#5C4E43] hover:text-[#261E19] border border-[#E2DBD0] bg-white rounded-lg transition"
+              className="px-4 py-2.5 text-xs font-medium text-[#4F5E47] hover:bg-[#EDE6DD]/60 border border-[#8A9A7B] bg-transparent rounded-xl transition-smooth"
             >
               Enter ZIP Instead
             </button>
@@ -691,25 +753,25 @@ export default function ConsultProfessionalPage() {
       )}
 
       {/* Search & Filter Controls */}
-      <section className="bg-white border border-[#E2DBD0] rounded-xl p-4 sm:p-5 space-y-4">
+      <section className="bg-white border border-[#4F5E47]/10 rounded-2xl shadow-serene p-4 sm:p-5 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center gap-3">
           {/* ZIP Code Form */}
           <form onSubmit={handleZipSearch} className="flex-1 flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
-              <MapPin className="w-4 h-4 text-[#8C7D73] absolute left-3 top-1/2 -translate-y-1/2" />
+              <MapPin className="w-4 h-4 text-[#A07E5F] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={zipInput}
                 onChange={(e) => setZipInput(e.target.value)}
                 placeholder="Enter ZIP code (e.g., 94102) or city..."
                 aria-label="ZIP code or city"
-                className="w-full pl-9 pr-3 py-2 text-sm bg-[#FAF9F6] border border-[#E2DBD0] rounded-lg text-[#261E19] placeholder-[#8C7D73] focus:outline-none focus:ring-2 focus:ring-[#435C4D]/30 focus:border-[#435C4D]"
+                className="w-full pl-9 pr-3 py-2.5 text-sm bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl text-[#1c1c19] placeholder-[#5F635E]/60 focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F]"
               />
             </div>
             <button
               type="submit"
               disabled={isSearching}
-              className="inline-flex items-center justify-center gap-1.5 px-5 py-2 text-xs font-medium text-white bg-[#435C4D] hover:bg-[#354A3E] rounded-lg transition disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 text-xs font-medium text-[#FAF7F2] bg-[#4F5E47] hover:bg-[#384631] rounded-xl transition-smooth disabled:opacity-60"
             >
               {isSearching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
               <span>Find Lawyers</span>
@@ -717,31 +779,31 @@ export default function ConsultProfessionalPage() {
           </form>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#8C7D73] hidden sm:inline">or</span>
+            <span className="text-xs text-[#5F635E] hidden sm:inline">or</span>
             <button
               type="button"
               onClick={handleUseMyLocation}
               disabled={isLocating}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-medium text-[#261E19] bg-[#FAF9F6] hover:bg-[#F0EAE1] border border-[#E2DBD0] rounded-lg transition disabled:opacity-60 w-full sm:w-auto"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-medium text-[#4F5E47] bg-transparent hover:bg-[#F4EFEA] border border-[#8A9A7B] rounded-xl transition-smooth disabled:opacity-60 w-full sm:w-auto"
             >
-              {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#435C4D]" /> : <Navigation className="w-3.5 h-3.5 text-[#435C4D]" />}
+              {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#4F5E47]" /> : <Navigation className="w-3.5 h-3.5 text-[#4F5E47]" />}
               <span>{isLocating ? 'Locating...' : 'Use My Location'}</span>
             </button>
           </div>
         </div>
 
         {/* Specialty & Radius Filters */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-[#F0EAE1]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-[#E2DAD0]/70">
           <div className="flex flex-wrap items-center gap-1.5">
             {CATEGORY_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
                 type="button"
                 onClick={() => setCategory(opt.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-smooth ${
                   category === opt.id
-                    ? 'bg-[#435C4D] text-white'
-                    : 'bg-[#FAF9F6] text-[#5C4E43] border border-[#E2DBD0] hover:bg-[#F0EAE1]'
+                    ? 'bg-[#4F5E47] text-[#FAF7F2]'
+                    : 'bg-[#FAF7F2] text-[#5F635E] border border-[#E2DAD0] hover:bg-[#F4EFEA] hover:text-[#2C332A]'
                 }`}
               >
                 {opt.label}
@@ -749,13 +811,13 @@ export default function ConsultProfessionalPage() {
             ))}
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-[#5C4E43]">
+          <div className="flex items-center gap-2 text-xs text-[#5F635E]">
             <span>Radius:</span>
             <select
               value={radiusMiles}
               onChange={(e) => setRadiusMiles(Number(e.target.value))}
               aria-label="Search radius"
-              className="bg-[#FAF9F6] border border-[#E2DBD0] rounded-lg px-2.5 py-1 text-xs text-[#261E19] focus:outline-none focus:border-[#435C4D]"
+              className="bg-[#FAF7F2] border border-[#E2DAD0] rounded-xl px-3 py-1.5 text-xs text-[#2C332A] focus:outline-none focus:border-[#A07E5F]"
             >
               {RADIUS_OPTIONS.map((r) => (
                 <option key={r.miles} value={r.miles}>
@@ -769,19 +831,19 @@ export default function ConsultProfessionalPage() {
 
       {/* API Key / Fallback Notice */}
       {usingFallbackMode && (
-        <div className="bg-amber-50/80 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2.5 text-xs text-amber-900">
-          <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+        <div className="bg-[#FAF2F0] border border-[#D9B3AC] rounded-2xl px-4 py-3 flex items-start gap-2.5 text-xs text-[#5F635E]">
+          <AlertCircle className="w-4 h-4 text-[#A86851] shrink-0 mt-0.5" />
           <div>
-            <span className="font-semibold">Google Maps Preview Mode:</span>{' '}
-            Add <code className="px-1 py-0.5 bg-amber-100 rounded font-mono text-[11px]">VITE_GOOGLE_MAPS_API_KEY</code> to{' '}
-            <code className="px-1 py-0.5 bg-amber-100 rounded font-mono text-[11px]">client/.env</code> (with Maps JavaScript, Places, and Geocoding APIs enabled) for live Google Maps pins and real-time Google Places directory results. Below is a preview with direct Google Maps links.
+            <span className="font-semibold text-[#2C332A]">Google Maps Preview Mode:</span>{' '}
+            Add <code className="px-1.5 py-0.5 bg-[#EDE6DD] text-[#2C332A] rounded font-mono text-[11px]">VITE_GOOGLE_MAPS_API_KEY</code> to{' '}
+            <code className="px-1.5 py-0.5 bg-[#EDE6DD] text-[#2C332A] rounded font-mono text-[11px]">client/.env</code> (with Maps JavaScript, Places, and Geocoding APIs enabled) for live Google Maps pins and real-time Google Places directory results. Below is a preview with direct Google Maps links.
           </div>
         </div>
       )}
 
       {/* Error Message */}
       {errorMsg && (
-        <div className="bg-[#FDF8F6] border border-[#E2DBD0] rounded-xl px-4 py-3 flex items-start gap-2.5 text-xs text-[#7e4d41]">
+        <div className="bg-[#FAF2F0] border border-[#D9B3AC] rounded-2xl px-4 py-3 flex items-start gap-2.5 text-xs text-[#A86851]">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{errorMsg}</span>
         </div>
@@ -793,15 +855,15 @@ export default function ConsultProfessionalPage() {
           {/* Left Column: Practice List */}
           <div className="lg:col-span-5 space-y-3">
             <div className="flex items-center justify-between px-1">
-              <div className="text-xs font-medium text-[#5C4E43]">
-                Showing <span className="text-[#261E19] font-semibold">{practices.length}</span> suggested practices near{' '}
-                <span className="text-[#261E19] font-semibold">{locationLabel}</span>
+              <div className="text-xs font-medium text-[#5F635E]">
+                Showing <span className="text-[#1c1c19] font-semibold">{practices.length}</span> suggested practices near{' '}
+                <span className="text-[#1c1c19] font-semibold">{locationLabel}</span>
               </div>
               <a
                 href={`https://www.google.com/maps/search/${encodeURIComponent(selectedCategoryObj.query)}/@${searchCenter.lat},${searchCenter.lng},12z`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-medium text-[#435C4D] hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-medium text-[#A07E5F] hover:text-[#4F5E47] hover:underline transition-smooth"
               >
                 <span>Open in Google Maps</span>
                 <ExternalLink className="w-3 h-3" />
@@ -810,15 +872,15 @@ export default function ConsultProfessionalPage() {
 
             <div className="space-y-3 max-h-[620px] overflow-y-auto pr-1">
               {isSearching ? (
-                <div className="bg-white border border-[#E2DBD0] rounded-xl p-8 text-center space-y-2">
-                  <Loader2 className="w-6 h-6 text-[#435C4D] animate-spin mx-auto" />
-                  <p className="text-xs text-[#5C4E43]">Searching family law offices near {locationLabel}...</p>
+                <div className="bg-white border border-[#4F5E47]/10 rounded-2xl shadow-serene p-8 text-center space-y-2">
+                  <Loader2 className="w-6 h-6 text-[#4F5E47] animate-spin mx-auto" />
+                  <p className="text-xs text-[#5F635E]">Searching family law offices near {locationLabel}...</p>
                 </div>
               ) : practices.length === 0 ? (
-                <div className="bg-white border border-[#E2DBD0] rounded-xl p-6 text-center space-y-2">
-                  <Building2 className="w-6 h-6 text-[#8C7D73] mx-auto" />
-                  <p className="text-sm font-medium text-[#261E19]">No practices found in this radius</p>
-                  <p className="text-xs text-[#5C4E43]">Try increasing your radius to 25 miles or switching to All Family Law.</p>
+                <div className="bg-white border border-[#4F5E47]/10 rounded-2xl shadow-serene p-6 text-center space-y-2">
+                  <Building2 className="w-6 h-6 text-[#8A9A7B] mx-auto" />
+                  <p className="text-sm font-medium text-[#1c1c19]">No practices found in this radius</p>
+                  <p className="text-xs text-[#5F635E]">Try increasing your radius to 25 miles or switching to All Family Law.</p>
                 </div>
               ) : (
                 practices.map((practice) => {
@@ -834,47 +896,47 @@ export default function ConsultProfessionalPage() {
                         cardRefs.current[practice.id] = el;
                       }}
                       onClick={() => selectPractice(practice, true)}
-                      className={`cursor-pointer rounded-xl p-4 border transition ${
+                      className={`cursor-pointer rounded-2xl p-4 border transition-smooth ${
                         isSelected
-                          ? 'bg-[#FAF9F6] border-[#435C4D] ring-1 ring-[#435C4D]/30 shadow-xs'
-                          : 'bg-white border-[#E2DBD0] hover:border-[#8C7D73]'
+                          ? 'bg-[#F4EFEA] border-[#4F5E47] ring-1 ring-[#4F5E47]/25 shadow-serene'
+                          : 'bg-white border-[#4F5E47]/10 hover:border-[#A07E5F]/50 shadow-serene'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="space-y-1">
-                          <span className="inline-block text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#E6ECE6] text-[#435C4D]">
+                          <span className="inline-block text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-[#EDE6DD] text-[#4F5E47]">
                             {practice.categoryLabel}
                           </span>
-                          <h3 className="text-sm font-semibold text-[#261E19] leading-snug">
+                          <h3 className="text-sm font-semibold text-[#1c1c19] leading-snug">
                             {practice.name}
                           </h3>
                         </div>
                         {practice.distanceMiles !== undefined && (
-                          <span className="text-[11px] font-medium text-[#5C4E43] bg-[#F4EFEB] px-2 py-0.5 rounded-md shrink-0">
+                          <span className="text-[11px] font-medium text-[#5F635E] bg-[#F4EFEA] border border-[#E2DAD0] px-2.5 py-0.5 rounded-full shrink-0">
                             {practice.distanceMiles} mi
                           </span>
                         )}
                       </div>
 
-                      <p className="text-xs text-[#5C4E43] mt-1.5 flex items-start gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-[#8C7D73] shrink-0 mt-0.5" />
+                      <p className="text-xs text-[#5F635E] mt-1.5 flex items-start gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-[#A07E5F] shrink-0 mt-0.5" />
                         <span>{practice.address}</span>
                       </p>
 
                       <div className="flex flex-wrap items-center gap-3 mt-2.5 text-xs">
                         {practice.rating && (
-                          <span className="inline-flex items-center gap-1 text-[#261E19] font-medium">
-                            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                          <span className="inline-flex items-center gap-1 text-[#1c1c19] font-medium">
+                            <Star className="w-3.5 h-3.5 text-[#A07E5F] fill-[#A07E5F]" />
                             <span>{practice.rating}</span>
                             {practice.userRatingsTotal !== undefined && (
-                              <span className="text-[#8C7D73] font-normal">({practice.userRatingsTotal})</span>
+                              <span className="text-[#5F635E] font-normal">({practice.userRatingsTotal})</span>
                             )}
                           </span>
                         )}
                         {practice.isOpenNow !== undefined && (
                           <span
                             className={`inline-flex items-center gap-1 text-[11px] font-medium ${
-                              practice.isOpenNow ? 'text-[#435C4D]' : 'text-[#8C7D73]'
+                              practice.isOpenNow ? 'text-[#4F5E47]' : 'text-[#5F635E]'
                             }`}
                           >
                             <Clock className="w-3 h-3" />
@@ -884,12 +946,12 @@ export default function ConsultProfessionalPage() {
                       </div>
 
                       {(practice.phone || practice.website) && (
-                        <div className="flex flex-wrap items-center gap-3 mt-2.5 pt-2.5 border-t border-[#F0EAE1] text-xs">
+                        <div className="flex flex-wrap items-center gap-3 mt-2.5 pt-2.5 border-t border-[#E2DAD0]/70 text-xs">
                           {practice.phone && (
                             <a
                               href={`tel:${practice.phone.replace(/[^\d+]/g, '')}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-1 text-[#435C4D] hover:underline font-medium"
+                              className="inline-flex items-center gap-1 text-[#4F5E47] hover:underline font-medium"
                             >
                               <Phone className="w-3 h-3" />
                               <span>{practice.phone}</span>
@@ -901,7 +963,7 @@ export default function ConsultProfessionalPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-1 text-[#5C4E43] hover:text-[#261E19] hover:underline"
+                              className="inline-flex items-center gap-1 text-[#5F635E] hover:text-[#1c1c19] hover:underline"
                             >
                               <Globe className="w-3 h-3" />
                               <span>Website</span>
@@ -916,7 +978,7 @@ export default function ConsultProfessionalPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#435C4D] hover:bg-[#354A3E] text-white transition"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-[11px] font-medium bg-[#4F5E47] hover:bg-[#384631] text-[#FAF7F2] transition-smooth"
                         >
                           <Navigation className="w-3 h-3" />
                           <span>Directions</span>
@@ -927,7 +989,7 @@ export default function ConsultProfessionalPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-white border border-[#E2DBD0] text-[#5C4E43] hover:text-[#261E19] transition"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-[11px] font-medium bg-transparent border border-[#8A9A7B] text-[#4F5E47] hover:bg-[#F4EFEA] transition-smooth"
                           >
                             <span>View Listing</span>
                             <ExternalLink className="w-3 h-3" />
@@ -943,25 +1005,25 @@ export default function ConsultProfessionalPage() {
 
           {/* Right Column: Interactive Map */}
           <div className="lg:col-span-7 lg:sticky lg:top-24">
-            <div className="bg-white border border-[#E2DBD0] rounded-xl overflow-hidden shadow-xs">
+            <div className="bg-white border border-[#4F5E47]/10 rounded-2xl overflow-hidden shadow-serene">
               {!usingFallbackMode ? (
                 <div ref={mapContainerRef} className="w-full h-[500px] lg:h-[620px]" />
               ) : (
-                <div className="relative w-full h-[500px] lg:h-[620px] bg-[#FAF9F6]">
+                <div className="relative w-full h-[500px] lg:h-[620px] bg-[#F4EFEA]">
                   <iframe
                     title="Area Map Preview"
                     src={osmEmbedUrl}
                     className="w-full h-full border-0"
                   />
-                  <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-xs border border-[#E2DBD0] rounded-lg px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs">
-                    <span className="text-[#5C4E43]">
-                      Showing map area for <strong className="text-[#261E19]">{locationLabel}</strong>
+                  <div className="absolute bottom-3 left-3 right-3 bg-[#FAF7F2]/95 backdrop-blur-sm border border-[#E2DAD0] rounded-xl px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs shadow-serene">
+                    <span className="text-[#5F635E]">
+                      Showing map area for <strong className="text-[#1c1c19]">{locationLabel}</strong>
                     </span>
                     <a
                       href={`https://www.google.com/maps/search/${encodeURIComponent(selectedCategoryObj.query)}/@${searchCenter.lat},${searchCenter.lng},12z`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 font-medium text-[#435C4D] hover:underline shrink-0"
+                      className="inline-flex items-center gap-1 font-medium text-[#4F5E47] hover:underline shrink-0"
                     >
                       <span>Open Full Google Maps</span>
                       <ExternalLink className="w-3 h-3" />
@@ -974,15 +1036,15 @@ export default function ConsultProfessionalPage() {
         </div>
       ) : (
         /* Empty Initial State */
-        <div className="bg-white border border-[#E2DBD0] rounded-xl p-10 text-center space-y-4">
-          <div className="w-12 h-12 rounded-xl bg-[#E6ECE6] text-[#435C4D] flex items-center justify-center mx-auto">
+        <div className="bg-white border border-[#4F5E47]/10 rounded-2xl shadow-serene p-10 text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#F4EFEA] border border-[#E2DAD0] text-[#4F5E47] flex items-center justify-center mx-auto">
             <MapPin className="w-6 h-6" />
           </div>
           <div className="max-w-md mx-auto space-y-1.5">
-            <h2 className="text-base font-semibold text-[#261E19]">
+            <h2 className="font-serif text-xl font-normal text-[#1c1c19]">
               Search by ZIP code or share your location
             </h2>
-            <p className="text-xs text-[#5C4E43] leading-relaxed">
+            <p className="text-xs text-[#5F635E] leading-relaxed">
               We&apos;ll show family law attorneys, divorce mediators, and local legal aid offices near you on an interactive map.
             </p>
           </div>
@@ -1004,7 +1066,7 @@ export default function ConsultProfessionalPage() {
                     `ZIP ${sampleZip}`
                   );
                 }}
-                className="px-3 py-1.5 text-xs font-medium bg-[#FAF9F6] hover:bg-[#F0EAE1] border border-[#E2DBD0] rounded-lg text-[#5C4E43] transition"
+                className="px-3.5 py-1.5 text-xs font-medium bg-[#FAF7F2] hover:bg-[#F4EFEA] border border-[#8A9A7B]/60 rounded-full text-[#4F5E47] transition-smooth"
               >
                 Try ZIP {sampleZip}
               </button>
@@ -1014,24 +1076,24 @@ export default function ConsultProfessionalPage() {
       )}
 
       {/* Consultation Preparation Tips */}
-      <section className="bg-[#FAF9F6] border border-[#E2DBD0] rounded-xl p-5 sm:p-6">
+      <section className="bg-[#F4EFEA] border border-[#E2DAD0] rounded-2xl p-5 sm:p-6">
         <div className="flex items-start gap-3">
-          <Sparkles className="w-5 h-5 text-[#435C4D] shrink-0 mt-0.5" />
+          <Sparkles className="w-5 h-5 text-[#A07E5F] shrink-0 mt-0.5" />
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-[#261E19]">
+            <h3 className="font-serif text-base font-medium text-[#1c1c19]">
               How to get the most out of a 15–30 minute consultation
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-[#5C4E43]">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-[#5F635E]">
               <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#435C4D] shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-[#4F5E47] shrink-0 mt-0.5" />
                 <span>Ask whether they offer a free initial consult and how retainers &amp; payment plans work.</span>
               </div>
               <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#435C4D] shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-[#4F5E47] shrink-0 mt-0.5" />
                 <span>Bring your Sparrow Discovery Brief so they can immediately see assets, Schedule B leads, and gaps.</span>
               </div>
               <div className="flex items-start gap-2">
-                <Shield className="w-4 h-4 text-[#435C4D] shrink-0 mt-0.5" />
+                <Shield className="w-4 h-4 text-[#4F5E47] shrink-0 mt-0.5" />
                 <span>Ask about temporary support orders or attorney-fee contribution if your spouse controls household accounts.</span>
               </div>
             </div>

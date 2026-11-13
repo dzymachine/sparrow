@@ -41,9 +41,9 @@ export default function ExtractionReviewDrawer() {
   const unlistedCount = editedDoc.unlistedAccounts?.length || 0;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-[#261E19]/40 backdrop-blur-xs flex justify-end">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-[#261E19]/40 backdrop-blur-xs flex justify-end animate-fade-in">
       <div 
-        className="w-full max-w-2xl bg-[#F8F6F2] border-l border-[#E2DBD0] h-full shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-200"
+        className="w-full max-w-2xl bg-[#F8F6F2] border-l border-[#E2DBD0] h-full shadow-2xl flex flex-col justify-between overflow-hidden animate-fade-in"
       >
         {/* Drawer Header */}
         <div className="p-5 bg-white border-b border-[#E2DBD0] shrink-0">
@@ -136,7 +136,7 @@ export default function ExtractionReviewDrawer() {
         </div>
 
         {/* Drawer Body Scroll Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        <div key={activeTab} className="flex-1 overflow-y-auto p-6 space-y-5 animate-fade-in">
           {/* TAB 1: PLAIN-ENGLISH SUMMARY */}
           {activeTab === 'summary' && (
             <div className="space-y-4">
