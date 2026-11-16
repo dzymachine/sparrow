@@ -1,7 +1,7 @@
 {
   "name": "ruth-ai",
   "version": "1.0.0",
-  "description": "Know What's Yours (RuthAI) - Empathetic financial discovery and divorce navigation platform for women",
+  "description": "Sparrow (Know What's Yours) - Empathetic financial discovery and divorce navigation platform for women",
   "main": "server/src/index.js",
   "scripts": {
     "install:all": "npm install && npm install --prefix server && npm install --prefix client",
@@ -16,12 +16,12 @@
   },
   "keywords": [
     "divorce-financial-navigation",
-    "ruthai",
+    "sparrow",
     "know-whats-yours",
     "gemini",
     "women-empowerment",
     "firebase"
   ],
-  "author": "RuthAI Team",
+  "author": "Sparrow Team",
   "license": "MIT"
 }

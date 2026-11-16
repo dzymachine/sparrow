@@ -858,7 +858,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
   res.json({
     status: 'healthy',
     name: 'Foothold Financial Discovery Service',
-    description: "Know What's Yours - Document Intelligence Engine",
+    description: "Sparrow (Know What's Yours) - Document Intelligence Engine",
     geminiModel: GEMINI_DISCOVERY_MODEL,
     geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
     time: new Date().toISOString()

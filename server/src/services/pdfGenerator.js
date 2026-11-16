@@ -88,7 +88,7 @@ async function generateFilledDocumentPdf({ schema, values, stateJurisdiction }) 
     borderWidth: 1
   });
 
-  page.drawText(sanitizePdfText(`RUTH AI | COMPLETED FORM PACKET (${schema.formCode || 'FORM'})`), {
+  page.drawText(sanitizePdfText(`SPARROW | COMPLETED FORM PACKET (${schema.formCode || 'FORM'})`), {
     x: margin + 12,
     y: y - 18,
     size: 9,
@@ -219,7 +219,7 @@ async function generateFilledDocumentPdf({ schema, values, stateJurisdiction }) 
   // Footer Disclaimer
   ensureSpace(30);
   page.drawText(
-    'Prepared with RuthAI Guided Document Filler. Review all entries before filing with your court clerk.',
+    'Prepared with Sparrow Guided Document Filler. Review all entries before filing with your court clerk.',
     {
       x: margin,
       y: margin - 10,

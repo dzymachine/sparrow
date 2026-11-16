@@ -1,7 +1,7 @@
 {
   "name": "ruth-ai-server",
   "version": "1.0.0",
-  "description": "Express Node.js backend for RuthAI profile and agent memory persistence",
+  "description": "Express Node.js backend for Sparrow profile and agent memory persistence",
   "main": "src/index.js",
   "scripts": {
     "start": "tsx src/server.ts",

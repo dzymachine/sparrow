@@ -414,7 +414,7 @@ function calculatePostDivorceProjection({ profile = {}, agentMemory = {}, wiki =
       missingFields: readiness.missingFields,
       recommendedMissingFields: readiness.recommendedMissingFields,
       message:
-        'Not enough financial or divorce information is available yet to build an initial post-divorce projection. Please provide the missing details below so RuthAI can calculate your take-home pay, support estimates, and asset outlook.',
+        'Not enough financial or divorce information is available yet to build an initial post-divorce projection. Please provide the missing details below so Sparrow can calculate your take-home pay, support estimates, and asset outlook.',
       currentSnapshot: {
         stateJurisdiction: ctx.stateJurisdiction,
         marriageLengthYears: ctx.marriageLengthYears,

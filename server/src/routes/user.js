@@ -309,7 +309,7 @@ router.post('/checklist/:userId/form/:docId/pdf', async (req, res) => {
 
     const safeCode = String(ctx.schema.formCode || docId).replace(/[^a-zA-Z0-9_-]/g, '_');
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="RuthAI_${safeCode}_Filled.pdf"`);
+    res.setHeader('Content-Disposition', `attachment; filename="Sparrow_${safeCode}_Filled.pdf"`);
     res.setHeader('Content-Length', pdfBuffer.length);
     return res.send(pdfBuffer);
   } catch (err) {

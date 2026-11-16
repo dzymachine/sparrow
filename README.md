@@ -10,7 +10,7 @@ Divorce cuts women's household income by roughly **41% to 50%**, and the women h
 
 Every existing legal tool asks the user to type in what they own. But if she was kept out of the accounts, she cannot list assets she doesn't know exist. 
 
-**Know What's Yours (RuthAI)** reads messy financial paperwork (tax returns, W-2s, bank slips, retirement statements) using Google's Gemini multimodal reasoning, discovers hidden assets and missing disclosures, maps out state-specific entitlements, simulates a 5-year post-divorce budget ("Can I afford the house?"), and generates a lawyer consultation brief to save hundreds of dollars in legal fees.
+**Sparrow (Know What's Yours)** reads messy financial paperwork (tax returns, W-2s, bank slips, retirement statements) using Google's Gemini multimodal reasoning, discovers hidden assets and missing disclosures, maps out state-specific entitlements, simulates a 5-year post-divorce budget ("Can I afford the house?"), and generates a lawyer consultation brief to save hundreds of dollars in legal fees.
 
 ---
 
@@ -23,7 +23,7 @@ Every existing legal tool asks the user to type in what they own. But if she was
    - **Financial Document Vault & Discovery Engine**: Cites discovered accounts back to source pages (e.g. Schedule B interest income).
    - **Entitlements Checklist**: 401(k) / QDROs, spousal maintenance duration, home equity, COBRA healthcare.
    - **Post-Divorce Life Projection**: 5-year affordability simulation for keeping vs selling the marital home.
-   - **Ruth AI Advisor Chat**: Contextualized conversation powered by stored user profile and agent memory.
+   - **Finch AI Advisor Chat**: Contextualized conversation powered by stored user profile and agent memory.
    - **Lawyer Prep Brief Exporter**: One-click download of discovered assets and target consultation questions.
 
 ---
