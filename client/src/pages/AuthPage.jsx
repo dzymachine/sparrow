@@ -217,7 +217,7 @@ export default function AuthPage() {
         {/* Privacy Note */}
         <div className="pt-2 text-center text-xs text-[#5F635E] flex items-center justify-center gap-1.5">
           <Lock className="w-3.5 h-3.5 text-[#4F5E47]" />
-          <span>Your session is private. Use the Quick Safe Exit bar anytime.</span>
+          <span>Your session is private.</span>
         </div>
       </div>
     </div>

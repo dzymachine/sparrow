@@ -10,6 +10,7 @@ import {
 import { useAgentMemory } from './AgentMemoryContext';
 
 const STORAGE_KEY = 'foothold_discovery_state_v1';
+const SEEDED_USER_IDS = new Set(['demo-user-123', 'seeded-maya-lin']);
 
 // The 7 Required Core Categories defined in California Discovery Requirements
 export const CORE_DISCOVERY_CATEGORIES: CategoryChecklistItem[] = [
@@ -235,6 +236,54 @@ const DEFAULT_WORKSPACE_STATE: DiscoveryWorkspaceState = {
   privacyMode: false
 };
 
+const EMPTY_WORKSPACE_STATE: DiscoveryWorkspaceState = {
+  documents: [],
+  accountVault: [],
+  baseline: {
+    monthlyInflow: 0,
+    userNetPaycheck: 0,
+    spouseNetPaycheck: 0,
+    spousalSupport: 0,
+    childSupport: 0,
+    mustPays: [],
+    lifeAndKids: []
+  },
+  housingSandbox: {
+    propertyAddress: '',
+    estimatedHomeValue: 0,
+    mortgageBalance: 0,
+    interestRate: 0,
+    monthlyMortgageTotal: 0,
+    principal: 0,
+    interest: 0,
+    escrow: 0,
+    hoa: 0,
+    coBorrowerStatus: '',
+    isLease: false
+  },
+  ledgerProtection: {
+    coparentingSplitRatio: '50/50',
+    spousalSupportMonthly: 0,
+    childSupportMonthly: 0,
+    obligations: [],
+    beneficiaryRequirements: [],
+    assetSplitDeadlines: []
+  },
+  privacyMode: false
+};
+
+function getInitialWorkspaceForUser(uid: string): DiscoveryWorkspaceState {
+  try {
+    const saved = localStorage.getItem(`${STORAGE_KEY}_${uid}`);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Failed reading discovery workspace from localStorage', e);
+  }
+  return SEEDED_USER_IDS.has(uid) ? DEFAULT_WORKSPACE_STATE : EMPTY_WORKSPACE_STATE;
+}
+
 interface WikiSyncSummary {
   addedCount: number;
   fileName: string;
@@ -290,17 +339,9 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
   const activeUserId: string = agentMemoryCtx?.activeUserId || 'guest-session';
   const refreshAllMemory: ((uid?: string) => Promise<void>) | undefined = agentMemoryCtx?.refreshAllMemory;
 
-  const [workspace, setWorkspace] = useState<DiscoveryWorkspaceState>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.error('Failed reading discovery workspace from localStorage', e);
-    }
-    return DEFAULT_WORKSPACE_STATE;
-  });
+  const [workspace, setWorkspace] = useState<DiscoveryWorkspaceState>(() =>
+    getInitialWorkspaceForUser(activeUserId)
+  );
 
   const [activeReviewDocId, setActiveReviewDocId] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -311,14 +352,21 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
   const [analyzingFileName, setAnalyzingFileName] = useState('');
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
-  // Sync state to localStorage
+  // Reload per-user workspace whenever the authenticated user changes
+  useEffect(() => {
+    setWorkspace(getInitialWorkspaceForUser(activeUserId));
+    setActiveReviewDocId(null);
+    setPendingTriage(null);
+  }, [activeUserId]);
+
+  // Sync state to per-user localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace));
+      localStorage.setItem(`${STORAGE_KEY}_${activeUserId}`, JSON.stringify(workspace));
     } catch (e) {
       console.error('Failed saving discovery state to localStorage', e);
     }
-  }, [workspace]);
+  }, [workspace, activeUserId]);
 
   // Keyboard shortcut for Quick Exit (Escape key twice quickly or Alt+X)
   useEffect(() => {
@@ -846,10 +894,10 @@ export function DiscoveryProvider({ children }: { children: React.ReactNode }) {
 
   // Reset workspace to clean defaults
   const resetWorkspace = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    setWorkspace(DEFAULT_WORKSPACE_STATE);
+    localStorage.removeItem(`${STORAGE_KEY}_${activeUserId}`);
+    setWorkspace(SEEDED_USER_IDS.has(activeUserId) ? DEFAULT_WORKSPACE_STATE : EMPTY_WORKSPACE_STATE);
     setActiveReviewDocId(null);
-  }, []);
+  }, [activeUserId]);
 
   // Export Discovery Packet (CSV / Print Summary)
   const exportDiscoveryPacket = useCallback(

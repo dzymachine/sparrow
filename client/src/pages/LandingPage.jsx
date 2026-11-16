@@ -9,7 +9,6 @@ import {
   HelpCircle,
   ChevronDown,
   Feather,
-  AlertOctagon,
 } from 'lucide-react';
 import { useSmoothNavigate } from '../context/TransitionContext';
 import {
@@ -29,10 +28,6 @@ export default function LandingPage() {
   const handleSmoothLink = (e, to) => {
     e.preventDefault();
     smoothNavigate(to);
-  };
-
-  const handleQuickExit = () => {
-    window.location.replace('https://weather.com');
   };
 
   return (
@@ -62,18 +57,8 @@ export default function LandingPage() {
             </div>
           </Link>
 
-          {/* Small Sign Up / Login + Safe Exit on Top Right */}
+          {/* Small Sign Up / Login on Top Right */}
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleQuickExit}
-              title="Quick Safe Exit to Weather.com"
-              className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-stone-200/90 hover:text-white bg-black/25 hover:bg-[#7e4d41]/80 backdrop-blur-md border border-white/15 px-2.5 py-1.5 rounded-lg transition"
-            >
-              <AlertOctagon className="w-3 h-3" />
-              <span>Safe Exit</span>
-            </button>
-
             <Link
               to="/auth?mode=login"
               onClick={(e) => handleSmoothLink(e, '/auth?mode=login')}

@@ -110,33 +110,81 @@ function getArticleBySlug(slug) {
   return null;
 }
 
+const STOP_WORDS = new Set([
+  'a', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'can', 'could',
+  'do', 'does', 'did', 'for', 'from', 'get', 'got', 'has', 'have', 'how',
+  'i', 'if', 'in', 'into', 'is', 'it', 'its', 'me', 'my', 'of', 'on', 'or',
+  'our', 'should', 'so', 'some', 'that', 'the', 'their', 'them', 'then',
+  'there', 'these', 'they', 'this', 'to', 'us', 'was', 'we', 'what', 'when',
+  'where', 'which', 'who', 'why', 'will', 'with', 'would', 'you', 'your'
+]);
+
+function tokenizeQuery(query) {
+  return query
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length > 1 && !STOP_WORDS.has(w));
+}
+
 /**
- * Search knowledge base by query string.
+ * Search knowledge base by query string (supports both exact phrases and natural-language questions).
  */
 function searchKnowledge(query) {
   if (!query || typeof query !== 'string') return [];
   const q = query.toLowerCase().trim();
+  if (!q) return [];
+  const tokens = tokenizeQuery(q);
   const articlesList = listArticles();
 
   const results = [];
   for (const artMeta of articlesList) {
     const fullArt = getArticleBySlug(artMeta.slug);
     if (!fullArt) continue;
-    
-    if (
-      fullArt.title.toLowerCase().includes(q) ||
-      fullArt.content.toLowerCase().includes(q) ||
-      artMeta.slug.toLowerCase().includes(q)
-    ) {
+
+    const titleLower = fullArt.title.toLowerCase();
+    const slugLower = artMeta.slug.toLowerCase();
+    const contentLower = fullArt.content.toLowerCase();
+
+    let score = 0;
+    if (titleLower.includes(q) || slugLower.includes(q)) score += 10;
+    if (contentLower.includes(q)) score += 5;
+
+    for (const token of tokens) {
+      if (slugLower.includes(token)) score += 4;
+      if (titleLower.includes(token)) score += 3;
+      if (contentLower.includes(token)) score += 1;
+    }
+
+    if (score > 0) {
       results.push({
         slug: fullArt.slug,
         title: fullArt.title,
         content: fullArt.content,
-        summary: artMeta.summary || fullArt.content.slice(0, 150)
+        summary: artMeta.summary || fullArt.content.slice(0, 150),
+        score,
+        filePath: `knowledge/wiki/${artMeta.slug}.md`
       });
     }
   }
+
+  results.sort((a, b) => b.score - a.score);
   return results;
+}
+
+/**
+ * Compile the entire California Law LLM Wiki (knowledge/wiki/*.md) into a single
+ * reference context string for agent prompt injection.
+ */
+function compileLawWikiContext() {
+  const articlesList = listArticles();
+  const sections = [];
+  for (const artMeta of articlesList) {
+    const fullArt = getArticleBySlug(artMeta.slug);
+    if (!fullArt) continue;
+    sections.push(`=== [knowledge/wiki/${artMeta.slug}.md] ${fullArt.title} ===\n${fullArt.content.trim()}`);
+  }
+  return sections.join('\n\n');
 }
 
 /**
@@ -255,10 +303,12 @@ module.exports = {
   listArticles,
   getArticleBySlug,
   searchKnowledge,
+  compileLawWikiContext,
   getRules,
   evaluateRules,
   getAgentGuidelines,
   getDemoPersona,
   getSources,
-  BASELINE_ARTICLES
+  BASELINE_ARTICLES,
+  WIKI_DIR
 };

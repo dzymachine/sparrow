@@ -23,6 +23,16 @@ const DEMO_USER = {
   isDemo: true
 };
 
+const SEEDED_USERS_BY_EMAIL = {
+  'maya.lin@sparrow.demo': {
+    uid: 'seeded-maya-lin',
+    email: 'maya.lin@sparrow.demo',
+    displayName: 'Maya Lin',
+    isDemo: false
+  },
+  'sarah.demo@ruthai.org': DEMO_USER
+};
+
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -118,6 +128,15 @@ export function AuthProvider({ children }) {
   };
 
   const signIn = async (email, password) => {
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    if (SEEDED_USERS_BY_EMAIL[normalizedEmail]) {
+      const seededUser = SEEDED_USERS_BY_EMAIL[normalizedEmail];
+      setCurrentUser(seededUser);
+      localStorage.setItem('ruthai_current_user', JSON.stringify(seededUser));
+      loadUserProfile(seededUser);
+      return seededUser;
+    }
+
     if (isFirebaseActive && auth) {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       return cred.user;
@@ -131,6 +150,7 @@ export function AuthProvider({ children }) {
       };
       setCurrentUser(user);
       localStorage.setItem('ruthai_current_user', JSON.stringify(user));
+      loadUserProfile(user);
       return user;
     }
   };

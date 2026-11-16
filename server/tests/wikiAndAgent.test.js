@@ -334,4 +334,24 @@ describe('Personal LLM Wiki & Ruth Agent Pipeline', () => {
       firebaseAdmin.isConfigured = origIsConfigured;
     }
   });
+
+  it('always reads knowledge/wiki/ when answering California law questions', async () => {
+    const knowledgeStore = require('../src/store/knowledgeStore');
+    const lawWiki = knowledgeStore.compileLawWikiContext();
+    assert.match(lawWiki, /knowledge\/wiki\/temporary-support\.md/);
+    assert.match(lawWiki, /knowledge\/wiki\/attorney-fees\.md/);
+
+    const searchHits = knowledgeStore.searchKnowledge('How do I ask for attorney fees under Family Code 2030?');
+    assert.ok(searchHits.length > 0, 'Expected natural-language law query to match knowledge/wiki');
+    assert.equal(searchHits[0].slug, 'attorney-fees');
+
+    const lawUser = 'law-user-' + Date.now();
+    const res = await request('POST', '/api/agent/chat', {
+      userId: lawUser,
+      message: 'What is the 6-month waiting period and how much is the filing fee in California?'
+    });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.success, true);
+    assert.match(res.body.reply, /six months|6 months|\$435|filing fee|Timeline/i);
+  });
 });

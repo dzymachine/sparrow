@@ -139,6 +139,124 @@ agentMemories.set(DEMO_USER_ID, {
   lastUpdated: new Date().toISOString()
 });
 
+// Seed realistic lived-in account for Maya Lin (maya.lin@sparrow.demo)
+const SEEDED_MAYA_ID = 'seeded-maya-lin';
+
+userProfiles.set(SEEDED_MAYA_ID, {
+  userId: SEEDED_MAYA_ID,
+  email: 'maya.lin@sparrow.demo',
+  displayName: 'Maya Lin',
+  goal: 'pursuing_divorce',
+  stateJurisdiction: 'California',
+  marriageLengthYears: 12,
+  hasChildren: true,
+  childrenCount: 2,
+  divorcePathway: 'collaborative_or_mediation',
+  hasPrenup: 'no',
+  ownsHome: true,
+  hasRetirementAccounts: true,
+  needsFeeWaiver: false,
+  needsProtectiveOrder: false,
+  financialRole: 'shared_but_spouse_led',
+  fearOfHiddenAssets: true,
+  primaryConcerns: [
+    'keeping_marital_home',
+    'discovering_hidden_accounts',
+    'securing_spousal_support',
+    'protecting_retirement_share'
+  ],
+  estimatedHouseholdIncome: '$220,000+',
+  userGrossMonthlyIncome: 4500,
+  spouseGrossMonthlyIncome: 14200,
+  custodySharePercent: 60,
+  monthlyLivingExpenses: 2600,
+  monthlyDebtPayments: 420,
+  totalDebts: 14500,
+  healthInsuranceMonthlyCost: 520,
+  estimatedRentIfSelling: 3400,
+  employmentStatus: 'part_time_professional',
+  safetyDiscreetMode: false,
+  createdAt: '2026-10-18T14:20:00.000Z',
+  updatedAt: new Date().toISOString()
+});
+
+agentMemories.set(SEEDED_MAYA_ID, {
+  userId: SEEDED_MAYA_ID,
+  financialProfileSummary: "Married 12 years in California (Community Property, >10-year long-duration marriage). Two children with 60% custody share. Exploring whether to keep the Oakland family home or sell and split equity.",
+  discoveredAssets: [
+    {
+      id: 'maya-ast-1',
+      type: 'Real Estate',
+      name: 'Family Home (Oakland, CA)',
+      estimatedValue: 920000,
+      mortgageRemaining: 380000,
+      monthlyPayment: 3150,
+      status: 'Community Property - Valuation Complete',
+      flag: 'Evaluate refinance vs. sale cash-flow impact'
+    },
+    {
+      id: 'maya-ast-2',
+      type: 'Retirement (401k)',
+      name: 'Spouse Tech Corp 401(k)',
+      estimatedValue: 485000,
+      status: 'Subject to QDRO Division',
+      flag: 'Requires Qualified Domestic Relations Order (QDRO)'
+    },
+    {
+      id: 'maya-ast-3',
+      type: 'Bank Account',
+      name: 'Ally Joint High-Yield Savings',
+      estimatedValue: 64000,
+      status: 'Verified Community Liquid Cash',
+      flag: 'Available for immediate transition buffer'
+    },
+    {
+      id: 'maya-ast-4',
+      type: 'Retirement (IRA)',
+      name: 'Maya Vanguard Roth IRA',
+      estimatedValue: 95000,
+      status: 'Community Contribution Review',
+      flag: 'Verify pre-marital balance if applicable'
+    },
+    {
+      id: 'maya-ast-5',
+      type: 'Potential Undisclosed Account',
+      name: 'Charles Schwab Dividend Account (Schedule B)',
+      estimatedValue: 52000,
+      sourceDocument: '2024 Joint Form 1040 Schedule B',
+      status: 'Needs formal FL-142 disclosure request',
+      flag: 'Dividend income reported on tax return not yet on asset sheet'
+    }
+  ],
+  keyQuestionsForLawyer: [
+    "Can I use part of my QDRO / savings share to equalize the Oakland home buyout?",
+    "How does California's 10+ year marriage rule affect spousal support duration?",
+    "What documents do I need to subpoena for the Schedule B Schwab dividend account?"
+  ],
+  lastUpdated: new Date().toISOString()
+});
+
+chatHistories.set(SEEDED_MAYA_ID, [
+  {
+    role: 'user',
+    text: 'We have been married 12 years in Oakland and have two kids. I earn $4,500/mo and my spouse earns $14,200/mo. Can I afford to keep our house?',
+    timestamp: '2026-11-10T18:30:00.000Z'
+  },
+  {
+    role: 'assistant',
+    text: 'I\'ve saved your California 12-year marriage details, income figures, and Oakland home mortgage ($3,150/mo) into your Personal Wiki and Life Projection Engine. Because your marriage exceeds 10 years, California treats it as a long-duration marriage. Check your Post-Divorce Life Projection to compare keeping the home versus selling and investing your equity.',
+    timestamp: '2026-11-10T18:30:05.000Z'
+  }
+]);
+
+checklistProgress.set(SEEDED_MAYA_ID, {
+  completedIds: ['fl-100', 'fl-110', 'fl-140', 'tax-returns-3yr', 'mortgage-statement'],
+  notes: {
+    'fl-140': 'Reviewed 2024 Form 1040 Schedule B; flagged Schwab dividend line item.',
+    'mortgage-statement': 'Remaining principal $380,000 at 3.25% interest.'
+  }
+});
+
 function getUserProfile(userId) {
   return userProfiles.get(userId) || null;
 }

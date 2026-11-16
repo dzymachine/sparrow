@@ -8,7 +8,6 @@ import {
   Minus,
   EyeOff,
   Eye,
-  AlertOctagon,
   Pencil,
   Trash2,
   Check,
@@ -180,10 +179,6 @@ export default function RuthBuddyWidget() {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [chatMessages, isBuddyOpen, activeTab, isUpdatingWiki]);
-
-  const handleQuickSafeExit = () => {
-    window.location.replace('https://weather.com');
-  };
 
   const handleSend = async (e) => {
     e?.preventDefault();
@@ -381,14 +376,6 @@ export default function RuthBuddyWidget() {
             className="p-1.5 rounded-lg text-[#FAF7F2]/80 hover:text-[#FAF7F2] hover:bg-[#FAF7F2]/10 transition-smooth"
           >
             <EyeOff className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleQuickSafeExit}
-            title="Quick Safe Exit (opens Weather.com)"
-            className="flex items-center gap-1 bg-[#FAF7F2]/15 hover:bg-[#FAF7F2]/25 text-[#FAF7F2] border border-[#FAF7F2]/30 text-[11px] font-semibold px-2.5 py-1 rounded-full transition-smooth"
-          >
-            <AlertOctagon className="w-3 h-3" />
-            Exit
           </button>
           <button
             onClick={closeBuddyDrawer}

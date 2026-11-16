@@ -1,4 +1,5 @@
 const wikiStore = require('../store/wikiStore');
+const knowledgeStore = require('../store/knowledgeStore');
 
 const INSTITUTIONS = [
   'Vanguard', 'Fidelity', 'Charles Schwab', 'Schwab', 'Chase', 'Bank of America',
@@ -285,7 +286,27 @@ function getFootprintHighlights(wiki) {
 }
 
 /**
+ * Extract concise, plain-English guidance and key points from a knowledge/wiki/*.md article.
+ */
+function extractWikiSnippet(articleContent) {
+  if (!articleContent) return '';
+  const lines = articleContent
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('>') && !l.startsWith('# '));
+
+  const bodyLines = [];
+  for (const line of lines) {
+    if (line.startsWith('## ')) continue;
+    bodyLines.push(line);
+    if (bodyLines.length >= 3) break;
+  }
+  return bodyLines.join(' ');
+}
+
+/**
  * Generates an empathetic, trauma-informed, wiki-context-grounded response.
+ * Always consults the California Law LLM Wiki (knowledge/wiki/) when answering law questions.
  */
 async function generateRuthResponse({ userId, message, profile, newlyAddedFacts = [] }) {
   const wiki = await wikiStore.getWikiAsync(userId);
@@ -296,15 +317,34 @@ async function generateRuthResponse({ userId, message, profile, newlyAddedFacts 
   const footprintFacts = getFootprintHighlights(wiki);
   const lawyerFacts = (wiki?.sections?.lawyer_readiness?.facts || []).map((f) => f.text);
 
+  // Always read the California Law LLM Wiki (knowledge/wiki/) and agent guidelines
+  const lawArticles = knowledgeStore.searchKnowledge(message);
+  const lawWikiContext = knowledgeStore.compileLawWikiContext();
+  const agentGuidelines = knowledgeStore.getAgentGuidelines();
+
   // Try Gemini if API key is configured
   if (process.env.GEMINI_API_KEY) {
+    const matchedSummary = lawArticles.length > 0
+      ? lawArticles.slice(0, 3).map((a) => `- ${a.filePath}: ${a.title}`).join('\n')
+      : 'None directly matched by keyword; review the full wiki below.';
+
     const systemPrompt = `You are Finch, a warm, casual, down-to-earth AI buddy helping women sort out their money during a divorce.
 Style rules (strict):
 - Be VERY short and concise (2-3 short sentences max, or 3 tiny bullets if listing things).
 - Sound conversational, casual, and friendly—like a supportive, smart friend texting, not a textbook or lawyer.
 - Explain complex money or legal stuff in plain, everyday words. NO complex jargon (if you must mention a term like QDRO or Schedule B, explain it in 3-5 simple words).
+- Always ground any California law, process, form, or timeline answers in the CALIFORNIA LAW LLM WIKI (knowledge/wiki/) below and include [S#] source citations when present.
 - Reference relevant facts (including specific account/institution names) from the user's Personal Wiki below so they feel heard.
 - End with a super brief reminder that this is just helpful info, not legal advice.
+
+AGENT GUIDELINES:
+${agentGuidelines}
+
+CALIFORNIA LAW LLM WIKI (knowledge/wiki/):
+${lawWikiContext}
+
+TOP MATCHED WIKI ARTICLES FOR THIS QUESTION:
+${matchedSummary}
 
 USER PERSONAL LLM WIKI:
 ${compiledContext}
@@ -312,19 +352,21 @@ ${compiledContext}
 USER MESSAGE:
 ${message}
 
-Keep it short, casual, easy to read, and grounded in ${jurisdiction} rules.`;
+Keep it short, casual, easy to read, and grounded in ${jurisdiction} rules and the California Law LLM Wiki.`;
 
     const geminiText = await callGeminiIfConfigured(systemPrompt);
     if (geminiText) {
       return {
         reply: geminiText.trim(),
         suggestedActions: buildSuggestedActions(message, footprintFacts),
-        compiledContextUsed: true
+        compiledContextUsed: true,
+        lawWikiConsulted: true,
+        matchedWikiArticles: lawArticles.slice(0, 3).map((a) => a.slug)
       };
     }
   }
 
-  // Deterministic, deeply personalized wiki-grounded response
+  // Deterministic, deeply personalized + law-wiki-grounded response
   const lower = String(message || '').toLowerCase();
   const parts = [];
 
@@ -342,6 +384,8 @@ Keep it short, casual, easy to read, and grounded in ${jurisdiction} rules.`;
   const realEstateFacts = footprintFacts.filter((t) =>
     /real estate|residence|house|mortgage|3\.\d%|400k|850,000/i.test(t)
   );
+
+  const topLawArticle = lawArticles[0] || null;
 
   if (lower.includes('remember') || lower.includes('know about me') || lower.includes('wiki') || lower.includes('summary')) {
     if (wiki.stats.totalFacts === 0) {
@@ -379,8 +423,11 @@ Keep it short, casual, easy to read, and grounded in ${jurisdiction} rules.`;
     const lawyerRef = lawyerFacts.length > 0
       ? `You also have ${lawyerFacts.length} note(s) saved for your lawyer. `
       : '';
+    const wikiNote = topLawArticle
+      ? ` From our California Law Wiki (**${topLawArticle.title}**): ${extractWikiSnippet(topLawArticle.content)}`
+      : '';
     parts.push(
-      `Lawyers charge by the hour, so going in organized saves real money. ${acctRef}${lawyerRef}Ask them: (1) how to get full account statements, (2) how to split retirement accounts without tax penalties, and (3) if you can get temporary support while things are sorted out.`
+      `Lawyers charge by the hour, so going in organized saves real money. ${acctRef}${lawyerRef}Ask them: (1) how to get full account statements, (2) how to split retirement accounts without tax penalties, and (3) if you can get temporary support while things are sorted out.${wikiNote}`
     );
   } else if (lower.includes('alimony') || lower.includes('support') || lower.includes('maintenance')) {
     const yrNote = marriageYears
@@ -389,8 +436,16 @@ Keep it short, casual, easy to read, and grounded in ${jurisdiction} rules.`;
     const caRule = (jurisdiction === 'California' && marriageYears && marriageYears >= 10)
       ? `California treats 10+ years as a long marriage—meaning spousal support doesn't have an automatic cutoff date. `
       : `spousal support depends on how long you were married, what each of you earns, and who handled caregiving. `;
+    const wikiNote = topLawArticle
+      ? ` (${topLawArticle.title}: ${extractWikiSnippet(topLawArticle.content)})`
+      : '';
     parts.push(
-      `${yrNote}${caRule}Jot down your usual living costs and work history so your lawyer has the full picture.`
+      `${yrNote}${caRule}Jot down your usual living costs and work history so your lawyer has the full picture.${wikiNote}`
+    );
+  } else if (topLawArticle) {
+    const snippet = extractWikiSnippet(topLawArticle.content);
+    parts.push(
+      `From our California Law Wiki (**${topLawArticle.title}**, \`${topLawArticle.filePath}\`): ${snippet}`
     );
   } else {
     const contextHint = mentionedAccounts.length > 0
@@ -406,7 +461,9 @@ Keep it short, casual, easy to read, and grounded in ${jurisdiction} rules.`;
   return {
     reply: parts.join(' '),
     suggestedActions: buildSuggestedActions(message, footprintFacts),
-    compiledContextUsed: true
+    compiledContextUsed: true,
+    lawWikiConsulted: true,
+    matchedWikiArticles: lawArticles.slice(0, 3).map((a) => a.slug)
   };
 }
 

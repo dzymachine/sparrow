@@ -182,7 +182,7 @@
 }
 
 .animate-page-fade-in {
-  animation: page-fade-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: page-fade-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .animate-fade-in {
@@ -193,11 +193,41 @@
   animation: serene-fade-in-slow 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Sparrow Flight Path glide animations */
+@keyframes gentleGlide {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(-1.5deg);
+  }
+}
+
+@keyframes wingFlap {
+  0%, 100% {
+    transform: scaleY(1) rotate(0deg);
+  }
+  50% {
+    transform: scaleY(0.75) rotate(-4deg);
+  }
+}
+
+.sparrow-body-bob {
+  animation: gentleGlide 3.6s ease-in-out infinite;
+}
+
+.sparrow-wing-movement {
+  transform-origin: 32px 34px;
+  animation: wingFlap 1.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-page-fade-in,
   .animate-fade-in,
   .animate-fade-in-slow,
-  .animate-fade-up-blur {
+  .animate-fade-up-blur,
+  .sparrow-body-bob,
+  .sparrow-wing-movement {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

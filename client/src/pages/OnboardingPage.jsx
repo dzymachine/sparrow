@@ -1,17 +1,79 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { ArrowRight, ArrowLeft, Check, Shield, Minus, Plus } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Shield, Minus, Plus, ChevronDown } from 'lucide-react';
 import { useAgentMemory } from '../context/AgentMemoryContext';
 import { useSmoothNavigate } from '../context/TransitionContext';
 
-const US_STATES = [
-  { name: 'California', type: 'Community Property' },
-  { name: 'New York', type: 'Equitable Distribution' },
-  { name: 'Texas', type: 'Community Property' },
-  { name: 'Florida', type: 'Equitable Distribution' },
-  { name: 'Illinois', type: 'Equitable Distribution' },
-  { name: 'Washington', type: 'Community Property' },
-  { name: 'Other State', type: 'Varies by Jurisdiction' }
+const COMMUNITY_PROPERTY_STATES = new Set([
+  'Arizona',
+  'California',
+  'Idaho',
+  'Louisiana',
+  'Nevada',
+  'New Mexico',
+  'Texas',
+  'Washington',
+  'Wisconsin'
+]);
+
+const US_STATE_NAMES = [
+  'Alabama',
+  'Alaska',
+  'Arizona',
+  'Arkansas',
+  'California',
+  'Colorado',
+  'Connecticut',
+  'Delaware',
+  'Florida',
+  'Georgia',
+  'Hawaii',
+  'Idaho',
+  'Illinois',
+  'Indiana',
+  'Iowa',
+  'Kansas',
+  'Kentucky',
+  'Louisiana',
+  'Maine',
+  'Maryland',
+  'Massachusetts',
+  'Michigan',
+  'Minnesota',
+  'Mississippi',
+  'Missouri',
+  'Montana',
+  'Nebraska',
+  'Nevada',
+  'New Hampshire',
+  'New Jersey',
+  'New Mexico',
+  'New York',
+  'North Carolina',
+  'North Dakota',
+  'Ohio',
+  'Oklahoma',
+  'Oregon',
+  'Pennsylvania',
+  'Rhode Island',
+  'South Carolina',
+  'South Dakota',
+  'Tennessee',
+  'Texas',
+  'Utah',
+  'Vermont',
+  'Virginia',
+  'Washington',
+  'West Virginia',
+  'Wisconsin',
+  'Wyoming'
 ];
+
+const US_STATES = US_STATE_NAMES.map((name) => ({
+  name,
+  type: COMMUNITY_PROPERTY_STATES.has(name)
+    ? 'Community Property'
+    : 'Equitable Distribution'
+}));
 
 const TOTAL_STEPS = 11;
 
@@ -129,7 +191,7 @@ export default function OnboardingPage() {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && (stepIndex === 2 || stepIndex === 3)) {
+    if (e.key === 'Enter' && (stepIndex === 1 || stepIndex === 2 || stepIndex === 3)) {
       e.preventDefault();
       handleNext();
     }
@@ -230,30 +292,36 @@ export default function OnboardingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {US_STATES.map((st) => {
-                const selected = formData.stateJurisdiction === st.name;
-                return (
-                  <button
-                    type="button"
-                    key={st.name}
-                    onClick={() =>
-                      selectAndAdvance((prev) => ({ ...prev, stateJurisdiction: st.name }))
-                    }
-                    className={`text-left px-4 py-3.5 rounded-2xl border transition-all duration-200 flex items-center justify-between ${
-                      selected
-                        ? 'border-[#4F5E47] bg-[#F4EFEA] text-[#1c1c19]'
-                        : 'border-[#E2DAD0] bg-white/80 hover:border-[#8A9A7B] hover:bg-white text-[#2C332A]'
-                    }`}
-                  >
-                    <div>
-                      <div className="text-sm font-medium">{st.name}</div>
-                      <div className="text-[11px] text-[#A07E5F] mt-0.5">{st.type}</div>
-                    </div>
-                    {selected && <Check className="w-4 h-4 text-[#4F5E47] flex-shrink-0" />}
-                  </button>
-                );
-              })}
+            <div className="space-y-3">
+              <label htmlFor="state-jurisdiction-select" className="sr-only">
+                Filing state
+              </label>
+              <div className="relative">
+                <select
+                  id="state-jurisdiction-select"
+                  value={formData.stateJurisdiction}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, stateJurisdiction: e.target.value }))
+                  }
+                  className="w-full appearance-none rounded-2xl border border-[#E2DAD0] bg-white px-5 py-4 pr-12 text-sm font-medium text-[#1c1c19] transition focus:outline-none focus:ring-2 focus:ring-[#A07E5F]/20 focus:border-[#A07E5F] hover:border-[#8A9A7B] cursor-pointer"
+                >
+                  {US_STATES.map((st) => (
+                    <option key={st.name} value={st.name}>
+                      {st.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-[#5F635E] pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" />
+              </div>
+
+              {(() => {
+                const selectedState = US_STATES.find((st) => st.name === formData.stateJurisdiction);
+                return selectedState ? (
+                  <p className="text-xs text-[#A07E5F] px-1">
+                    {selectedState.name} follows <span className="font-medium">{selectedState.type}</span> guidelines.
+                  </p>
+                ) : null;
+              })()}
             </div>
           </div>
         )}

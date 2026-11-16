@@ -23,7 +23,6 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useAgentMemory } from '../context/AgentMemoryContext';
 import { useDiscovery } from '../context/DiscoveryContext';
-import FlightPathWidget from '../components/FlightPathWidget';
 import FinancialInfographicSidebar from '../components/dashboard/FinancialInfographicSidebar';
 import TimelineInfographicSidebar from '../components/dashboard/TimelineInfographicSidebar';
 
@@ -411,9 +410,6 @@ export default function DashboardPage() {
           </div>
         </Link>
       </section>
-
-      {/* Interactive Sparrow Flight Path */}
-      <FlightPathWidget />
 
       {/* 3. "Where You May Be Exposed" — Apple Inset Grouped List */}
       <section className="bg-white border border-[#E2DBD0] rounded-2xl overflow-hidden">
