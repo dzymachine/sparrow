@@ -1,4 +1,4 @@
-# Know What's Yours | RuthAI
+# Know What's Yours | Sparrow Divorce Finance Platform
 
 > **Empathetic Divorce Financial Discovery Platform for Women**  
 > *Google AI Hackathon for Women's Social Good*
